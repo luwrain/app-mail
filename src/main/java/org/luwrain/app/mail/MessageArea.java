@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2014 Michael Pozhidaev <msp@altlinux.org>
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of the Luwrain.
 
@@ -25,16 +25,20 @@ import org.luwrain.controls.*;
 public class MessageArea extends SimpleArea
 {
     private Luwrain luwrain;
-    private StringConstructor stringConstructor;
+    private Strings strings;
     private Actions actions;
 
     public MessageArea(Luwrain luwrain,
 		       Actions actions,
-		       StringConstructor stringConstructor)
+		       Strings strings)
     {
-	super(new DefaultControlEnvironment(luwrain), stringConstructor.messageAreaName());
+	super(new DefaultControlEnvironment(luwrain), strings.messageAreaName());
 	this.actions =  actions;
-	this.stringConstructor = stringConstructor;
+	this.strings = strings;
+	if (actions == null)
+	    throw new NullPointerException("actions may not be null");
+	if (strings == null)
+	    throw new NullPointerException("strings may not be null");
     }
 
     public void show(Message message)
@@ -76,7 +80,7 @@ public class MessageArea extends SimpleArea
     {
 	if (event.getCode() == EnvironmentEvent.CLOSE)
 	{
-	    actions.close();
+	    actions.closeApp();
 	    return true;
 	}
 	return false;

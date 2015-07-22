@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2014 Michael Pozhidaev <msp@altlinux.org>
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of the Luwrain.
 
@@ -24,48 +24,50 @@ public class MailApp implements Application, Actions
 {
     private Luwrain luwrain;
     private Base base = new Base();
-    private StringConstructor stringConstructor = null;
+    private Strings strings;
 
     private TreeArea foldersArea;
     private TableArea summaryArea;
     private MessageArea messageArea;
 
-    public boolean onLaunch(Luwrain luwrain)
+    @Override public boolean onLaunch(Luwrain luwrain)
     {
-	Object o = Langs.requestStringConstructor("mail-reader");
+	Object o = "";//FIXME:Langs.requestStringConstructor("mail-reader");
 	if (o == null)
 	    return false;
-	stringConstructor = (StringConstructor)o;
+	strings = (Strings)o;
 	this.luwrain = luwrain;
-	base.init(luwrain, stringConstructor);
-	if (!base.isValid())
-	{
-	    luwrain.message(stringConstructor.noMailStoring());
-	    return false;
-	}
+	base.init(luwrain, strings);
 	createFoldersArea();
 	createSummaryArea();
 	createMessageArea();
 	return true;
     }
 
+    @Override public String getAppName()
+    {
+	return "mail";
+    }
+
     public void openFolder(Object folder)
     {
+	/*
 	if (folder == null || !base.isStoredMailGroup(folder))
 	    return;
+	*/
 	if (base.openFolder(folder, summaryArea))
 	    gotoSummary(); else
-	    luwrain.message(stringConstructor.errorOpeningFolder());
+	    luwrain.message(strings.errorOpeningFolder());
     }
 
     private void createFoldersArea()
     {
 	final Actions a = this;
-	final StringConstructor s = stringConstructor;
+	final Strings s = strings;
 	foldersArea = new TreeArea(new DefaultControlEnvironment(luwrain),
 				   base.getFoldersModel(),
-				   stringConstructor.foldersAreaName()){
-		private StringConstructor stringConstructor = s;
+				   strings.foldersAreaName()){
+		private Strings strings = s;
 		private Actions actions = a;
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
@@ -83,7 +85,7 @@ public class MailApp implements Application, Actions
 		    switch(event.getCode())
 		    {
 		    case EnvironmentEvent.CLOSE:
-			actions.close();
+			actions.closeApp();
 			return true;
 		    default:
 			return super.onEnvironmentEvent(event);
@@ -100,13 +102,13 @@ public class MailApp implements Application, Actions
     private void createSummaryArea()
     {
 	final Actions a = this;
-	final StringConstructor s = stringConstructor;
+	final Strings s = strings;
 	summaryArea = new TableArea(new DefaultControlEnvironment(luwrain),
 				    base.getSummaryModel(),
-				    stringConstructor.summaryAreaName(),
+				    strings.summaryAreaName(),
 				    base.getSummaryAppearance(),
 				    null) { //Click handler;
-		private StringConstructor stringConstructor = s;
+		private Strings strings = s;
 		private Actions actions = a;
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
@@ -124,7 +126,7 @@ public class MailApp implements Application, Actions
 		    switch(event.getCode())
 		    {
 		    case EnvironmentEvent.CLOSE:
-			actions.close();
+			actions.closeApp();
 			return true;
 		    default:
 			return super.onEnvironmentEvent(event);
@@ -143,7 +145,7 @@ public class MailApp implements Application, Actions
 
     private void createMessageArea()
     {
-	messageArea = new MessageArea(luwrain, this, stringConstructor);
+	messageArea = new MessageArea(luwrain, this, strings);
     }
 
     public AreaLayout getAreasToShow()
@@ -166,7 +168,7 @@ public class MailApp implements Application, Actions
 	luwrain.setActiveArea(messageArea);
     }
 
-    public void close()
+    @Override public void closeApp()
     {
 	luwrain.closeApp();
     }

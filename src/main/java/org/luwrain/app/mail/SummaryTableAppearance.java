@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2014 Michael Pozhidaev <msp@altlinux.org>
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of the Luwrain.
 
@@ -22,40 +22,45 @@ import org.luwrain.pim.*;
 
 class SummaryTableAppearance implements TableAppearance
 {
-    public void introduceRow(TableModel model,
+    @Override public void introduceRow(TableModel model,
 			     int index,
 			     int flags)
     {
 	if (model == null || index >= model.getRowCount())
 	    return;
+	/*
 	Object obj = model.getRow(index);
-	if (obj == null || !(obj instanceof StoredMailMessage))
+	if (obj == null || !(obj instanceof StoredEmailMessage))
 	    return;
 	StoredMailMessage message = (StoredMailMessage)obj;
 	Speech.say(message.getSubject());
+	*/
     }
 
-    public int getInitialHotPointX(TableModel model)
+    @Override public int getInitialHotPointX(TableModel model)
     {
 	return 2;
     }
 
-    public String getCellText(TableModel model,
+    @Override public String getCellText(TableModel model,
 		       int col,
 		       int row)
     {
 	if (model == null)
 	    return "#NO MODEL#";
+	/*
 	Object cell = model.getCell(col, row);
 	return cell != null?cell.toString():"";
+	*/
+	return null;
     }
 
-    public String getRowPrefix(TableModel model, int index)
+    @Override public String getRowPrefix(TableModel model, int index)
     {
 	return "  ";
     }
 
-    public int getColWidth(TableModel model, int  colIndex)
+    @Override public int getColWidth(TableModel model, int  colIndex)
     {
 	return 20;
     }

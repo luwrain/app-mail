@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2014 Michael Pozhidaev <msp@altlinux.org>
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of the Luwrain.
 
@@ -19,35 +19,33 @@ package org.luwrain.app.mail;
 import java.util.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
-import org.luwrain.pim.*;
-
+import org.luwrain.pim.email.*;
 
 class Base
 {
     private Luwrain luwrain;
-    private StringConstructor stringConstructor;
-    private MailStoring mailStoring;
+    private Strings strings;
+    private EmailStoring emailStoring;
     private FoldersTreeModel foldersModel;
     private SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
-    public void init(Luwrain luwrain, StringConstructor stringConstructor)
+    public void init(Luwrain luwrain, Strings strings)
     {
 	this.luwrain = luwrain;
-	this.stringConstructor = stringConstructor;
-	mailStoring = luwrain.getPimManager().getMailStoring();
-    }
-
-    public boolean isValid()
-    {
-	return mailStoring != null;
+	this.strings = strings;
+	if (luwrain == null)
+	    throw new NullPointerException("luwrain may not be null");
+	if (strings == null)
+	    throw new NullPointerException("strings may not be null");
+	//	mailStoring = luwrain.getPimManager().getMailStoring();
     }
 
     public FoldersTreeModel getFoldersModel()
     {
 	if (foldersModel != null)
 	    return foldersModel;
-	foldersModel = new FoldersTreeModel(mailStoring, stringConstructor);
+	foldersModel = new FoldersTreeModel(emailStoring, strings);
 	return foldersModel;
     }
 
@@ -55,7 +53,7 @@ class Base
     {
 	if (summaryModel != null)
 	    return summaryModel;
-	summaryModel = new SummaryTableModel(mailStoring);
+	summaryModel = new SummaryTableModel(emailStoring);
 	return summaryModel;
     }
 
@@ -67,17 +65,22 @@ class Base
 	return summaryAppearance;
     }
 
+    /*
     public boolean isStoredMailGroup(Object obj)
     {
 	return obj != null && (obj instanceof StoredMailGroup);
     }
+    */
 
     public boolean openFolder(Object obj, TableArea summaryTable)
     {
+	/*
 	if (obj == null || !(obj instanceof StoredMailGroup))
 	    return false;
 	summaryModel.setCurrentMailGroup((StoredMailGroup)obj);
 	summaryTable.refresh();//FIXME:Reset hot point position;
 	return summaryModel.isValidState();
+	*/
+	return false;
     }
 }

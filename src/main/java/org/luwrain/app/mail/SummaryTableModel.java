@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2014 Michael Pozhidaev <msp@altlinux.org>
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of the Luwrain.
 
@@ -18,27 +18,29 @@ package org.luwrain.app.mail;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
-import org.luwrain.pim.*;
+import org.luwrain.pim.email.*;
 
 class SummaryTableModel implements TableModel
 {
-    private MailStoring mailStoring;
-    private StoredMailGroup mailGroup;
-    private StoredMailMessage[] messages;//null value with existing group means invalid state, empty content should be a valid array with zero length;
+    private EmailStoring storing;
+    private StoredEmailFolder mailFolder;
+    private StoredEmailMessage[] messages;//null value with existing group means invalid state, empty content should be a valid array with zero length;
 
-    public SummaryTableModel(MailStoring mailStoring)
+    public SummaryTableModel(EmailStoring storing)
     {
-	this.mailStoring = mailStoring;
+	this.storing = storing;
+	if (storing == null)
+	    throw new NullPointerException("storing may not be null");
     }
 
-    public void setCurrentMailGroup(StoredMailGroup mailGroup)
+    public void setCurrentMailFolder(StoredEmailFolder mailFolder)
     {
-	this.mailGroup = mailGroup;
+	this.mailFolder = mailFolder;
     }
 
     public boolean isValidState()
     {
-	return mailGroup  == null || messages != null;
+	return mailFolder  == null || messages != null;
     }
 
     public int getRowCount()
@@ -51,11 +53,11 @@ class SummaryTableModel implements TableModel
 	return 3;
     }
 
-    public Object getCell(int col, int row)
+    @Override public Object getCell(int col, int row)
     {
 	if (messages == null || row >= messages.length)
 	    return null;
-	return messages[row].getSubject();//FIXME:
+	return "FIXME:";//messages[row].getSubject();//FIXME:
     }
 
     public Object getRow(int index)
@@ -72,17 +74,18 @@ class SummaryTableModel implements TableModel
 
     public void refresh()
     {
-	if (mailStoring == null || mailGroup == null)
+	if (storing == null || mailFolder == null)
 	{
 	    messages = null;
 	    return;
 	}
 	try {
-	    messages = mailStoring.loadMessagesFromGroup(mailGroup);
+	    //FIXME:	    messages = mailStoring.loadMessagesFromGroup(mailFolder);
+	    messages = new StoredEmailMessage[0];
 	}
 	catch(Exception e)
 	{
-	    Log.error("mail", "loading messages from group" + mailGroup.getName() + ":" + e.getMessage());
+	    //	    Log.error("mail", "loading messages from group" + mailFolder.getName() + ":" + e.getMessage());
 	    e.printStackTrace();
 	    messages = null;
 	}

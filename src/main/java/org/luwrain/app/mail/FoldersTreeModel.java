@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2014 Michael Pozhidaev <msp@altlinux.org>
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of the Luwrain.
 
@@ -17,112 +17,97 @@
 package org.luwrain.app.mail;
 
 import java.util.*;
-import org.luwrain.core.Log;
+
 import org.luwrain.controls.*;
-import org.luwrain.pim.*;
+import org.luwrain.pim.email.*;
 
 class FoldersTreeModel implements TreeModel
 {
-    private MailStoring mailStoring;
-    private StringConstructor stringConstructor;
-    private String root = "";
-    private AbstractMap<Object, StoredMailGroup[]> groupsCache = new HashMap<Object, StoredMailGroup[]>();
+    private EmailStoring storing;
+    private Strings strings;
+    private StoredEmailFolder cachedFolder;
+    private StoredEmailFolder[] cache;
 
-    public FoldersTreeModel(MailStoring mailStoring, StringConstructor stringConstructor)
+    public FoldersTreeModel(EmailStoring storing, Strings strings)
     {
-	this.mailStoring = mailStoring;
-	this.stringConstructor = stringConstructor;
-	this.root = stringConstructor.mailFoldersRoot();
+	this.storing = storing;
+	this.strings = strings;
+	if (storing == null)
+	    throw new NullPointerException("emailStoring may not be null");
+	if (strings == null)
+	    throw new NullPointerException("strings may not be null");
     }
 
-    public Object getRoot()
+    @Override public Object getRoot()
     {
-	return root;
-    }
-
-    public boolean isLeaf(Object node)
-    {
-	if (node == null)
-	    return true;
-	if (node == root)
-	{
-	    try {
-		StoredMailGroup rootGroup = mailStoring.loadRootGroup();
-		if (rootGroup == null)
-		    return true;
-		StoredMailGroup[] children = mailStoring.loadChildGroups(rootGroup);
-		return children == null || children.length < 1;
-	    }
-	    catch (Exception e)
-	    {
-		Log.error("mail", "problem getting children of root mail group:" + e.getMessage());
-		e.printStackTrace();
-	    }
-	    return true;
-	}
 	try {
-	    StoredMailGroup[] children = mailStoring.loadChildGroups((StoredMailGroup)node);
-	    return children == null || children.length < 1;
+	    return storing.getFoldersRoot(); 
 	}
 	catch (Exception e)
 	{
-	    Log.error("mail", "problem getting children of mail group:" + e.getMessage());
 	    e.printStackTrace();
+	    return null;
 	}
-	return false;
     }
 
-    public void beginChildEnumeration(Object node)
+    @Override public boolean isLeaf(Object node)
     {
-	if (node == null)
-	    return;
-	if (node == root)
-	{
-	    try {
-		StoredMailGroup rootGroup = mailStoring.loadRootGroup();
-		if (rootGroup == null)
-		    return;
-		StoredMailGroup[] children = mailStoring.loadChildGroups(rootGroup);
-		if (children != null)
-		    groupsCache.put(root, children);
-	    }
-	    catch (Exception e)
-	    {
-		Log.error("mail", "problem getting children of root mail group:" + e.getMessage());
-		e.printStackTrace();
-	    }
-	    return;
-	}
+	if (node == null || !(node instanceof StoredEmailFolder))
+	    return true;
+	final StoredEmailFolder folder = (StoredEmailFolder)node;
 	try {
-	    StoredMailGroup[] children = mailStoring.loadChildGroups((StoredMailGroup)node);
-	    if (children != null)
-		groupsCache.put(node, children);
+	    StoredEmailFolder[] folders = storing.getChildFolders(folder);
+	    return folders == null || folders.length < 1;
 	}
 	catch (Exception e)
 	{
-	    Log.error("mail", "problem getting children of mail group:" + e.getMessage());
 	    e.printStackTrace();
+	    return true;
+	}
+    }
+
+    @Override public void beginChildEnumeration(Object node)
+    {
+	if (node == null || !(node instanceof StoredEmailFolder))
+	    return;
+	final StoredEmailFolder folder = (StoredEmailFolder)node;
+	try {
+	    cachedFolder = folder;
+	    cache = storing.getChildFolders(folder);
+	    if (cache == null)
+		cache = new StoredEmailFolder[0];
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	    cachedFolder = null;
+	    cache = null;
 	}
     }
 
     public int getChildCount(Object parent)
     {
-	if (parent == null)
+	if (parent == null || !(parent instanceof StoredEmailFolder))
 	    return 0;
-	StoredMailGroup[] children = groupsCache.get(parent);
-	return children != null?children.length:0;
+	final StoredEmailFolder folder = (StoredEmailFolder)parent;
+	if (cachedFolder == null || !cachedFolder.equals(folder))
+	    return 0;
+	return cache.length;
     }
 
-    public Object getChild(Object parent, int index)
+    @Override public Object getChild(Object parent, int index)
     {
-	if (parent == null)
+	if (parent == null || !(parent instanceof StoredEmailFolder))
 	    return null;
-	StoredMailGroup[] children = groupsCache.get(parent);
-	return (children != null && index < children.length)?children[index]:null;
+	final StoredEmailFolder folder = (StoredEmailFolder)parent;
+	if (cachedFolder == null || !cachedFolder.equals(folder))
+	    return null;
+	return index < cache.length?cache[index]:null;
     }
 
     public void endChildEnumeration(Object node)
     {
-	groupsCache.remove(node);
+	cachedFolder = null;
+	cache = null;
     }
 }
