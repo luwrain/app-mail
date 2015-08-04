@@ -19,9 +19,13 @@ package org.luwrain.app.mail;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
+import org.luwrain.pim.email.*;
 
 public class MailApp implements Application, Actions
 {
+    private static final String STRINGS_NAME = "luwrain.mail";
+
+
     private Luwrain luwrain;
     private Base base = new Base();
     private Strings strings;
@@ -32,38 +36,41 @@ public class MailApp implements Application, Actions
 
     @Override public boolean onLaunch(Luwrain luwrain)
     {
-	Object o = "";//FIXME:Langs.requestStringConstructor("mail-reader");
-	if (o == null)
+	final Object o = luwrain.i18n().getStrings(STRINGS_NAME);
+	if (o == null || !(o instanceof Strings))
 	    return false;
 	strings = (Strings)o;
 	this.luwrain = luwrain;
-	base.init(luwrain, strings);
-	createFoldersArea();
-	createSummaryArea();
-	createMessageArea();
+	if (!base.init(luwrain, strings))//FIXME:Let user know what happens;
+	    return false;
+	createAreas();
 	return true;
     }
 
     @Override public String getAppName()
     {
-	return "mail";
+	return strings.appName();
     }
 
-    public void openFolder(Object folder)
+    @Override public void openFolder(StoredEmailFolder folder)
     {
-	/*
-	if (folder == null || !base.isStoredMailGroup(folder))
-	    return;
-	*/
-	if (base.openFolder(folder, summaryArea))
-	    gotoSummary(); else
-	    luwrain.message(strings.errorOpeningFolder());
+	base.openFolder(folder);
+	summaryArea.refresh();
     }
 
-    private void createFoldersArea()
+    @Override public boolean insertMessages()
+    {
+	if (!base.insertMessages())
+	    return false;
+	summaryArea.refresh();
+	return true;
+    }
+
+    private void createAreas()
     {
 	final Actions a = this;
 	final Strings s = strings;
+
 	foldersArea = new TreeArea(new DefaultControlEnvironment(luwrain),
 				   base.getFoldersModel(),
 				   strings.foldersAreaName()){
@@ -71,17 +78,23 @@ public class MailApp implements Application, Actions
 		private Actions actions = a;
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
-		    if (event.isCommand() &&
-			!event.isModified() &&
-			event.getCommand() == KeyboardEvent.TAB)
-		    {
-			actions.gotoSummary();
-			return true;
-		    }
+		    if (event == null)
+			throw new NullPointerException("event may not be null");
+		    if (event.isCommand() && !event.isModified())
+			switch(event.getCommand())
+			{
+			case KeyboardEvent.TAB:
+			    actions.gotoSummary();
+			    return true;
+			default:
+			    return super.onKeyboardEvent(event);
+			}
 		    return super.onKeyboardEvent(event);
 		}
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
+		    if (event == null)
+			throw new NullPointerException("eevent may not be null");
 		    switch(event.getCode())
 		    {
 		    case EnvironmentEvent.CLOSE:
@@ -93,16 +106,13 @@ public class MailApp implements Application, Actions
 		}
 		@Override public void onClick(Object obj)
 		{
-		    if (obj != null)
-			actions.openFolder(obj);
+		    if (obj == null || !(obj instanceof FolderWrapper))
+			return;
+		    final FolderWrapper wrapper = (FolderWrapper)obj;
+		    actions.openFolder(wrapper.folder());
 		}
 	    };
-    }
 
-    private void createSummaryArea()
-    {
-	final Actions a = this;
-	final Strings s = strings;
 	summaryArea = new TableArea(new DefaultControlEnvironment(luwrain),
 				    base.getSummaryModel(),
 				    strings.summaryAreaName(),
@@ -112,17 +122,23 @@ public class MailApp implements Application, Actions
 		private Actions actions = a;
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
-		    if (event.isCommand() &&
-			!event.isModified() &&
-			event.getCommand() == KeyboardEvent.TAB)
-		    {
-			actions.gotoMessage();
-			return true;
-		    }
+		    if (event.isCommand() && !event.isModified())
+			switch(event.getCommand())
+			{
+			case KeyboardEvent.TAB:
+			    actions.gotoMessage();
+			    return true;
+			case KeyboardEvent.INSERT:
+			    return actions.insertMessages();
+			default:
+			    return super.onKeyboardEvent(event);
+			}
 		    return super.onKeyboardEvent(event);
 		}
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
+		    if (event == null)
+			throw new NullPointerException("event may not be null");
 		    switch(event.getCode())
 		    {
 		    case EnvironmentEvent.CLOSE:
@@ -133,37 +149,34 @@ public class MailApp implements Application, Actions
 		    }
 		}
 		@Override public boolean onClick(TableModel model,
-					      int col,
-					      int row,
-					      Object cell)
+						 int col,
+						 int row,
+						 Object cell)
 		{
 		    //FIXME:
 		    return false;
 		}
 	    };
-    }
 
-    private void createMessageArea()
-    {
 	messageArea = new MessageArea(luwrain, this, strings);
     }
 
-    public AreaLayout getAreasToShow()
+    @Override  public AreaLayout getAreasToShow()
     {
 	return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, messageArea);
     }
 
-    public void gotoFolders()
+    @Override public void gotoFolders()
     {
 	luwrain.setActiveArea(foldersArea);
     }
 
-    public void gotoSummary()
+    @Override public void gotoSummary()
     {
 	luwrain.setActiveArea(summaryArea);
     }
 
-    public void gotoMessage()
+    @Override public void gotoMessage()
     {
 	luwrain.setActiveArea(messageArea);
     }

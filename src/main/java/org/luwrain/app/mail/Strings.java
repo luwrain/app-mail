@@ -18,6 +18,8 @@ package org.luwrain.app.mail;
 
 public interface Strings
 {
+    String appName();
+    String folderTitle(String src);
     String foldersAreaName();
     String summaryAreaName();
     String messageAreaName();

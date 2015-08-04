@@ -17,20 +17,26 @@
 package org.luwrain.app.mail;
 
 import java.util.*;
+import java.io.*;
+
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
+import org.luwrain.popups.*;
 import org.luwrain.pim.email.*;
 
 class Base
 {
+    private static final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
+
     private Luwrain luwrain;
     private Strings strings;
-    private EmailStoring emailStoring;
+    private EmailStoring storing;
+    private StoredEmailFolder currentFolder = null;
     private FoldersTreeModel foldersModel;
     private SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
-    public void init(Luwrain luwrain, Strings strings)
+    public boolean init(Luwrain luwrain, Strings strings)
     {
 	this.luwrain = luwrain;
 	this.strings = strings;
@@ -38,14 +44,22 @@ class Base
 	    throw new NullPointerException("luwrain may not be null");
 	if (strings == null)
 	    throw new NullPointerException("strings may not be null");
-	//	mailStoring = luwrain.getPimManager().getMailStoring();
+	final Object obj = luwrain.getSharedObject(SHARED_OBJECT_NAME);
+	if (obj == null || !(obj instanceof org.luwrain.pim.email.Factory))
+	    return false;
+	final org.luwrain.pim.email.Factory factory = (org.luwrain.pim.email.Factory)obj;
+	final Object obj2 = factory.createEmailStoring();
+	if (obj2 == null || !(obj2 instanceof EmailStoring))
+	    return false;
+	storing = (EmailStoring)obj2;
+	return true;
     }
 
     public FoldersTreeModel getFoldersModel()
     {
 	if (foldersModel != null)
 	    return foldersModel;
-	foldersModel = new FoldersTreeModel(emailStoring, strings);
+	foldersModel = new FoldersTreeModel(storing, strings);
 	return foldersModel;
     }
 
@@ -53,7 +67,7 @@ class Base
     {
 	if (summaryModel != null)
 	    return summaryModel;
-	summaryModel = new SummaryTableModel(emailStoring);
+	summaryModel = new SummaryTableModel(storing);
 	return summaryModel;
     }
 
@@ -72,15 +86,52 @@ class Base
     }
     */
 
-    public boolean openFolder(Object obj, TableArea summaryTable)
+    public boolean openFolder(StoredEmailFolder folder)
     {
-	/*
-	if (obj == null || !(obj instanceof StoredMailGroup))
+	if (folder == null)
 	    return false;
-	summaryModel.setCurrentMailGroup((StoredMailGroup)obj);
-	summaryTable.refresh();//FIXME:Reset hot point position;
-	return summaryModel.isValidState();
-	*/
-	return false;
+	currentFolder = folder;
+	try {
+	System.out.println("reading folder " + folder.getTitle());
+	} catch(Exception e) {}
+	try {
+	    final StoredEmailMessage[] messages = storing.loadMessages(currentFolder);
+	    for(StoredEmailMessage m: messages)
+		System.out.println(m.getSubject());
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	}
+	//	summaryModel.setCurrentMailGroup((StoredMailGroup)obj);
+	return true;
+    }
+
+    public boolean insertMessages()
+    {
+	if (currentFolder == null)
+	    return false;
+	final File file = Popups.file(luwrain, "Добавление сообщений", "Выберите каталог с файлами сообщений для добавления:",
+				      luwrain.launchContext().userHomeDirAsFile(), FilePopup.DIRECTORY, 0);
+	if (file == null)
+	    return true;
+	final EmailEssentialJavamail mail = new EmailEssentialJavamail();
+	final File[] files = file.listFiles();
+	for(File f: files)
+	{
+	    if (f.isDirectory())
+		continue;
+	    try {
+		final EmailMessage message = mail.loadEmailFromFile(new FileInputStream(f.getAbsolutePath()));
+		if (message == null)
+		    continue;
+		storing.saveMessage(currentFolder, message);
+	    }
+	    catch (Exception e)
+	    {
+		e.printStackTrace();
+	    }
+	}
+	return true;
     }
 }

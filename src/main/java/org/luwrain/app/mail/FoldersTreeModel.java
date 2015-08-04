@@ -23,10 +23,22 @@ import org.luwrain.pim.email.*;
 
 class FoldersTreeModel implements TreeModel
 {
+private class CacheItem
+{
+    public FolderWrapper parent;
+    public FolderWrapper[] folders = new FolderWrapper[0];
+
+    public CacheItem(FolderWrapper parent)
+    {
+	this.parent = parent;
+	if (parent == null)
+	    throw new NullPointerException("parent may not be null");
+    }
+}
+
     private EmailStoring storing;
     private Strings strings;
-    private StoredEmailFolder cachedFolder;
-    private StoredEmailFolder[] cache;
+    private  LinkedList<CacheItem> cache = new LinkedList<CacheItem>();
 
     public FoldersTreeModel(EmailStoring storing, Strings strings)
     {
@@ -41,7 +53,9 @@ class FoldersTreeModel implements TreeModel
     @Override public Object getRoot()
     {
 	try {
-	    return storing.getFoldersRoot(); 
+	    final StoredEmailFolder root = storing.getFoldersRoot();
+	    //	    System.out.println("root" + root);
+	    return root != null?new FolderWrapper(root, strings.folderTitle(root.getTitle())):null;
 	}
 	catch (Exception e)
 	{
@@ -52,11 +66,11 @@ class FoldersTreeModel implements TreeModel
 
     @Override public boolean isLeaf(Object node)
     {
-	if (node == null || !(node instanceof StoredEmailFolder))
+	if (node == null || !(node instanceof FolderWrapper))
 	    return true;
-	final StoredEmailFolder folder = (StoredEmailFolder)node;
+	final FolderWrapper wrapper = (FolderWrapper)node;
 	try {
-	    StoredEmailFolder[] folders = storing.getChildFolders(folder);
+	    StoredEmailFolder[] folders = storing.getFolders(wrapper.folder());
 	    return folders == null || folders.length < 1;
 	}
 	catch (Exception e)
@@ -68,46 +82,56 @@ class FoldersTreeModel implements TreeModel
 
     @Override public void beginChildEnumeration(Object node)
     {
-	if (node == null || !(node instanceof StoredEmailFolder))
+	if (node == null || !(node instanceof FolderWrapper))
 	    return;
-	final StoredEmailFolder folder = (StoredEmailFolder)node;
+	final FolderWrapper wrapper = (FolderWrapper)node;
+	CacheItem newItem = null;
+	for(CacheItem c: cache)
+	    if (c.parent.equals(wrapper))
+		newItem = c;
+	if (newItem == null)
+	{
+	    newItem = new CacheItem(wrapper);
+	    cache.add(newItem);
+	}
 	try {
-	    cachedFolder = folder;
-	    cache = storing.getChildFolders(folder);
-	    if (cache == null)
-		cache = new StoredEmailFolder[0];
+	    final StoredEmailFolder[] folders = storing.getFolders(wrapper.folder());
+	    if (folders == null || folders.length < 1)
+		return;
+	    newItem.folders = new FolderWrapper[folders.length];
+	    for(int i = 0;i < folders.length;++i)
+		newItem.folders[i] = new FolderWrapper(folders[i], strings.folderTitle(folders[i].getTitle()));
 	}
 	catch(Exception e)
 	{
 	    e.printStackTrace();
-	    cachedFolder = null;
-	    cache = null;
 	}
     }
 
     public int getChildCount(Object parent)
     {
-	if (parent == null || !(parent instanceof StoredEmailFolder))
+	if (parent == null || !(parent instanceof FolderWrapper))
 	    return 0;
-	final StoredEmailFolder folder = (StoredEmailFolder)parent;
-	if (cachedFolder == null || !cachedFolder.equals(folder))
-	    return 0;
-	return cache.length;
+	final FolderWrapper wrapper = (FolderWrapper)parent;
+	for(CacheItem c: cache)
+	    if (c.parent.equals(wrapper))
+		return c.folders.length;
+	return 0;
     }
 
     @Override public Object getChild(Object parent, int index)
     {
-	if (parent == null || !(parent instanceof StoredEmailFolder))
-	    return null;
-	final StoredEmailFolder folder = (StoredEmailFolder)parent;
-	if (cachedFolder == null || !cachedFolder.equals(folder))
-	    return null;
-	return index < cache.length?cache[index]:null;
+	if (parent == null || !(parent instanceof FolderWrapper))
+	    return 0;
+	final FolderWrapper wrapper = (FolderWrapper)parent;
+	for(CacheItem c: cache)
+	    if (c.parent.equals(wrapper))
+		return c.folders[index];
+	return null;
     }
 
     public void endChildEnumeration(Object node)
     {
-	cachedFolder = null;
-	cache = null;
+	//FIXME:
     }
 }

@@ -16,11 +16,14 @@
 
 package org.luwrain.app.mail;
 
+import org.luwrain.pim.email.*;
+
 interface Actions
 {
     void gotoFolders();
     void gotoSummary();
     void gotoMessage();
-    void openFolder(Object obj);
+    void openFolder(StoredEmailFolder folder);
+    boolean insertMessages();
     void closeApp();
 }
