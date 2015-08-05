@@ -1,14 +1,14 @@
 
 package org.luwrain.app.mail;
 
-    import org.luwrain.pim.email.*;
+import org.luwrain.pim.mail.*;
 
 class FolderWrapper
 {
-    private StoredEmailFolder folder;
+    private StoredMailFolder folder;
     private String title;
 
-    public FolderWrapper(StoredEmailFolder folder, String title)
+    public FolderWrapper(StoredMailFolder folder, String title)
     {
 	this.folder = folder;
 	this.title = title;
@@ -18,7 +18,7 @@ class FolderWrapper
 	    throw new NullPointerException("title may not be null");
     }
 
-    public StoredEmailFolder folder()
+    public StoredMailFolder folder()
     {
 	return folder;
     }

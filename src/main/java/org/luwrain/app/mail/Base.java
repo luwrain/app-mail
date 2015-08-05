@@ -22,7 +22,7 @@ import java.io.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.*;
-import org.luwrain.pim.email.*;
+import org.luwrain.pim.mail.*;
 
 class Base
 {
@@ -30,8 +30,8 @@ class Base
 
     private Luwrain luwrain;
     private Strings strings;
-    private EmailStoring storing;
-    private StoredEmailFolder currentFolder = null;
+    private MailStoring storing;
+    private StoredMailFolder currentFolder = null;
     private FoldersTreeModel foldersModel;
     private SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
@@ -45,13 +45,13 @@ class Base
 	if (strings == null)
 	    throw new NullPointerException("strings may not be null");
 	final Object obj = luwrain.getSharedObject(SHARED_OBJECT_NAME);
-	if (obj == null || !(obj instanceof org.luwrain.pim.email.Factory))
+	if (obj == null || !(obj instanceof org.luwrain.pim.mail.Factory))
 	    return false;
-	final org.luwrain.pim.email.Factory factory = (org.luwrain.pim.email.Factory)obj;
-	final Object obj2 = factory.createEmailStoring();
-	if (obj2 == null || !(obj2 instanceof EmailStoring))
+	final org.luwrain.pim.mail.Factory factory = (org.luwrain.pim.mail.Factory)obj;
+	final Object obj2 = factory.createMailStoring();
+	if (obj2 == null || !(obj2 instanceof MailStoring))
 	    return false;
-	storing = (EmailStoring)obj2;
+	storing = (MailStoring)obj2;
 	return true;
     }
 
@@ -86,7 +86,7 @@ class Base
     }
     */
 
-    public boolean openFolder(StoredEmailFolder folder)
+    public boolean openFolder(StoredMailFolder folder)
     {
 	if (folder == null)
 	    return false;
@@ -95,8 +95,8 @@ class Base
 	System.out.println("reading folder " + folder.getTitle());
 	} catch(Exception e) {}
 	try {
-	    final StoredEmailMessage[] messages = storing.loadMessages(currentFolder);
-	    for(StoredEmailMessage m: messages)
+	    final StoredMailMessage[] messages = storing.loadMessages(currentFolder);
+	    for(StoredMailMessage m: messages)
 		System.out.println(m.getSubject());
 	}
 	catch(Exception e)
@@ -115,14 +115,14 @@ class Base
 				      luwrain.launchContext().userHomeDirAsFile(), FilePopup.DIRECTORY, 0);
 	if (file == null)
 	    return true;
-	final EmailEssentialJavamail mail = new EmailEssentialJavamail();
+	final MailEssentialJavamail mail = new MailEssentialJavamail();
 	final File[] files = file.listFiles();
 	for(File f: files)
 	{
 	    if (f.isDirectory())
 		continue;
 	    try {
-		final EmailMessage message = mail.loadEmailFromFile(new FileInputStream(f.getAbsolutePath()));
+		final MailMessage message = mail.loadMailFromFile(new FileInputStream(f.getAbsolutePath()));
 		if (message == null)
 		    continue;
 		storing.saveMessage(currentFolder, message);

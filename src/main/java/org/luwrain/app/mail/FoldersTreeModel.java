@@ -19,7 +19,7 @@ package org.luwrain.app.mail;
 import java.util.*;
 
 import org.luwrain.controls.*;
-import org.luwrain.pim.email.*;
+import org.luwrain.pim.mail.*;
 
 class FoldersTreeModel implements TreeModel
 {
@@ -36,16 +36,16 @@ private class CacheItem
     }
 }
 
-    private EmailStoring storing;
+    private MailStoring storing;
     private Strings strings;
     private  LinkedList<CacheItem> cache = new LinkedList<CacheItem>();
 
-    public FoldersTreeModel(EmailStoring storing, Strings strings)
+    public FoldersTreeModel(MailStoring storing, Strings strings)
     {
 	this.storing = storing;
 	this.strings = strings;
 	if (storing == null)
-	    throw new NullPointerException("emailStoring may not be null");
+	    throw new NullPointerException("storing may not be null");
 	if (strings == null)
 	    throw new NullPointerException("strings may not be null");
     }
@@ -53,7 +53,7 @@ private class CacheItem
     @Override public Object getRoot()
     {
 	try {
-	    final StoredEmailFolder root = storing.getFoldersRoot();
+	    final StoredMailFolder root = storing.getFoldersRoot();
 	    //	    System.out.println("root" + root);
 	    return root != null?new FolderWrapper(root, strings.folderTitle(root.getTitle())):null;
 	}
@@ -70,7 +70,7 @@ private class CacheItem
 	    return true;
 	final FolderWrapper wrapper = (FolderWrapper)node;
 	try {
-	    StoredEmailFolder[] folders = storing.getFolders(wrapper.folder());
+	    StoredMailFolder[] folders = storing.getFolders(wrapper.folder());
 	    return folders == null || folders.length < 1;
 	}
 	catch (Exception e)
@@ -95,7 +95,7 @@ private class CacheItem
 	    cache.add(newItem);
 	}
 	try {
-	    final StoredEmailFolder[] folders = storing.getFolders(wrapper.folder());
+	    final StoredMailFolder[] folders = storing.getFolders(wrapper.folder());
 	    if (folders == null || folders.length < 1)
 		return;
 	    newItem.folders = new FolderWrapper[folders.length];

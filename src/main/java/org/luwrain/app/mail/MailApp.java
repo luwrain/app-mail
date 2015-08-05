@@ -19,7 +19,7 @@ package org.luwrain.app.mail;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
-import org.luwrain.pim.email.*;
+import org.luwrain.pim.mail.*;
 
 public class MailApp implements Application, Actions
 {
@@ -52,7 +52,7 @@ public class MailApp implements Application, Actions
 	return strings.appName();
     }
 
-    @Override public void openFolder(StoredEmailFolder folder)
+    @Override public void openFolder(StoredMailFolder folder)
     {
 	base.openFolder(folder);
 	summaryArea.refresh();

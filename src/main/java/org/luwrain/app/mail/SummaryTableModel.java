@@ -18,22 +18,22 @@ package org.luwrain.app.mail;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
-import org.luwrain.pim.email.*;
+import org.luwrain.pim.mail.*;
 
 class SummaryTableModel implements TableModel
 {
-    private EmailStoring storing;
-    private StoredEmailFolder mailFolder;
-    private StoredEmailMessage[] messages;//null value with existing group means invalid state, empty content should be a valid array with zero length;
+    private MailStoring storing;
+    private StoredMailFolder mailFolder;
+    private StoredMailMessage[] messages;//null value with existing group means invalid state, empty content should be a valid array with zero length;
 
-    public SummaryTableModel(EmailStoring storing)
+    public SummaryTableModel(MailStoring storing)
     {
 	this.storing = storing;
 	if (storing == null)
 	    throw new NullPointerException("storing may not be null");
     }
 
-    public void setCurrentMailFolder(StoredEmailFolder mailFolder)
+    public void setCurrentMailFolder(StoredMailFolder mailFolder)
     {
 	this.mailFolder = mailFolder;
     }
@@ -81,7 +81,7 @@ class SummaryTableModel implements TableModel
 	}
 	try {
 	    //FIXME:	    messages = mailStoring.loadMessagesFromGroup(mailFolder);
-	    messages = new StoredEmailMessage[0];
+	    messages = new StoredMailMessage[0];
 	}
 	catch(Exception e)
 	{

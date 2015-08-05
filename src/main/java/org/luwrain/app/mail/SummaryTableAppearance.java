@@ -30,7 +30,7 @@ class SummaryTableAppearance implements TableAppearance
 	    return;
 	/*
 	Object obj = model.getRow(index);
-	if (obj == null || !(obj instanceof StoredEmailMessage))
+	if (obj == null || !(obj instanceof StoredMailMessage))
 	    return;
 	StoredMailMessage message = (StoredMailMessage)obj;
 	Speech.say(message.getSubject());
