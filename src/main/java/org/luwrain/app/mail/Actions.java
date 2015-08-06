@@ -23,7 +23,9 @@ interface Actions
     void gotoFolders();
     void gotoSummary();
     void gotoMessage();
+    void refreshMessages(boolean refreshTableArea);
     void openFolder(StoredMailFolder folder);
+    void showMessage(StoredMailMessage message);
     boolean insertMessages();
     void closeApp();
 }

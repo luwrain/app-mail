@@ -22,33 +22,30 @@ import org.luwrain.pim.mail.*;
 
 class SummaryTableModel implements TableModel
 {
-    private MailStoring storing;
-    private StoredMailFolder mailFolder;
     private StoredMailMessage[] messages;//null value with existing group means invalid state, empty content should be a valid array with zero length;
 
-    public SummaryTableModel(MailStoring storing)
+    public SummaryTableModel()
     {
-	this.storing = storing;
-	if (storing == null)
-	    throw new NullPointerException("storing may not be null");
     }
 
-    public void setCurrentMailFolder(StoredMailFolder mailFolder)
+    public void setMessages(StoredMailMessage[] messages)
     {
-	this.mailFolder = mailFolder;
+	this.messages = messages;
     }
 
+    /*
     public boolean isValidState()
     {
 	return mailFolder  == null || messages != null;
     }
+    */
 
-    public int getRowCount()
+    @Override public int getRowCount()
     {
 	return messages != null?messages.length:0;
     }
 
-    public int getColCount()
+    @Override public int getColCount()
     {
 	return 3;
     }
@@ -57,37 +54,39 @@ class SummaryTableModel implements TableModel
     {
 	if (messages == null || row >= messages.length)
 	    return null;
-	return "FIXME:";//messages[row].getSubject();//FIXME:
+	final StoredMailMessage message = messages[row];
+	try {
+	    switch (col)
+	    {
+	    case 0:
+		return message.getFrom();
+	    case 1:
+		return message.getSubject();
+	    case 2:
+		return message.getSentDate();
+	    default:
+		return "#InvalidColumn " + col + "!#";
+	    }
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	    return "#StoringError!#";
+	}
     }
 
-    public Object getRow(int index)
+    @Override public Object getRow(int index)
     {
-	if (messages == null || index >= messages.length)
-	    return null;
-	return messages[index];
+	return (messages != null && index < messages.length)?messages[index]:null;
     }
 
-    public Object getCol(int index)
+    @Override public Object getCol(int index)
     {
 	return "Column";//FIXME:
     }
 
-    public void refresh()
+    @Override public void refresh()
     {
-	if (storing == null || mailFolder == null)
-	{
-	    messages = null;
-	    return;
-	}
-	try {
-	    //FIXME:	    messages = mailStoring.loadMessagesFromGroup(mailFolder);
-	    messages = new StoredMailMessage[0];
-	}
-	catch(Exception e)
-	{
-	    //	    Log.error("mail", "loading messages from group" + mailFolder.getName() + ":" + e.getMessage());
-	    e.printStackTrace();
-	    messages = null;
-	}
+	//We have a custom handler of refresh event in the corresponding area;
     }
 }

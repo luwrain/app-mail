@@ -18,23 +18,40 @@ package org.luwrain.app.mail;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
-import org.luwrain.pim.*;
+import org.luwrain.pim.mail.*;
 
 class SummaryTableAppearance implements TableAppearance
 {
+    private Luwrain luwrain;
+
+    public SummaryTableAppearance(Luwrain luwrain)
+    {
+	this.luwrain = luwrain;
+	if (luwrain == null)
+	    throw new NullPointerException("luwrain may not be null");
+    }
+
     @Override public void introduceRow(TableModel model,
-			     int index,
-			     int flags)
+				       int index,
+				       int flags)
     {
 	if (model == null || index >= model.getRowCount())
 	    return;
-	/*
-	Object obj = model.getRow(index);
+	final Object obj = model.getRow(index);
 	if (obj == null || !(obj instanceof StoredMailMessage))
 	    return;
-	StoredMailMessage message = (StoredMailMessage)obj;
-	Speech.say(message.getSubject());
-	*/
+	final StoredMailMessage message = (StoredMailMessage)obj;
+	String line = "";
+	try {
+	    line = message.getFrom() + " " + message.getSubject();
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	    luwrain.say("#StorageError!#");
+	    return;
+	}
+	luwrain.say(line);
     }
 
     @Override public int getInitialHotPointX(TableModel model)
@@ -43,25 +60,22 @@ class SummaryTableAppearance implements TableAppearance
     }
 
     @Override public String getCellText(TableModel model,
-		       int col,
-		       int row)
+					int col,
+					int row)
     {
 	if (model == null)
 	    return "#NO MODEL#";
-	/*
-	Object cell = model.getCell(col, row);
+	final Object cell = model.getCell(col, row);
 	return cell != null?cell.toString():"";
-	*/
-	return null;
     }
 
     @Override public String getRowPrefix(TableModel model, int index)
     {
-	return "  ";
+	return "  ";//FIXME:
     }
 
     @Override public int getColWidth(TableModel model, int  colIndex)
     {
-	return 20;
+	return 10;
     }
 }

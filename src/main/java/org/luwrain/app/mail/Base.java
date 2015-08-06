@@ -29,6 +29,7 @@ class Base
     private static final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
 
     private Luwrain luwrain;
+    private Actions actions;
     private Strings strings;
     private MailStoring storing;
     private StoredMailFolder currentFolder = null;
@@ -36,12 +37,17 @@ class Base
     private SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
-    public boolean init(Luwrain luwrain, Strings strings)
+    public boolean init(Luwrain luwrain,
+			Actions actions,
+			Strings strings)
     {
 	this.luwrain = luwrain;
+	this.actions = actions;
 	this.strings = strings;
 	if (luwrain == null)
 	    throw new NullPointerException("luwrain may not be null");
+	if (actions == null)
+	    throw new NullPointerException("actions may not be null");
 	if (strings == null)
 	    throw new NullPointerException("strings may not be null");
 	final Object obj = luwrain.getSharedObject(SHARED_OBJECT_NAME);
@@ -67,7 +73,7 @@ class Base
     {
 	if (summaryModel != null)
 	    return summaryModel;
-	summaryModel = new SummaryTableModel(storing);
+	summaryModel = new SummaryTableModel();
 	return summaryModel;
     }
 
@@ -75,7 +81,7 @@ class Base
     {
 	if (summaryAppearance != null)
 	    return summaryAppearance;
-	summaryAppearance = new SummaryTableAppearance();
+	summaryAppearance = new SummaryTableAppearance(luwrain);
 	return summaryAppearance;
     }
 
@@ -92,18 +98,14 @@ class Base
 	    return false;
 	currentFolder = folder;
 	try {
-	System.out.println("reading folder " + folder.getTitle());
-	} catch(Exception e) {}
-	try {
 	    final StoredMailMessage[] messages = storing.loadMessages(currentFolder);
-	    for(StoredMailMessage m: messages)
-		System.out.println(m.getSubject());
+	    summaryModel.setMessages(messages);
 	}
 	catch(Exception e)
 	{
 	    e.printStackTrace();
+	    return false;
 	}
-	//	summaryModel.setCurrentMailGroup((StoredMailGroup)obj);
 	return true;
     }
 

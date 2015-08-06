@@ -41,7 +41,7 @@ public class MailApp implements Application, Actions
 	    return false;
 	strings = (Strings)o;
 	this.luwrain = luwrain;
-	if (!base.init(luwrain, strings))//FIXME:Let user know what happens;
+	if (!base.init(luwrain, this, strings))//FIXME:Let user know what happens;
 	    return false;
 	createAreas();
 	return true;
@@ -52,10 +52,23 @@ public class MailApp implements Application, Actions
 	return strings.appName();
     }
 
+    @Override public void refreshMessages(boolean refreshTableArea)
+    {
+	//FIXME:
+    }
+
     @Override public void openFolder(StoredMailFolder folder)
     {
-	base.openFolder(folder);
+	if (!base.openFolder(folder))
+	    return;
 	summaryArea.refresh();
+	gotoSummary();
+    }
+
+    @Override public void showMessage(StoredMailMessage message)
+    {
+	messageArea.show(message);
+	gotoMessage();
     }
 
     @Override public boolean insertMessages()
@@ -70,6 +83,22 @@ public class MailApp implements Application, Actions
     {
 	final Actions a = this;
 	final Strings s = strings;
+
+	final TableClickHandler summaryHandler = new TableClickHandler(){
+		private Actions actions = a;
+		@Override public boolean onClick(TableModel model,
+						 int col,
+						 int row,
+						 Object obj)
+		{
+		    if (model == null)
+			return false;
+		    final Object o = model.getRow(row);
+		    if (o == null || !(o instanceof StoredMailMessage))
+			return false;
+		    actions.showMessage((StoredMailMessage)o);
+		    return true;
+		}};
 
 	foldersArea = new TreeArea(new DefaultControlEnvironment(luwrain),
 				   base.getFoldersModel(),
@@ -115,9 +144,9 @@ public class MailApp implements Application, Actions
 
 	summaryArea = new TableArea(new DefaultControlEnvironment(luwrain),
 				    base.getSummaryModel(),
-				    strings.summaryAreaName(),
 				    base.getSummaryAppearance(),
-				    null) { //Click handler;
+				    summaryHandler,
+				    strings.summaryAreaName()) { //Click handler;
 		private Strings strings = s;
 		private Actions actions = a;
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
@@ -147,14 +176,6 @@ public class MailApp implements Application, Actions
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
-		}
-		@Override public boolean onClick(TableModel model,
-						 int col,
-						 int row,
-						 Object cell)
-		{
-		    //FIXME:
-		    return false;
 		}
 	    };
 
