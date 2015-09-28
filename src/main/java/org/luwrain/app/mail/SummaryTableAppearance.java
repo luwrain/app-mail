@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
-
-   This file is part of the Luwrain.
-
-   Luwrain is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   Luwrain is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.mail;
 
@@ -23,12 +8,14 @@ import org.luwrain.pim.mail.*;
 class SummaryTableAppearance implements TableAppearance
 {
     private Luwrain luwrain;
+    private Strings strings;
 
-    public SummaryTableAppearance(Luwrain luwrain)
+    SummaryTableAppearance(Luwrain luwrain, Strings strings)
     {
 	this.luwrain = luwrain;
-	if (luwrain == null)
-	    throw new NullPointerException("luwrain may not be null");
+	this.strings = strings;
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(strings, "strings");
     }
 
     @Override public void introduceRow(TableModel model,
@@ -43,7 +30,7 @@ class SummaryTableAppearance implements TableAppearance
 	final StoredMailMessage message = (StoredMailMessage)obj;
 	String line = "";
 	try {
-	    line = message.getFrom() + " " + message.getSubject();
+	    line = Base.getDisplaiedAddress(message.getFrom()) + " " + message.getSubject() + " " + strings.passedTimeBrief(message.getSentDate());
 	}
 	catch(Exception e)
 	{

@@ -1,33 +1,18 @@
-/*
-   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
-
-   This file is part of the Luwrain.
-
-   Luwrain is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   Luwrain is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.mail;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
+import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.*;
 
-public class MailApp implements Application, Actions
+class MailApp implements Application, Actions
 {
-    private static final String STRINGS_NAME = "luwrain.mail";
-
+    static private final String STRINGS_NAME = "luwrain.mail";
 
     private Luwrain luwrain;
-    private Base base = new Base();
+    private final Base base = new Base();
     private Strings strings;
 
     private TreeArea foldersArea;
@@ -52,6 +37,25 @@ public class MailApp implements Application, Actions
 	return strings.appName();
     }
 
+    @Override public boolean makeReply(StoredMailMessage message)
+    {
+	try {
+	base.makeReply(message);
+	return true;
+	}
+	catch(Exception e)
+			  {
+			      e.printStackTrace();
+			      luwrain.message("Произошла ошибка при подготовке ответа", Luwrain.MESSAGE_ERROR);
+			      return true;
+			  }
+    }
+
+    @Override public boolean makeForward(StoredMailMessage message)
+    {
+	return true;
+    }
+
     @Override public void refreshMessages(boolean refreshTableArea)
     {
 	//FIXME:
@@ -65,27 +69,30 @@ public class MailApp implements Application, Actions
 	gotoSummary();
     }
 
+    @Override public boolean onFolderUniRefQuery(AreaQuery query)
+    {
+	if (query == null || !(query instanceof ObjectUniRefQuery))
+	    return false;
+	final Object selected = foldersArea.selected();
+	if (selected == null || !(selected instanceof FolderWrapper))
+	    return false;
+	return base.onFolderUniRefQuery((ObjectUniRefQuery)query, (FolderWrapper)selected);
+    }
+
     @Override public void showMessage(StoredMailMessage message)
     {
+	if (message == null)
+	    return;
 	messageArea.show(message);
 	gotoMessage();
     }
 
-    @Override public boolean insertMessages()
-    {
-	if (!base.insertMessages())
-	    return false;
-	summaryArea.refresh();
-	return true;
-    }
-
     private void createAreas()
     {
-	final Actions a = this;
+	final Actions actions = this;
 	final Strings s = strings;
 
 	final TableClickHandler summaryHandler = new TableClickHandler(){
-		private Actions actions = a;
 		@Override public boolean onClick(TableModel model,
 						 int col,
 						 int row,
@@ -101,29 +108,22 @@ public class MailApp implements Application, Actions
 		}};
 
 	foldersArea = new TreeArea(new DefaultControlEnvironment(luwrain),
-				   base.getFoldersModel(),
-				   strings.foldersAreaName()){
-		private Strings strings = s;
-		private Actions actions = a;
+				   base.getFoldersModel(), strings.foldersAreaName()){
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
-		    if (event == null)
-			throw new NullPointerException("event may not be null");
+		    NullCheck.notNull(event, "event");
 		    if (event.isCommand() && !event.isModified())
 			switch(event.getCommand())
 			{
 			case KeyboardEvent.TAB:
 			    actions.gotoSummary();
 			    return true;
-			default:
-			    return super.onKeyboardEvent(event);
 			}
 		    return super.onKeyboardEvent(event);
 		}
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
-		    if (event == null)
-			throw new NullPointerException("eevent may not be null");
+		    NullCheck.notNull(event, "event");
 		    switch(event.getCode())
 		    {
 		    case EnvironmentEvent.CLOSE:
@@ -131,6 +131,17 @@ public class MailApp implements Application, Actions
 			return true;
 		    default:
 			return super.onEnvironmentEvent(event);
+		    }
+		}
+		@Override public boolean onAreaQuery(AreaQuery query)
+		{
+		    NullCheck.notNull(query, "query");
+		    switch(query.getQueryCode())
+		    {
+		    case AreaQuery.OBJECT_UNIREF:
+			return actions.onFolderUniRefQuery(query);
+		    default:
+			return super.onAreaQuery(query);
 		    }
 		}
 		@Override public void onClick(Object obj)
@@ -143,31 +154,26 @@ public class MailApp implements Application, Actions
 	    };
 
 	summaryArea = new TableArea(new DefaultControlEnvironment(luwrain),
-				    base.getSummaryModel(),
-				    base.getSummaryAppearance(),
-				    summaryHandler,
-				    strings.summaryAreaName()) { //Click handler;
-		private Strings strings = s;
-		private Actions actions = a;
+				    base.getSummaryModel(), base.getSummaryAppearance(),
+				    summaryHandler, strings.summaryAreaName()) { //Click handler;
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
+		    NullCheck.notNull(event, "event");
 		    if (event.isCommand() && !event.isModified())
 			switch(event.getCommand())
 			{
 			case KeyboardEvent.TAB:
 			    actions.gotoMessage();
 			    return true;
-			case KeyboardEvent.INSERT:
-			    return actions.insertMessages();
-			default:
-			    return super.onKeyboardEvent(event);
+			case KeyboardEvent.BACKSPACE:
+			    actions.gotoFolders();
+			    return true;
 			}
 		    return super.onKeyboardEvent(event);
 		}
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
-		    if (event == null)
-			throw new NullPointerException("event may not be null");
+		    NullCheck.notNull(event, "event");
 		    switch(event.getCode())
 		    {
 		    case EnvironmentEvent.CLOSE:
@@ -176,6 +182,14 @@ public class MailApp implements Application, Actions
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
+		}
+		@Override public Action[] getAreaActions()
+		{
+		    return new Action[]{
+			new Action("reply", "Ответить"),
+			new Action("reply-all", "Ответить всем"),
+			new Action("forward", "Переслать"),
+		    };
 		}
 	    };
 

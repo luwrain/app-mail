@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
-
-   This file is part of the Luwrain.
-
-   Luwrain is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   Luwrain is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.mail;
 
@@ -20,24 +5,26 @@ import java.util.*;
 import java.io.*;
 
 import org.luwrain.core.*;
+import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.*;
 import org.luwrain.pim.mail.*;
 
 class Base
 {
-    private static final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
+    static private final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
 
     private Luwrain luwrain;
     private Actions actions;
     private Strings strings;
     private MailStoring storing;
     private StoredMailFolder currentFolder = null;
-    private FoldersTreeModel foldersModel;
+    private TreeModelSource treeModelSource;
+    private TreeModel foldersModel;
     private SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
-    public boolean init(Luwrain luwrain,
+    boolean init(Luwrain luwrain,
 			Actions actions,
 			Strings strings)
     {
@@ -61,15 +48,16 @@ class Base
 	return true;
     }
 
-    public FoldersTreeModel getFoldersModel()
+    TreeModel getFoldersModel()
     {
 	if (foldersModel != null)
 	    return foldersModel;
-	foldersModel = new FoldersTreeModel(storing, strings);
+	treeModelSource = new TreeModelSource(storing, strings);
+	foldersModel = new CachedTreeModel(treeModelSource);
 	return foldersModel;
     }
 
-    public SummaryTableModel getSummaryModel()
+    SummaryTableModel getSummaryModel()
     {
 	if (summaryModel != null)
 	    return summaryModel;
@@ -77,11 +65,11 @@ class Base
 	return summaryModel;
     }
 
-    public SummaryTableAppearance getSummaryAppearance()
+    SummaryTableAppearance getSummaryAppearance()
     {
 	if (summaryAppearance != null)
 	    return summaryAppearance;
-	summaryAppearance = new SummaryTableAppearance(luwrain);
+	summaryAppearance = new SummaryTableAppearance(luwrain, strings);
 	return summaryAppearance;
     }
 
@@ -92,7 +80,7 @@ class Base
     }
     */
 
-    public boolean openFolder(StoredMailFolder folder)
+    boolean openFolder(StoredMailFolder folder)
     {
 	if (folder == null)
 	    return false;
@@ -109,7 +97,7 @@ class Base
 	return true;
     }
 
-    public boolean insertMessages()
+    boolean insertMessages()
     {
 	if (currentFolder == null)
 	    return false;
@@ -136,4 +124,59 @@ class Base
 	}
 	return true;
     }
+
+    void makeReply(StoredMailMessage message) throws Exception
+    {
+	NullCheck.notNull(message, "message");
+	final StringBuilder newBody = new StringBuilder();
+	newBody.append("writes:\n\n");
+	for(String s: message.getBaseContent().split("\n"))
+	    newBody.append(">" + s + "\n");
+
+	luwrain.launchApp("message", new String[]{
+		"mail@mail.ru",
+		"subject",
+		newBody.toString()
+});
+    }
+
+    static String getDisplaiedAddress(String addr)
+    {
+	NullCheck.notNull(addr, "addr");
+	if (addr.trim().isEmpty())
+	    return addr;
+	try {
+	    final javax.mail.internet.InternetAddress inetAddr = new javax.mail.internet.InternetAddress(addr, false);
+	final String personal = inetAddr.getPersonal();
+	if (personal == null || personal.trim().isEmpty())
+	    return addr;
+	//	System.out.println(personal);
+	return personal;
+	}
+	catch (javax.mail.internet.AddressException e)
+	{
+	    e.printStackTrace();
+	    return addr;
+	}
+    }
+
+    boolean onFolderUniRefQuery(ObjectUniRefQuery query, FolderWrapper wrapper)
+    {
+	NullCheck.notNull(query, "query");
+	NullCheck.notNull(wrapper, "wrapper");
+	if (wrapper.folder() == null)
+	    return false;
+	try {
+	    final String uniRef = storing.getFolderUniRef(wrapper.folder());
+	    if (uniRef == null || uniRef.trim().isEmpty())
+		return false;
+	    query.setUniRef(uniRef);
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	    return false;
+	}
+	return true;
+	}
 }
