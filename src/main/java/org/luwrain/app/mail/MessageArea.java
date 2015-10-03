@@ -1,5 +1,22 @@
+/*
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+
+   This file is part of the LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.mail;
+
+import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
@@ -13,10 +30,8 @@ class MessageArea extends NavigateArea
     private Actions actions;
     private StoredMailMessage message;
 
-    private String from = "";
-    private String to = "";
-    private String subject = "";
-    private String date = "";
+    private String[] headers = new String[0];
+    private String[] attachments = new String[0];
     private String[] text = new String[0];
 
     MessageArea(Luwrain luwrain, Actions actions,
@@ -33,31 +48,42 @@ class MessageArea extends NavigateArea
 
     void show(StoredMailMessage message)
     {
+	if (message == null)
+	{
+	    this.message = null;
+	    headers = new String[0];
+	    attachments = new String[0];
+	    text = new String[0];
+	    luwrain.onAreaNewContent(this);
+	    return;
+	}
 	try {
 	    this.message = message;
-	    from = message.getFrom();
-	    to = "";
-	    for(String s: message.getTo())
-	    {
-		if (!to.isEmpty())
-		    to += ", ";
-		to += s;
-	    }
-	    subject = message.getSubject();
-	    date = message.getSentDate().toString();
-	    text = message.getBaseContent().split("\n");
+	    final LinkedList<String> headersList = new LinkedList<String>();
+	    headersList.add("ОТ: " + Base.getFullDisplaiedAddress(message.getFrom()));
+	    headersList.add("Кому: " + prepareList(message.getTo()));
+	    headersList.add("Копия: " + prepareList(message.getCc()));
+	    headersList.add("Тема: " + message.getSubject());
+	    headersList.add("Время: " + strings.messageSentDate(message.getSentDate()));
+	    headersList.add("Тип данных: " + message.getMimeContentType());
+	    headers = headersList.toArray(new String[headersList.size()]);
+	    headers = headersList.toArray(new String[headersList.size()]);
+	    text = prepareText(message.getBaseContent());
+	    attachments = message.getAttachments();
+	    if (attachments == null)
+		attachments = new String[0];
+	    //	    System.out.println("attachments:" + attachments.length);
+	    luwrain.onAreaNewContent(this);
 	}
 	catch(Exception e)
 	{
 	    e.printStackTrace();
 	    this.message = null;
-	    to = "";
-	    from = "";
-	    subject = "";
-	    date = "";
+	    attachments = new String[0];
+	    headers = new String[0];
 	    text = new String[0];
+	    luwrain.onAreaNewContent(this);
 	}
-	luwrain.onAreaNewContent(this);
     }
 
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
@@ -74,7 +100,7 @@ class MessageArea extends NavigateArea
 	    return true;
 	    case KeyboardEvent.F5://FIXME:Action
 		if (message != null)
-		return actions.makeReply(message);
+		return actions.makeReply();
 		return false;
 	    }
 	return super.onKeyboardEvent(event);
@@ -82,16 +108,33 @@ class MessageArea extends NavigateArea
 
     @Override public boolean onEnvironmentEvent(EnvironmentEvent event)
     {
-	if (event == null)
-	    throw new NullPointerException("event may not be null");
+	NullCheck.notNull(event, "event");
 	switch (event.getCode())
 	{
 	case EnvironmentEvent.CLOSE:
 	    actions.closeApp();
 	    return true;
+	case EnvironmentEvent.ACTION:
+	    if (ActionEvent.isAction(event, "raw-mode"))
+	    {
+		if (!actions.switchToRawMessage())
+		    luwrain.message("Невозможно переключиться к сырому виду сообщения", Luwrain.MESSAGE_ERROR);
+		return true;
+	    }
+	    return false;
 	default:
 	    return super.onEnvironmentEvent(event);
 	}
+    }
+
+    @Override public Action[] getAreaActions()
+    {
+	return new Action[]{
+	    new Action("reply", "Ответить"),
+	    new Action("reply-all", "Ответить всем"),
+	    new Action("forward", "Переслать"),
+	    new Action("raw-mode", "Показать сырой вид"),
+	};
     }
 
     @Override public String getAreaName()
@@ -101,25 +144,62 @@ class MessageArea extends NavigateArea
 
     @Override public int getLineCount()
     {
-	return 5 + text.length;
+	int res = headers.length + text.length + 2;
+	if (attachments != null && attachments.length > 0)
+	    res += (attachments.length + 1);
+return res;
     }
 
     @Override public String getLine(int index)
     {
-	switch(index)
-	{
-	case 0:
-	    return "От: " + from;
-	case 1:
-	    return "Кому: " + to;
-	case 2:
-	    return "Тема: " + subject;
-	case 3:
-	    return "Дата: " + date;
-	case 4:
+	if (index < 0)
 	    return "";
-	default:
-	    return index - 5 < text.length?text[index - 5]:"";
-	}
+	if (index < headers.length)
+	    return headers[index];
+	if (index == headers.length)
+	    return "";
+	int offset = headers.length + 1;
+	if (attachments != null && attachments.length > 0)
+{
+    if (index - offset < attachments.length)
+	return "Прикреплённый файл: " + attachments[index - offset];
+    if (index - offset == attachments.length)
+	return "";
+    offset += (attachments.length + 1);
+}
+	if (index - offset < text.length)
+	    return text[index - offset];
+	return "";
+    }
+
+    @Override public void introduceLine(int index, String text)
+    {
+	if (attachments != null && attachments.length > 0 &&
+index >= headers.length + 1 && index < headers.length + attachments.length + 1)
+	    luwrain.playSound(Sounds.NEW_LIST_ITEM);
+	if (text == null || text.trim().isEmpty())
+	    luwrain.hint(Hints.EMPTY_LINE); else
+	    luwrain.say(text);
+    }
+
+    static private String prepareList(String[] items)
+    {
+	if (items == null || items.length < 1)
+	    return "";
+	final StringBuilder b = new StringBuilder();
+	b.append(Base.getFullDisplaiedAddress(items[0]));
+	for(int i = 1;i < items.length;++i)
+	    b.append("," + Base.getFullDisplaiedAddress(items[i]));
+	return b.toString();
+    }
+
+    static private String[] prepareText(String str)
+    {
+	if (str == null || str.trim().isEmpty())
+	    return new String[0];
+	final String[] res = str.split("\n");
+	for(int i = 0;i < res.length;++i)
+	    res[i] = res[i].replaceAll("\r", "");
+	return res;
     }
 }

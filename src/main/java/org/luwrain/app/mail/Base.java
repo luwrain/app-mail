@@ -1,3 +1,18 @@
+/*
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+
+   This file is part of the LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.mail;
 
@@ -9,6 +24,7 @@ import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.util.*;
 
 class Base
 {
@@ -19,6 +35,7 @@ class Base
     private Strings strings;
     private MailStoring storing;
     private StoredMailFolder currentFolder = null;
+    private StoredMailMessage currentMessage;
     private TreeModelSource treeModelSource;
     private TreeModel foldersModel;
     private SummaryTableModel summaryModel;
@@ -48,6 +65,16 @@ class Base
 	return true;
     }
 
+    void setCurrentMessage(StoredMailMessage message)
+    {
+	this.currentMessage = message;
+    }
+
+    boolean hasCurrentMessage()
+    {
+	return currentMessage != null;
+    }
+
     TreeModel getFoldersModel()
     {
 	if (foldersModel != null)
@@ -72,13 +99,6 @@ class Base
 	summaryAppearance = new SummaryTableAppearance(luwrain, strings);
 	return summaryAppearance;
     }
-
-    /*
-    public boolean isStoredMailGroup(Object obj)
-    {
-	return obj != null && (obj instanceof StoredMailGroup);
-    }
-    */
 
     boolean openFolder(StoredMailFolder folder)
     {
@@ -125,19 +145,20 @@ class Base
 	return true;
     }
 
-    void makeReply(StoredMailMessage message) throws Exception
+    boolean makeReply() throws Exception
     {
-	NullCheck.notNull(message, "message");
+	if (currentMessage == null)
+	    return false;
 	final StringBuilder newBody = new StringBuilder();
 	newBody.append("writes:\n\n");
-	for(String s: message.getBaseContent().split("\n"))
+	for(String s: currentMessage.getBaseContent().split("\n"))
 	    newBody.append(">" + s + "\n");
-
 	luwrain.launchApp("message", new String[]{
 		"mail@mail.ru",
 		"subject",
 		newBody.toString()
 });
+	return true;
     }
 
     static String getDisplaiedAddress(String addr)
@@ -159,6 +180,27 @@ class Base
 	    return addr;
 	}
     }
+
+    static String getFullDisplaiedAddress(String addr)
+    {
+	NullCheck.notNull(addr, "addr");
+	if (addr.trim().isEmpty())
+	    return addr;
+	try {
+	    final javax.mail.internet.InternetAddress inetAddr = new javax.mail.internet.InternetAddress(addr, false);
+	final String personal = inetAddr.getPersonal();
+	final String addrStr = inetAddr.getAddress();
+	if (personal == null || personal.trim().isEmpty())
+	    return addr;
+	return personal + " <" + addrStr + ">";
+	}
+	catch (javax.mail.internet.AddressException e)
+	{
+	    e.printStackTrace();
+	    return addr;
+	}
+    }
+
 
     boolean onFolderUniRefQuery(ObjectUniRefQuery query, FolderWrapper wrapper)
     {

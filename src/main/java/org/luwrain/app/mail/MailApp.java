@@ -1,3 +1,18 @@
+/*
+   Copyright 2012-2015 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+
+   This file is part of the LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.mail;
 
@@ -11,13 +26,20 @@ class MailApp implements Application, Actions
 {
     static private final String STRINGS_NAME = "luwrain.mail";
 
+    private enum Mode {
+	REGULAR,
+	RAW,
+    };
+
     private Luwrain luwrain;
     private final Base base = new Base();
     private Strings strings;
 
+    private Mode mode = Mode.REGULAR;
     private TreeArea foldersArea;
     private TableArea summaryArea;
     private MessageArea messageArea;
+    private RawMessageArea rawMessageArea;
 
     @Override public boolean onLaunch(Luwrain luwrain)
     {
@@ -32,26 +54,23 @@ class MailApp implements Application, Actions
 	return true;
     }
 
-    @Override public String getAppName()
+    @Override public boolean makeReply()
     {
-	return strings.appName();
-    }
-
-    @Override public boolean makeReply(StoredMailMessage message)
-    {
+	if (!base.hasCurrentMessage())
+	    return false;
 	try {
-	base.makeReply(message);
+	base.makeReply();
 	return true;
 	}
 	catch(Exception e)
 			  {
 			      e.printStackTrace();
-			      luwrain.message("Произошла ошибка при подготовке ответа", Luwrain.MESSAGE_ERROR);
+			      luwrain.message("При подготовке ответа произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
 			      return true;
 			  }
     }
 
-    @Override public boolean makeForward(StoredMailMessage message)
+    @Override public boolean makeForward()
     {
 	return true;
     }
@@ -83,8 +102,23 @@ class MailApp implements Application, Actions
     {
 	if (message == null)
 	    return;
+	base.setCurrentMessage(message);
 	messageArea.show(message);
+	messageArea.setHotPoint(0, 0);
+	rawMessageArea.show(message);
+	rawMessageArea.setHotPoint(0, 0);
+	enableMessageMode(Mode.REGULAR);
 	gotoMessage();
+    }
+
+    @Override public boolean switchToRawMessage()
+    {
+	System.out.println("switching");
+	if (!base.hasCurrentMessage())
+	    return false;
+	enableMessageMode(Mode.RAW);
+	gotoMessage();
+	return true;
     }
 
     private void createAreas()
@@ -194,11 +228,20 @@ class MailApp implements Application, Actions
 	    };
 
 	messageArea = new MessageArea(luwrain, this, strings);
+	rawMessageArea = new RawMessageArea(luwrain, this, strings);
     }
 
     @Override  public AreaLayout getAreasToShow()
     {
+	System.out.println(mode);
+	switch(mode)
+	{
+	case REGULAR:
 	return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, messageArea);
+	case RAW:
+	return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, rawMessageArea);
+	}
+	return null;
     }
 
     @Override public void gotoFolders()
@@ -213,11 +256,31 @@ class MailApp implements Application, Actions
 
     @Override public void gotoMessage()
     {
-	luwrain.setActiveArea(messageArea);
+	switch(mode)
+	{
+	case REGULAR:
+	    luwrain.setActiveArea(messageArea);
+	    return;
+	case RAW:
+	    luwrain.setActiveArea(rawMessageArea);
+	    return;
+	}
     }
 
     @Override public void closeApp()
     {
 	luwrain.closeApp();
+    }
+    @Override public String getAppName()
+    {
+	return strings.appName();
+    }
+
+    private void enableMessageMode(Mode mode)
+    {
+	if (this.mode == mode)
+	    return;
+	this.mode = mode;
+	luwrain.onNewAreaLayout();
     }
 }
