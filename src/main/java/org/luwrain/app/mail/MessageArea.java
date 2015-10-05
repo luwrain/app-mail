@@ -60,7 +60,7 @@ class MessageArea extends NavigateArea
 	try {
 	    this.message = message;
 	    final LinkedList<String> headersList = new LinkedList<String>();
-	    headersList.add("ОТ: " + Base.getFullDisplaiedAddress(message.getFrom()));
+	    headersList.add("ОТ: " + message.getFrom());
 	    headersList.add("Кому: " + prepareList(message.getTo()));
 	    headersList.add("Копия: " + prepareList(message.getCc()));
 	    headersList.add("Тема: " + message.getSubject());
@@ -99,9 +99,7 @@ class MessageArea extends NavigateArea
 	    actions.gotoSummary();
 	    return true;
 	    case KeyboardEvent.F5://FIXME:Action
-		if (message != null)
-		return actions.makeReply();
-		return false;
+		return actions.makeReply(null, false);
 	    }
 	return super.onKeyboardEvent(event);
     }
@@ -119,6 +117,21 @@ class MessageArea extends NavigateArea
 	    {
 		if (!actions.switchToRawMessage())
 		    luwrain.message("Невозможно переключиться к сырому виду сообщения", Luwrain.MESSAGE_ERROR);
+		return true;
+	    }
+	    if (ActionEvent.isAction(event, "reply"))
+	    {
+		actions.makeReply(null, false);
+		return true;
+	    }
+	    if (ActionEvent.isAction(event, "reply-all"))
+	    {
+		actions.makeReply(null, true);
+		return true;
+	    }
+	    if (ActionEvent.isAction(event, "forward"))
+	    {
+		actions.makeForward(null);
 		return true;
 	    }
 	    return false;
@@ -187,9 +200,9 @@ index >= headers.length + 1 && index < headers.length + attachments.length + 1)
 	if (items == null || items.length < 1)
 	    return "";
 	final StringBuilder b = new StringBuilder();
-	b.append(Base.getFullDisplaiedAddress(items[0]));
+	b.append(items[0]);
 	for(int i = 1;i < items.length;++i)
-	    b.append("," + Base.getFullDisplaiedAddress(items[i]));
+	    b.append("," + items[i]);
 	return b.toString();
     }
 

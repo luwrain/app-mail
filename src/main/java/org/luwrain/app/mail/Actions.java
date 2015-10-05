@@ -24,8 +24,10 @@ interface Actions
     void gotoFolders();
     void gotoSummary();
     void gotoMessage();
-    boolean makeReply();
-    boolean makeForward();
+
+    //Returns false is operation isn't possible at all, shows error message if some errors occurred but returns true anyway
+    boolean makeReply(StoredMailMessage message, boolean wideReply);
+    boolean makeForward(StoredMailMessage message);
     boolean switchToRawMessage();
     void refreshMessages(boolean refreshTableArea);
     void openFolder(StoredMailFolder folder);

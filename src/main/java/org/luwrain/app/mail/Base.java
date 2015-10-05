@@ -119,6 +119,7 @@ class Base
 
     boolean insertMessages()
     {
+	/*
 	if (currentFolder == null)
 	    return false;
 	final File file = Popups.file(luwrain, "Добавление сообщений", "Выберите каталог с файлами сообщений для добавления:",
@@ -143,25 +144,82 @@ class Base
 	    }
 	}
 	return true;
+	*/
+	return false;
     }
 
-    boolean makeReply() throws Exception
+    boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
-	if (currentMessage == null)
+	try {
+	    return makeReplyImpl(message, wideReply);
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
 	    return false;
+	}
+    }
+
+    private boolean makeReplyImpl(StoredMailMessage message, boolean wideReply) throws Exception
+    {
+	if (message == null && currentMessage == null)
+	    return false;
+	final StoredMailMessage m = message != null?message:currentMessage;
+	String subject = m.getSubject();
+	if (!subject.toLowerCase().startsWith("re: "))
+	    subject = "Re: " + subject;
+	final byte[] bytes = m.getRawMail();
+	final String from = m.getFrom();
+	if (from.trim().isEmpty())
+	    return false;
+	String replyTo = getReplyTo(bytes);
+	if (replyTo.trim().isEmpty())
+	    replyTo = from;
 	final StringBuilder newBody = new StringBuilder();
-	newBody.append("writes:\n\n");
+	newBody.append(strings.replyFirstLine(getDisplayedAddress(from), m.getSentDate()) + "\n");
+	newBody.append("\n");
 	for(String s: currentMessage.getBaseContent().split("\n"))
 	    newBody.append(">" + s + "\n");
+
+	if (wideReply)
+	{
 	luwrain.launchApp("message", new String[]{
-		"mail@mail.ru",
-		"subject",
+		replyTo,
+		new MailEssentialJavamail().constructWideReplyCcList(bytes, true),
+		subject,
 		newBody.toString()
-});
+	    });
+	} else 
+	{
+	luwrain.launchApp("message", new String[]{
+		replyTo,
+		subject,
+		newBody.toString()
+	    });
+	}
 	return true;
+
     }
 
-    static String getDisplaiedAddress(String addr)
+    boolean makeForward(StoredMailMessage message)
+    {
+	try {
+	    return makeForwardImpl(message);
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	    luwrain.message("Во время подготовки перенаправленяи произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
+	    return false;
+	}
+    }
+
+    private boolean makeForwardImpl(StoredMailMessage message) throws Exception
+    {
+	return false;
+    }
+
+    static String getDisplayedAddress(String addr)
     {
 	NullCheck.notNull(addr, "addr");
 	if (addr.trim().isEmpty())
@@ -181,6 +239,7 @@ class Base
 	}
     }
 
+    /*
     static String getFullDisplaiedAddress(String addr)
     {
 	NullCheck.notNull(addr, "addr");
@@ -200,7 +259,7 @@ class Base
 	    return addr;
 	}
     }
-
+    */
 
     boolean onFolderUniRefQuery(ObjectUniRefQuery query, FolderWrapper wrapper)
     {
@@ -221,4 +280,12 @@ class Base
 	}
 	return true;
 	}
+
+    static private String getReplyTo(byte[] bytes) throws Exception
+    {
+	final String[] res = new MailEssentialJavamail().getReplyTo(bytes, true);
+	if (res == null || res.length < 1)
+	    return "";
+	return res[0];
+    }
 }

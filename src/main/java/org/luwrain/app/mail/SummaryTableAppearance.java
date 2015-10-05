@@ -44,7 +44,7 @@ class SummaryTableAppearance implements TableAppearance
 	final StoredMailMessage message = (StoredMailMessage)obj;
 	String line = "";
 	try {
-	    line = Base.getDisplaiedAddress(message.getFrom()) + ":" + message.getSubject() + "(" + strings.passedTimeBrief(message.getSentDate()) + ")";
+	    line = Base.getDisplayedAddress(message.getFrom()) + ":" + message.getSubject() + " " + strings.passedTimeBrief(message.getSentDate());
 	}
 	catch(Exception e)
 	{

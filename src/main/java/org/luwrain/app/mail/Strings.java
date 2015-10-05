@@ -35,4 +35,5 @@ public interface Strings
     String firstSummaryLine();
     String passedTimeBrief(Date date);
     String messageSentDate(Date date);
+    String replyFirstLine(String sender, Date sentDate);
 }

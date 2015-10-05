@@ -82,7 +82,7 @@ class RawMessageArea extends NavigateArea
 	    return true;
 	    case KeyboardEvent.F5://FIXME:Action
 		if (message != null)
-		return actions.makeReply();
+		    return actions.makeReply(null, false);
 		return false;
 	    }
 	return super.onKeyboardEvent(event);

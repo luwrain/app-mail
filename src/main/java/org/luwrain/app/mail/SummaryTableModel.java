@@ -53,7 +53,7 @@ class SummaryTableModel implements TableModel
 	    switch (col)
 	    {
 	    case 0:
-		return Base.getDisplaiedAddress(message.getFrom());
+		return Base.getDisplayedAddress(message.getFrom());
 	    case 1:
 		return message.getSubject();
 	    case 2:

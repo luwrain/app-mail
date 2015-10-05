@@ -54,25 +54,16 @@ class MailApp implements Application, Actions
 	return true;
     }
 
-    @Override public boolean makeReply()
+    @Override public boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
-	if (!base.hasCurrentMessage())
-	    return false;
-	try {
-	base.makeReply();
+	if (!base.makeReply(message, wideReply))
+	    luwrain.message("Во время подготовки ответа произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
 	return true;
-	}
-	catch(Exception e)
-			  {
-			      e.printStackTrace();
-			      luwrain.message("При подготовке ответа произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
-			      return true;
-			  }
     }
 
-    @Override public boolean makeForward()
+    @Override public boolean makeForward(StoredMailMessage message)
     {
-	return true;
+	return base.makeForward(message);
     }
 
     @Override public void refreshMessages(boolean refreshTableArea)
