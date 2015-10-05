@@ -81,10 +81,16 @@ class RawMessageArea extends NavigateArea
 	    actions.gotoSummary();
 	    return true;
 	    case KeyboardEvent.F5://FIXME:Action
-		if (message != null)
 		    return actions.makeReply(null, false);
-		return false;
+	    case KeyboardEvent.F6://FIXME:Action
+		return actions.makeForward(null);
 	    }
+	if (event.isCommand() && event.withShiftOnly())
+	    switch(event.getCommand())
+	    {
+	    case KeyboardEvent.F5://FIXME:Action
+		    return actions.makeReply(null, true);
+}
 	return super.onKeyboardEvent(event);
     }
 
@@ -96,9 +102,37 @@ class RawMessageArea extends NavigateArea
 	case EnvironmentEvent.CLOSE:
 	    actions.closeApp();
 	    return true;
+	case EnvironmentEvent.ACTION:
+	    if (ActionEvent.isAction(event, "reply"))
+	    {
+		actions.makeReply(null, false);
+		return true;
+	    }
+	    if (ActionEvent.isAction(event, "reply-all"))
+	    {
+		actions.makeReply(null, true);
+		return true;
+	    }
+	    if (ActionEvent.isAction(event, "forward"))
+	    {
+		actions.makeForward(null);
+		return true;
+	    }
+	    return false;
+
+
 	default:
 	    return super.onEnvironmentEvent(event);
 	}
+    }
+
+    @Override public Action[] getAreaActions()
+    {
+	return new Action[]{
+	    new Action("reply", "Ответить"),
+	    new Action("reply-all", "Ответить всем"),
+	    new Action("forward", "Переслать"),
+	};
     }
 
     @Override public String getAreaName()

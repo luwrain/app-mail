@@ -100,6 +100,14 @@ class MessageArea extends NavigateArea
 	    return true;
 	    case KeyboardEvent.F5://FIXME:Action
 		return actions.makeReply(null, false);
+	    case KeyboardEvent.F6://FIXME:Action
+		return actions.makeForward(null);
+	    }
+	if (event.isCommand() && event.withShiftOnly())
+	    switch(event.getCommand())
+	    {
+	    case KeyboardEvent.F5://FIXME:Action
+		return actions.makeReply(null, true);
 	    }
 	return super.onKeyboardEvent(event);
     }

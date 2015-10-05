@@ -63,7 +63,9 @@ class MailApp implements Application, Actions
 
     @Override public boolean makeForward(StoredMailMessage message)
     {
-	return base.makeForward(message);
+	if (!base.makeForward(message))
+	    luwrain.message("Во время подготовки перенаправленяи произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
+	return true;
     }
 
     @Override public void refreshMessages(boolean refreshTableArea)
@@ -193,6 +195,22 @@ class MailApp implements Application, Actions
 			case KeyboardEvent.BACKSPACE:
 			    actions.gotoFolders();
 			    return true;
+			case KeyboardEvent.F5:
+			    if (getSelectedRow() == null)
+				return false;
+			    return base.makeReply((StoredMailMessage)getSelectedRow(), false);
+			case KeyboardEvent.F6:
+			    if (getSelectedRow() == null)
+				return false;
+			    return base.makeForward((StoredMailMessage)getSelectedRow());
+			}
+		    if (event.isCommand() && event.withShiftOnly())
+			switch(event.getCommand())
+			{
+			case KeyboardEvent.F5:
+			    if (getSelectedRow() == null)
+				return false;
+			    return base.makeReply((StoredMailMessage)getSelectedRow(), true);
 			}
 		    return super.onKeyboardEvent(event);
 		}
@@ -204,6 +222,28 @@ class MailApp implements Application, Actions
 		    case EnvironmentEvent.CLOSE:
 			actions.closeApp();
 			return true;
+		    case EnvironmentEvent.ACTION:
+			if (ActionEvent.isAction(event, "reply"))
+			{
+			    if (getSelectedRow() == null)
+				return false;
+			    base.makeReply((StoredMailMessage)getSelectedRow(), false);
+			    return true;
+			}
+			if (ActionEvent.isAction(event, "reply-all"))
+			{
+			    if (getSelectedRow() == null)
+				return false;
+			    base.makeReply((StoredMailMessage)getSelectedRow(), true);
+			    return true;
+			}
+			if (ActionEvent.isAction(event, "forward"))
+			{
+			    if (getSelectedRow() == null)
+				return false;
+			    base.makeForward((StoredMailMessage)getSelectedRow());
+			    return true;
+			}
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }

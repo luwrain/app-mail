@@ -117,37 +117,6 @@ class Base
 	return true;
     }
 
-    boolean insertMessages()
-    {
-	/*
-	if (currentFolder == null)
-	    return false;
-	final File file = Popups.file(luwrain, "Добавление сообщений", "Выберите каталог с файлами сообщений для добавления:",
-				      luwrain.launchContext().userHomeDirAsFile(), FilePopup.DIRECTORY, 0);
-	if (file == null)
-	    return true;
-	final MailEssentialJavamail mail = new MailEssentialJavamail();
-	final File[] files = file.listFiles();
-	for(File f: files)
-	{
-	    if (f.isDirectory())
-		continue;
-	    try {
-		final MailMessage message = mail.loadMailFromFile(new FileInputStream(f.getAbsolutePath()));
-		if (message == null)
-		    continue;
-		storing.saveMessage(currentFolder, message);
-	    }
-	    catch (Exception e)
-	    {
-		e.printStackTrace();
-	    }
-	}
-	return true;
-	*/
-	return false;
-    }
-
     boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
 	try {
@@ -168,37 +137,41 @@ class Base
 	String subject = m.getSubject();
 	if (!subject.toLowerCase().startsWith("re: "))
 	    subject = "Re: " + subject;
+	System.out.println("subject " + subject);
 	final byte[] bytes = m.getRawMail();
 	final String from = m.getFrom();
 	if (from.trim().isEmpty())
 	    return false;
+	System.out.println("from " + from);
 	String replyTo = getReplyTo(bytes);
 	if (replyTo.trim().isEmpty())
 	    replyTo = from;
+	System.out.println("replyto " + replyTo);
 	final StringBuilder newBody = new StringBuilder();
 	newBody.append(strings.replyFirstLine(getDisplayedAddress(from), m.getSentDate()) + "\n");
+	System.out.println("here");
 	newBody.append("\n");
-	for(String s: currentMessage.getBaseContent().split("\n"))
+	System.out.println("here2");
+	for(String s: m.getBaseContent().split("\n"))
 	    newBody.append(">" + s + "\n");
-
 	if (wideReply)
 	{
-	luwrain.launchApp("message", new String[]{
-		replyTo,
-		new MailEssentialJavamail().constructWideReplyCcList(bytes, true),
-		subject,
-		newBody.toString()
-	    });
+	    luwrain.launchApp("message", new String[]{
+		    replyTo,
+		    new MailEssentialJavamail().constructWideReplyCcList(bytes, true),
+		    subject,
+		    newBody.toString()
+		});
 	} else 
 	{
-	luwrain.launchApp("message", new String[]{
-		replyTo,
-		subject,
-		newBody.toString()
-	    });
+	    System.out.println("here3");
+	    luwrain.launchApp("message", new String[]{
+		    replyTo,
+		    subject,
+		    newBody.toString()
+		});
 	}
 	return true;
-
     }
 
     boolean makeForward(StoredMailMessage message)
@@ -209,14 +182,61 @@ class Base
 	catch(Exception e)
 	{
 	    e.printStackTrace();
-	    luwrain.message("Во время подготовки перенаправленяи произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
 	    return false;
 	}
     }
 
     private boolean makeForwardImpl(StoredMailMessage message) throws Exception
     {
-	return false;
+	if (message == null && currentMessage == null)
+	    return false;
+	final StoredMailMessage m = message != null?message:currentMessage;
+	String subject = m.getSubject();
+	if (!subject.toLowerCase().startsWith("fwd: "))
+	    subject = "Fwd: " + subject;
+	final byte[] bytes = m.getRawMail();
+	final String from = m.getFrom();
+	final StringBuilder newBody = new StringBuilder();
+	newBody.append("=== Пересылаемое сообщение ===\n");
+
+	newBody.append("ОТ: ");
+	newBody.append(m.getFrom());
+	newBody.append("\n");
+
+	newBody.append("Кому: ");
+	if (m.getTo().length > 0)
+	{
+	    final String[] values = m.getTo();
+	    newBody.append(values[0]);
+	    for(int i = 1;i < values.length;++i)
+		newBody.append("," + values[i]);
+	}
+	newBody.append("\n");
+
+	if (m.getCc().length > 0)
+	{
+	    newBody.append("Копия: ");
+	    final String[] values = m.getCc();
+	    newBody.append(values[0]);
+	    for(int i = 1;i < values.length;++i)
+		newBody.append("," + values[i]);
+	}
+	newBody.append("\n");
+
+	newBody.append("Тема: " + m.getSubject() + "\n");
+	newBody.append("Дата: " + m.getSentDate() + "\n");
+
+	newBody.append("\n");
+	for(String s: m.getBaseContent().split("\n"))
+	    newBody.append(s + "\n");
+	newBody.append("=== Конец пересылаемого сообщения ===");
+
+	luwrain.launchApp("message", new String[]{
+		"",
+		subject,
+		newBody.toString()
+	    });
+	return true;
     }
 
     static String getDisplayedAddress(String addr)
@@ -226,11 +246,11 @@ class Base
 	    return addr;
 	try {
 	    final javax.mail.internet.InternetAddress inetAddr = new javax.mail.internet.InternetAddress(addr, false);
-	final String personal = inetAddr.getPersonal();
-	if (personal == null || personal.trim().isEmpty())
-	    return addr;
-	//	System.out.println(personal);
-	return personal;
+	    final String personal = inetAddr.getPersonal();
+	    if (personal == null || personal.trim().isEmpty())
+		return addr;
+	    //	System.out.println(personal);
+	    return personal;
 	}
 	catch (javax.mail.internet.AddressException e)
 	{
@@ -238,28 +258,6 @@ class Base
 	    return addr;
 	}
     }
-
-    /*
-    static String getFullDisplaiedAddress(String addr)
-    {
-	NullCheck.notNull(addr, "addr");
-	if (addr.trim().isEmpty())
-	    return addr;
-	try {
-	    final javax.mail.internet.InternetAddress inetAddr = new javax.mail.internet.InternetAddress(addr, false);
-	final String personal = inetAddr.getPersonal();
-	final String addrStr = inetAddr.getAddress();
-	if (personal == null || personal.trim().isEmpty())
-	    return addr;
-	return personal + " <" + addrStr + ">";
-	}
-	catch (javax.mail.internet.AddressException e)
-	{
-	    e.printStackTrace();
-	    return addr;
-	}
-    }
-    */
 
     boolean onFolderUniRefQuery(ObjectUniRefQuery query, FolderWrapper wrapper)
     {
@@ -279,7 +277,7 @@ class Base
 	    return false;
 	}
 	return true;
-	}
+    }
 
     static private String getReplyTo(byte[] bytes) throws Exception
     {
