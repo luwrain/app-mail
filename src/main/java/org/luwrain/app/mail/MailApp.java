@@ -54,6 +54,11 @@ class MailApp implements Application, Actions
 	return true;
     }
 
+    @Override public void launchMailFetch()
+    {
+	luwrain.launchApp("fetch", new String[]{"--MAIL"});
+    }
+
     @Override public void saveAttachment(String fileName)
     {
 	base.saveAttachment(fileName);
@@ -150,6 +155,9 @@ class MailApp implements Application, Actions
 			case KeyboardEvent.TAB:
 			    actions.gotoSummary();
 			    return true;
+			case KeyboardEvent.F9:
+			    actions.launchMailFetch();
+			    return true;
 			}
 		    return super.onKeyboardEvent(event);
 		}
@@ -199,6 +207,9 @@ class MailApp implements Application, Actions
 			    return true;
 			case KeyboardEvent.BACKSPACE:
 			    actions.gotoFolders();
+			    return true;
+			case KeyboardEvent.F9:
+			    actions.launchMailFetch();
 			    return true;
 			case KeyboardEvent.F5:
 			    if (getSelectedRow() == null)

@@ -35,4 +35,5 @@ interface Actions
     void closeApp();
     boolean onFolderUniRefQuery(AreaQuery query);
     void saveAttachment(String fileName);
+    void launchMailFetch();
 }

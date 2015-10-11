@@ -98,6 +98,9 @@ class MessageArea extends NavigateArea
 	    case KeyboardEvent.BACKSPACE:
 	    actions.gotoSummary();
 	    return true;
+	    case KeyboardEvent.F9:
+		actions.launchMailFetch();
+		return true;
 	    case KeyboardEvent.ENTER:
 		return onEnter();
 	    case KeyboardEvent.F5://FIXME:Action

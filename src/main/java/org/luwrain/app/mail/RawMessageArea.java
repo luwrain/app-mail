@@ -74,6 +74,9 @@ class RawMessageArea extends NavigateArea
 	if (event.isCommand() && !event.isModified())
 	    switch(event.getCommand())
 	    {
+	    case KeyboardEvent.F9:
+		actions.launchMailFetch();
+		return true;
 	    case KeyboardEvent.TAB:
 	    actions.gotoFolders();
 	    return true;
