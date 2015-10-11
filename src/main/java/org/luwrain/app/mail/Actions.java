@@ -36,4 +36,6 @@ interface Actions
     boolean onFolderUniRefQuery(AreaQuery query);
     void saveAttachment(String fileName);
     void launchMailFetch();
+    boolean deleteInSummary();
+    void clearMessageArea();
 }

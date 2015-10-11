@@ -54,6 +54,19 @@ class MailApp implements Application, Actions
 	return true;
     }
 
+    @Override public boolean deleteInSummary()
+    {
+	final Object o = summaryArea.getSelectedRow();
+	if (o == null || !(o instanceof StoredMailMessage))
+	    return false;
+	final StoredMailMessage message = (StoredMailMessage)o;
+	if (!base.deleteInSummary(message))
+	    return true;
+	summaryArea.refresh();
+	clearMessageArea();
+	return true;
+    }
+
     @Override public void launchMailFetch()
     {
 	luwrain.launchApp("fetch", new String[]{"--MAIL"});
@@ -80,7 +93,7 @@ class MailApp implements Application, Actions
 
     @Override public void refreshMessages(boolean refreshTableArea)
     {
-	//FIXME:
+	summaryArea.refresh();
     }
 
     @Override public void openFolder(StoredMailFolder folder)
@@ -99,6 +112,16 @@ class MailApp implements Application, Actions
 	if (selected == null || !(selected instanceof FolderWrapper))
 	    return false;
 	return base.onFolderUniRefQuery((ObjectUniRefQuery)query, (FolderWrapper)selected);
+    }
+
+    @Override public void clearMessageArea()
+    {
+	base.setCurrentMessage(null);
+	messageArea.show(null);
+	messageArea.setHotPoint(0, 0);
+	rawMessageArea.show(null);
+	rawMessageArea.setHotPoint(0, 0);
+	enableMessageMode(Mode.REGULAR);
     }
 
     @Override public void showMessage(StoredMailMessage message)
@@ -202,6 +225,8 @@ class MailApp implements Application, Actions
 		    if (event.isCommand() && !event.isModified())
 			switch(event.getCommand())
 			{
+			case KeyboardEvent.DELETE:
+			    return actions.deleteInSummary();
 			case KeyboardEvent.TAB:
 			    actions.gotoMessage();
 			    return true;

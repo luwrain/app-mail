@@ -307,6 +307,24 @@ class Base
 	return true;
     }
 
+    boolean deleteInSummary(StoredMailMessage message)
+    {
+	NullCheck.notNull(message, "message");
+	if (currentFolder == null)
+	    return false;
+	try {
+	    storing.deleteMessage(message);
+	summaryModel.setMessages(storing.loadMessages(currentFolder));
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	    luwrain.message("Во время удаления сообщения произошла непредвиденная ошибка:" + e.getMessage());
+	    return false;
+	}
+	return true;
+    }
+
     static private String getReplyTo(byte[] bytes) throws Exception
     {
 	final String[] res = new MailEssentialJavamail().getReplyTo(bytes, true);
