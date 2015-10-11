@@ -54,6 +54,11 @@ class MailApp implements Application, Actions
 	return true;
     }
 
+    @Override public void saveAttachment(String fileName)
+    {
+	base.saveAttachment(fileName);
+    }
+
     @Override public boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
 	if (!base.makeReply(message, wideReply))

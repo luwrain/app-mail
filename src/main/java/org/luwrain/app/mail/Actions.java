@@ -34,4 +34,5 @@ interface Actions
     void showMessage(StoredMailMessage message);
     void closeApp();
     boolean onFolderUniRefQuery(AreaQuery query);
+    void saveAttachment(String fileName);
 }

@@ -98,6 +98,8 @@ class MessageArea extends NavigateArea
 	    case KeyboardEvent.BACKSPACE:
 	    actions.gotoSummary();
 	    return true;
+	    case KeyboardEvent.ENTER:
+		return onEnter();
 	    case KeyboardEvent.F5://FIXME:Action
 		return actions.makeReply(null, false);
 	    case KeyboardEvent.F6://FIXME:Action
@@ -201,6 +203,21 @@ index >= headers.length + 1 && index < headers.length + attachments.length + 1)
 	if (text == null || text.trim().isEmpty())
 	    luwrain.hint(Hints.EMPTY_LINE); else
 	    luwrain.say(text);
+    }
+
+    private boolean onEnter()
+    {
+	if (attachments == null || attachments.length < 1)
+	    return false;
+	if (getHotPointY() <= headers.length)
+	    return false;
+	final int index = getHotPointY() - headers.length - 1;
+	if (index >= attachments.length)
+	    return false;
+	if (attachments[index] == null || attachments[index].isEmpty())
+	    return false;
+	actions.saveAttachment(attachments[index]);
+	return true;
     }
 
     static private String prepareList(String[] items)

@@ -279,6 +279,34 @@ class Base
 	return true;
     }
 
+    boolean saveAttachment(String fileName)
+    {
+	if (currentMessage == null)
+	    return false;
+	File destFile = new File(luwrain.launchContext().userHomeDirAsFile(), fileName);
+	destFile = Popups.file(luwrain, "Сохранение прикрепления", "Введите имя файла для сохранения прикрепления:", destFile, 0, 0);
+	if (destFile == null)
+	    return false;
+	if (destFile.isDirectory())
+	    destFile = new File(destFile, fileName);
+	final org.luwrain.util.MailEssentialJavamail util = new org.luwrain.util.MailEssentialJavamail();
+	try {
+	    if (!util.saveAttachment(currentMessage.getRawMail(), fileName, destFile))
+	    {
+		luwrain.message("Целостность почтового сообщения нарушена, сохранение прикрепления невозможно", Luwrain.MESSAGE_ERROR);
+		return false;
+	    }
+	}
+	catch (Exception e)
+	{
+	    e.printStackTrace();
+	    luwrain.message("Во время сохранения прикрепления произошла непредвиденная ошибка:" + e.getMessage());
+	    return false;
+	}
+	luwrain.message("Файл " + destFile.getAbsolutePath() + " успешно сохранён", Luwrain.MESSAGE_OK);
+	return true;
+    }
+
     static private String getReplyTo(byte[] bytes) throws Exception
     {
 	final String[] res = new MailEssentialJavamail().getReplyTo(bytes, true);
