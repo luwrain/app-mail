@@ -281,6 +281,7 @@ class Base
 
     boolean saveAttachment(String fileName)
     {
+	/*
 	if (currentMessage == null)
 	    return false;
 	File destFile = new File(luwrain.launchContext().userHomeDirAsFile(), fileName);
@@ -304,6 +305,7 @@ class Base
 	    return false;
 	}
 	luwrain.message("Файл " + destFile.getAbsolutePath() + " успешно сохранён", Luwrain.MESSAGE_OK);
+	*/
 	return true;
     }
 
