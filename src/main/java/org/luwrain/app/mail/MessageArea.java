@@ -122,10 +122,10 @@ class MessageArea extends NavigateArea
 	NullCheck.notNull(event, "event");
 	switch (event.getCode())
 	{
-	case EnvironmentEvent.CLOSE:
+	case CLOSE:
 	    actions.closeApp();
 	    return true;
-	case EnvironmentEvent.ACTION:
+	case ACTION:
 	    if (ActionEvent.isAction(event, "raw-mode"))
 	    {
 		if (!actions.switchToRawMessage())
