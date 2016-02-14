@@ -172,13 +172,13 @@ class MailApp implements Application, Actions
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (event.isCommand() && !event.isModified())
-			switch(event.getCommand())
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
 			{
-			case KeyboardEvent.TAB:
+			case TAB:
 			    actions.gotoSummary();
 			    return true;
-			case KeyboardEvent.F9:
+			case F9:
 			    actions.launchMailFetch();
 			    return true;
 			}
@@ -222,33 +222,33 @@ class MailApp implements Application, Actions
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (event.isCommand() && !event.isModified())
-			switch(event.getCommand())
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
 			{
-			case KeyboardEvent.DELETE:
+			case DELETE:
 			    return actions.deleteInSummary();
-			case KeyboardEvent.TAB:
+			case TAB:
 			    actions.gotoMessage();
 			    return true;
-			case KeyboardEvent.BACKSPACE:
+			case BACKSPACE:
 			    actions.gotoFolders();
 			    return true;
-			case KeyboardEvent.F9:
+			case F9:
 			    actions.launchMailFetch();
 			    return true;
-			case KeyboardEvent.F5:
+			case F5:
 			    if (getSelectedRow() == null)
 				return false;
 			    return base.makeReply((StoredMailMessage)getSelectedRow(), false);
-			case KeyboardEvent.F6:
+			case F6:
 			    if (getSelectedRow() == null)
 				return false;
 			    return base.makeForward((StoredMailMessage)getSelectedRow());
 			}
-		    if (event.isCommand() && event.withShiftOnly())
-			switch(event.getCommand())
+		    if (event.isSpecial() && event.withShiftOnly())
+			switch(event.getSpecial())
 			{
-			case KeyboardEvent.F5:
+			case F5:
 			    if (getSelectedRow() == null)
 				return false;
 			    return base.makeReply((StoredMailMessage)getSelectedRow(), true);

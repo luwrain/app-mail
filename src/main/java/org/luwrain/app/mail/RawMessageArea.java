@@ -71,27 +71,27 @@ class RawMessageArea extends NavigateArea
     @Override public boolean onKeyboardEvent(KeyboardEvent event)
     {
 	NullCheck.notNull(event, "event");
-	if (event.isCommand() && !event.isModified())
-	    switch(event.getCommand())
+	if (event.isSpecial() && !event.isModified())
+	    switch(event.getSpecial())
 	    {
-	    case KeyboardEvent.F9:
+	    case F9:
 		actions.launchMailFetch();
 		return true;
-	    case KeyboardEvent.TAB:
+	    case TAB:
 	    actions.gotoFolders();
 	    return true;
-	    case KeyboardEvent.BACKSPACE:
+	    case BACKSPACE:
 	    actions.gotoSummary();
 	    return true;
-	    case KeyboardEvent.F5://FIXME:Action
+	    case F5://FIXME:Action
 		    return actions.makeReply(null, false);
-	    case KeyboardEvent.F6://FIXME:Action
+	    case F6://FIXME:Action
 		return actions.makeForward(null);
 	    }
-	if (event.isCommand() && event.withShiftOnly())
-	    switch(event.getCommand())
+	if (event.isSpecial() && event.withShiftOnly())
+	    switch(event.getSpecial())
 	    {
-	    case KeyboardEvent.F5://FIXME:Action
+	    case F5://FIXME:Action
 		    return actions.makeReply(null, true);
 }
 	return super.onKeyboardEvent(event);
