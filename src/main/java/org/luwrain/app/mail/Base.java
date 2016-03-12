@@ -37,7 +37,7 @@ class Base
     private StoredMailFolder currentFolder = null;
     private StoredMailMessage currentMessage;
     private TreeModelSource treeModelSource;
-    private TreeModel foldersModel;
+    private TreeArea.Model foldersModel;
     private SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
@@ -75,7 +75,7 @@ class Base
 	return currentMessage != null;
     }
 
-    TreeModel getFoldersModel()
+    TreeArea.Model getFoldersModel()
     {
 	if (foldersModel != null)
 	    return foldersModel;

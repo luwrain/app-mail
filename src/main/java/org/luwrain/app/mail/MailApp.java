@@ -167,8 +167,12 @@ class MailApp implements Application, Actions
 		    return true;
 		}};
 
-	foldersArea = new TreeArea(new DefaultControlEnvironment(luwrain),
-				   base.getFoldersModel(), strings.foldersAreaName()){
+	final TreeArea.Params treeParams = new TreeArea.Params();
+	treeParams.environment = new DefaultControlEnvironment(luwrain);
+	treeParams.model = base.getFoldersModel(); 
+	treeParams.name = strings.foldersAreaName();
+
+	foldersArea = new TreeArea(treeParams) {
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
