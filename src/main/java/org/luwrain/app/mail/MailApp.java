@@ -22,7 +22,7 @@ import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.*;
 
-class MailApp implements Application, Actions
+class MailApp implements Application, MonoApp, Actions
 {
     static private final String STRINGS_NAME = "luwrain.mail";
 
@@ -52,6 +52,12 @@ class MailApp implements Application, Actions
 	    return false;
 	createAreas();
 	return true;
+    }
+
+    @Override public MonoApp.Result onMonoAppSecondInstance(Application app)
+    {
+	NullCheck.notNull(app, "app");
+	return MonoApp.Result.BRING_FOREGROUND;
     }
 
     @Override public boolean deleteInSummary()
