@@ -274,38 +274,14 @@ class MailApp implements Application, MonoApp, Actions
 			actions.closeApp();
 			return true;
 		    case ACTION:
-			if (ActionEvent.isAction(event, "reply"))
-			{
-			    if (getSelectedRow() == null)
-				return false;
-			    base.makeReply((StoredMailMessage)getSelectedRow(), false);
-			    return true;
-			}
-			if (ActionEvent.isAction(event, "reply-all"))
-			{
-			    if (getSelectedRow() == null)
-				return false;
-			    base.makeReply((StoredMailMessage)getSelectedRow(), true);
-			    return true;
-			}
-			if (ActionEvent.isAction(event, "forward"))
-			{
-			    if (getSelectedRow() == null)
-				return false;
-			    base.makeForward((StoredMailMessage)getSelectedRow());
-			    return true;
-			}
+			return actions.onSummaryAreaAction(event);
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return new Action[]{
-			new Action("reply", "Ответить"),
-			new Action("reply-all", "Ответить всем"),
-			new Action("forward", "Переслать"),
-		    };
+		    return actions.getSummaryAreaActions();
 		}
 	    };
 
@@ -313,9 +289,44 @@ class MailApp implements Application, MonoApp, Actions
 	rawMessageArea = new RawMessageArea(luwrain, this, strings);
     }
 
+    @Override public boolean onSummaryAreaAction(EnvironmentEvent event)
+    {
+	NullCheck.notNull(event, "event");
+			if (ActionEvent.isAction(event, "reply"))
+			{
+			    if (summaryArea.getSelectedRow() == null)
+				return false;
+			    base.makeReply((StoredMailMessage)summaryArea.getSelectedRow(), false);
+			    return true;
+			}
+			if (ActionEvent.isAction(event, "reply-all"))
+			{
+			    if (summaryArea.getSelectedRow() == null)
+				return false;
+			    base.makeReply((StoredMailMessage)summaryArea.getSelectedRow(), true);
+			    return true;
+			}
+			if (ActionEvent.isAction(event, "forward"))
+			{
+			    if (summaryArea.getSelectedRow() == null)
+				return false;
+			    base.makeForward((StoredMailMessage)summaryArea.getSelectedRow());
+			    return true;
+			}
+			return false;
+    }
+
+			@Override public Action[] getSummaryAreaActions()
+			{
+		    return new Action[]{
+			new Action("reply", "Ответить"),
+			new Action("reply-all", "Ответить всем"),
+			new Action("forward", "Переслать"),
+		    };
+			}
+
     @Override  public AreaLayout getAreasToShow()
     {
-	System.out.println(mode);
 	switch(mode)
 	{
 	case REGULAR:

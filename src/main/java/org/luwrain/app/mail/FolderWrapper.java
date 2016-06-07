@@ -1,6 +1,7 @@
 
 package org.luwrain.app.mail;
 
+import org.luwrain.core.NullCheck;
 import org.luwrain.pim.mail.*;
 
 class FolderWrapper
@@ -8,29 +9,26 @@ class FolderWrapper
     private StoredMailFolder folder;
     private String title;
 
-    public FolderWrapper(StoredMailFolder folder, String title)
+    FolderWrapper(StoredMailFolder folder, String title)
     {
+	NullCheck.notNull(folder, "folder");
+	NullCheck.notNull(title, "title");
 	this.folder = folder;
 	this.title = title;
-	if (folder == null)
-	    throw new NullPointerException("folder may not be null");
-	if (title == null)
-	    throw new NullPointerException("title may not be null");
     }
 
-    public StoredMailFolder folder()
+    StoredMailFolder folder()
     {
 	return folder;
     }
 
-    public String title()
+    String title()
     {
 	return title;
     }
 
     @Override public String toString()
     {
-	//	System.out.println(title);
 	return title;
     }
 

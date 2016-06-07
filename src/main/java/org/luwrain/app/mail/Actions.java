@@ -2,6 +2,7 @@
 package org.luwrain.app.mail;
 
 import org.luwrain.core.*;
+import org.luwrain.core.events.*;
 import org.luwrain.pim.mail.*;
 
 interface Actions
@@ -23,4 +24,6 @@ interface Actions
     void launchMailFetch();
     boolean deleteInSummary();
     void clearMessageArea();
+    boolean onSummaryAreaAction(EnvironmentEvent event);
+    Action[] getSummaryAreaActions();
 }

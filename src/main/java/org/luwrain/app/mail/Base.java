@@ -65,7 +65,7 @@ class Base
     {
 	if (foldersModel != null)
 	    return foldersModel;
-	treeModelSource = new TreeModelSource(storing, strings);
+	treeModelSource = new TreeModelSource(luwrain, storing, strings);
 	foldersModel = new CachedTreeModel(treeModelSource);
 	return foldersModel;
     }

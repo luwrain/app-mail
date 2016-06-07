@@ -1,20 +1,25 @@
 
 package org.luwrain.app.mail;
 
-import org.luwrain.core.NullCheck;
+import org.luwrain.core.*;
+import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 
 class TreeModelSource implements org.luwrain.controls.CachedTreeModelSource
 {
+    private Luwrain luwrain;
     private MailStoring storing;
     private Strings strings;
 
-    public TreeModelSource(MailStoring storing, Strings strings)
+    TreeModelSource(Luwrain luwrain,
+		    MailStoring storing, Strings strings)
     {
-	this.storing = storing;
-	this.strings = strings;
+	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(storing, "storing");
 	NullCheck.notNull(strings, "strings");
+	this.luwrain = luwrain;
+	this.storing = storing;
+	this.strings = strings;
     }
 
     @Override public Object getRoot()
@@ -25,17 +30,16 @@ class TreeModelSource implements org.luwrain.controls.CachedTreeModelSource
 		return null;
 	    return new FolderWrapper(root, strings.folderTitle(root.getTitle()));
 	}
-	catch (Exception e)
+	catch (PimException e)
 	{
-	    e.printStackTrace();
+	    luwrain.crash(e);
 	    return null;
 	}
     }
 
     @Override public Object[] getChildObjs(Object obj)
     {
-	if (obj == null || !(obj instanceof FolderWrapper))
-	    return new Object[0];
+	NullCheck.notNull(obj, "obj");
 	final FolderWrapper wrapper = (FolderWrapper)obj;
 	try {
 	    StoredMailFolder[] folders = storing.getFolders(wrapper.folder());
@@ -46,9 +50,9 @@ class TreeModelSource implements org.luwrain.controls.CachedTreeModelSource
 		wrappers[i] = new FolderWrapper(folders[i], strings.folderTitle(folders[i].getTitle()));
 	    return wrappers;
 	}
-	catch(Exception e)
+	catch(PimException e)
 	{
-	    e.printStackTrace();
+	    luwrain.crash(e);
 	    return new Object[0];
 	}
     }
