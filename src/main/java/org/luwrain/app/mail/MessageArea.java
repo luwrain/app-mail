@@ -187,7 +187,7 @@ return res;
     {
 	if (attachments != null && attachments.length > 0 &&
 index >= headers.length + 1 && index < headers.length + attachments.length + 1)
-	    luwrain.playSound(Sounds.NEW_LIST_ITEM);
+	    luwrain.playSound(Sounds.LIST_ITEM);
 	if (text == null || text.trim().isEmpty())
 	    luwrain.hint(Hints.EMPTY_LINE); else
 	    luwrain.say(text);

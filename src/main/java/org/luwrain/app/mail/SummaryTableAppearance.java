@@ -37,7 +37,7 @@ class SummaryTableAppearance implements TableAppearance
 	    luwrain.say("#StorageError!#");
 	    return;
 	}
-	luwrain.playSound(Sounds.NEW_LIST_ITEM);
+	luwrain.playSound(Sounds.LIST_ITEM);
 	luwrain.say(line);
     }
 
