@@ -8,7 +8,7 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.*;
 
-class MessageArea extends NavigateArea
+class MessageArea extends NavigationArea
 {
     private Luwrain luwrain;
     private Strings strings;
@@ -183,7 +183,7 @@ return res;
 	return "";
     }
 
-    @Override public void introduceLine(int index, String text)
+    @Override public void announceLine(int index, String text)
     {
 	if (attachments != null && attachments.length > 0 &&
 index >= headers.length + 1 && index < headers.length + attachments.length + 1)

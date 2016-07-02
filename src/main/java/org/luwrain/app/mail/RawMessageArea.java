@@ -6,7 +6,7 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.*;
 
-class RawMessageArea extends NavigateArea
+class RawMessageArea extends NavigationArea
 {
     private Luwrain luwrain;
     private Strings strings;
