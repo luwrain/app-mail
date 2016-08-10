@@ -11,6 +11,7 @@ import org.luwrain.popups.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.util.*;
+import org.luwrain.network.*;
 
 class Base
 {
@@ -116,7 +117,14 @@ class Base
 	    final String from = m.getFrom();
 	    if (from.trim().isEmpty())
 		return false;
-	    String replyTo = Utils.getReplyTo(bytes);
+	    String replyTo = null;
+	    try {
+replyTo = Utils.getReplyTo(bytes);
+	}
+	catch(IOException e)
+	{
+	    luwrain.crash(e);
+	}
 	    if (replyTo.trim().isEmpty())
 		replyTo = from;
 	    final StringBuilder newBody = new StringBuilder();
@@ -126,9 +134,17 @@ class Base
 		newBody.append(">" + s + "\n");
 	    if (wideReply)
 	    {
+		final MailUtils utils = new MailUtils();
+		try {
+		    utils.load(bytes);
+		}
+		catch (IOException e)
+		{
+		    luwrain.crash(e);
+		}
 		luwrain.launchApp("message", new String[]{
 			replyTo,
-			new MailEssentialJavamail().constructWideReplyCcList(bytes, true),
+			utils.constructWideReplyCcList(true),
 			subject,
 			newBody.toString()
 		    });

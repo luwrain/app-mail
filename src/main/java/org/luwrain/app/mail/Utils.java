@@ -4,6 +4,7 @@ package org.luwrain.app.mail;
 import org.luwrain.core.*;
 import org.luwrain.pim.*;
 import org.luwrain.util.*;
+import org.luwrain.network.*;
 
 class Utils 
 {
@@ -27,9 +28,11 @@ class Utils
 	}
     }
 
-    static String getReplyTo(byte[] bytes) throws PimException
+    static String getReplyTo(byte[] bytes) throws PimException, java.io.IOException
     {
-	final String[] res = new MailEssentialJavamail().getReplyTo(bytes, true);
+	final MailUtils utils = new MailUtils();
+	utils.load(bytes);
+	final String[] res = utils.getReplyTo(true);
 	if (res == null || res.length < 1)
 	    return "";
 	return res[0];
