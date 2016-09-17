@@ -230,7 +230,7 @@ replyTo = Utils.getReplyTo(bytes);
 	    final String uniRef = storing.getFolderUniRef(wrapper.folder());
 	    if (uniRef == null || uniRef.trim().isEmpty())
 		return false;
-	    query.setUniRef(uniRef);
+	    query.answer(uniRef);
 	}
 	catch(PimException e)
 	{
