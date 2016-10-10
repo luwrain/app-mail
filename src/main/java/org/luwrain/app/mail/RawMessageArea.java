@@ -8,22 +8,22 @@ import org.luwrain.pim.mail.*;
 
 class RawMessageArea extends NavigationArea
 {
-    private Luwrain luwrain;
-    private Strings strings;
-    private Actions actions;
+    private final Luwrain luwrain;
+    private final Strings strings;
+    private final MailApp app;
     private StoredMailMessage message;
     private String[] content = new String[0];
 
-    RawMessageArea(Luwrain luwrain, Actions actions,
+    RawMessageArea(Luwrain luwrain, MailApp app,
 		Strings strings)
     {
 	super(new DefaultControlEnvironment(luwrain));
-	this.luwrain = luwrain;
-	this.actions =  actions;
-	this.strings = strings;
 	NullCheck.notNull(luwrain, "luwrain");
-	NullCheck.notNull(actions, "actions");
+	NullCheck.notNull(app, "app");
 	NullCheck.notNull(strings, "strings");
+	this.luwrain = luwrain;
+	this.app = app;
+	this.strings = strings;
     }
 
     boolean show(StoredMailMessage message)
@@ -60,24 +60,24 @@ class RawMessageArea extends NavigationArea
 	    switch(event.getSpecial())
 	    {
 	    case F9:
-		actions.launchMailFetch();
+app.launchMailFetch();
 		return true;
 	    case TAB:
-	    actions.gotoFolders();
+app.gotoFolders();
 	    return true;
 	    case BACKSPACE:
-	    actions.gotoSummary();
+app.gotoSummary();
 	    return true;
 	    case F5://FIXME:Action
-		    return actions.makeReply(null, false);
+		    return app.makeReply(null, false);
 	    case F6://FIXME:Action
-		return actions.makeForward(null);
+		return app.makeForward(null);
 	    }
 	if (event.isSpecial() && event.withShiftOnly())
 	    switch(event.getSpecial())
 	    {
 	    case F5://FIXME:Action
-		    return actions.makeReply(null, true);
+		    return app.makeReply(null, true);
 }
 	return super.onKeyboardEvent(event);
     }
@@ -88,22 +88,22 @@ class RawMessageArea extends NavigationArea
 	switch (event.getCode())
 	{
 	case CLOSE:
-	    actions.closeApp();
+app.closeApp();
 	    return true;
 	case ACTION:
 	    if (ActionEvent.isAction(event, "reply"))
 	    {
-		actions.makeReply(null, false);
+app.makeReply(null, false);
 		return true;
 	    }
 	    if (ActionEvent.isAction(event, "reply-all"))
 	    {
-		actions.makeReply(null, true);
+app.makeReply(null, true);
 		return true;
 	    }
 	    if (ActionEvent.isAction(event, "forward"))
 	    {
-		actions.makeForward(null);
+app.makeForward(null);
 		return true;
 	    }
 	    return false;

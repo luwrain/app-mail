@@ -7,6 +7,7 @@ import org.luwrain.pim.mail.*;
 
 interface Actions
 {
+    /*
     void gotoFolders();
     void gotoSummary();
     void gotoMessage();
@@ -26,4 +27,5 @@ interface Actions
     void clearMessageArea();
     boolean onSummaryAreaAction(EnvironmentEvent event);
     Action[] getSummaryAreaActions();
+    */
 }

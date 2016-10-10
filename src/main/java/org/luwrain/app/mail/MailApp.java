@@ -60,7 +60,7 @@ class MailApp implements Application, MonoApp, Actions
 	return MonoApp.Result.BRING_FOREGROUND;
     }
 
-    @Override public boolean deleteInSummary()
+    boolean deleteInSummary()
     {
 	final Object o = summaryArea.getSelectedRow();
 	if (o == null || !(o instanceof StoredMailMessage))
@@ -73,36 +73,36 @@ class MailApp implements Application, MonoApp, Actions
 	return true;
     }
 
-    @Override public void launchMailFetch()
+    void launchMailFetch()
     {
 	luwrain.launchApp("fetch", new String[]{"--MAIL"});
     }
 
-    @Override public void saveAttachment(String fileName)
+void saveAttachment(String fileName)
     {
 	base.saveAttachment(fileName);
     }
 
-    @Override public boolean makeReply(StoredMailMessage message, boolean wideReply)
+    boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
 	if (!base.makeReply(message, wideReply))
 	    luwrain.message("Во время подготовки ответа произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
 	return true;
     }
 
-    @Override public boolean makeForward(StoredMailMessage message)
+    boolean makeForward(StoredMailMessage message)
     {
 	if (!base.makeForward(message))
 	    luwrain.message("Во время подготовки перенаправленяи произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
 	return true;
     }
 
-    @Override public void refreshMessages(boolean refreshTableArea)
+    void refreshMessages(boolean refreshTableArea)
     {
 	summaryArea.refresh();
     }
 
-    @Override public void openFolder(StoredMailFolder folder)
+    void openFolder(StoredMailFolder folder)
     {
 	if (!base.openFolder(folder))
 	    return;
@@ -110,7 +110,7 @@ class MailApp implements Application, MonoApp, Actions
 	gotoSummary();
     }
 
-    @Override public boolean onFolderUniRefQuery(AreaQuery query)
+    boolean onFolderUniRefQuery(AreaQuery query)
     {
 	if (query == null || !(query instanceof ObjectUniRefQuery))
 	    return false;
@@ -120,7 +120,7 @@ class MailApp implements Application, MonoApp, Actions
 	return base.onFolderUniRefQuery((ObjectUniRefQuery)query, (FolderWrapper)selected);
     }
 
-    @Override public void clearMessageArea()
+    void clearMessageArea()
     {
 	base.setCurrentMessage(null);
 	messageArea.show(null);
@@ -130,7 +130,7 @@ class MailApp implements Application, MonoApp, Actions
 	enableMessageMode(Mode.REGULAR);
     }
 
-    @Override public void showMessage(StoredMailMessage message)
+void showMessage(StoredMailMessage message)
     {
 	if (message == null)
 	    return;
@@ -143,7 +143,7 @@ class MailApp implements Application, MonoApp, Actions
 	gotoMessage();
     }
 
-    @Override public boolean switchToRawMessage()
+boolean switchToRawMessage()
     {
 	System.out.println("switching");
 	if (!base.hasCurrentMessage())
@@ -169,7 +169,7 @@ class MailApp implements Application, MonoApp, Actions
 		    final Object o = model.getRow(row);
 		    if (o == null || !(o instanceof StoredMailMessage))
 			return false;
-		    actions.showMessage((StoredMailMessage)o);
+		    showMessage((StoredMailMessage)o);
 		    return true;
 		}};
 
@@ -186,10 +186,10 @@ class MailApp implements Application, MonoApp, Actions
 			switch(event.getSpecial())
 			{
 			case TAB:
-			    actions.gotoSummary();
+gotoSummary();
 			    return true;
 			case F9:
-			    actions.launchMailFetch();
+launchMailFetch();
 			    return true;
 			}
 		    return super.onKeyboardEvent(event);
@@ -200,7 +200,7 @@ class MailApp implements Application, MonoApp, Actions
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
-			actions.closeApp();
+closeApp();
 			return true;
 		    default:
 			return super.onEnvironmentEvent(event);
@@ -212,7 +212,7 @@ class MailApp implements Application, MonoApp, Actions
 		    switch(query.getQueryCode())
 		    {
 		    case AreaQuery.OBJECT_UNIREF:
-			return actions.onFolderUniRefQuery(query);
+			return onFolderUniRefQuery(query);
 		    default:
 			return super.onAreaQuery(query);
 		    }
@@ -222,7 +222,7 @@ class MailApp implements Application, MonoApp, Actions
 		    if (obj == null || !(obj instanceof FolderWrapper))
 			return;
 		    final FolderWrapper wrapper = (FolderWrapper)obj;
-		    actions.openFolder(wrapper.folder());
+openFolder(wrapper.folder());
 		}
 	    };
 
@@ -236,15 +236,15 @@ class MailApp implements Application, MonoApp, Actions
 			switch(event.getSpecial())
 			{
 			case DELETE:
-			    return actions.deleteInSummary();
+			    return deleteInSummary();
 			case TAB:
-			    actions.gotoMessage();
+			    gotoMessage();
 			    return true;
 			case BACKSPACE:
-			    actions.gotoFolders();
+gotoFolders();
 			    return true;
 			case F9:
-			    actions.launchMailFetch();
+launchMailFetch();
 			    return true;
 			case F5:
 			    if (getSelectedRow() == null)
@@ -271,17 +271,17 @@ class MailApp implements Application, MonoApp, Actions
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
-			actions.closeApp();
+closeApp();
 			return true;
 		    case ACTION:
-			return actions.onSummaryAreaAction(event);
+			return onSummaryAreaAction(event);
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return actions.getSummaryAreaActions();
+		    return getSummaryAreaActions();
 		}
 	    };
 
@@ -289,7 +289,7 @@ class MailApp implements Application, MonoApp, Actions
 	rawMessageArea = new RawMessageArea(luwrain, this, strings);
     }
 
-    @Override public boolean onSummaryAreaAction(EnvironmentEvent event)
+boolean onSummaryAreaAction(EnvironmentEvent event)
     {
 	NullCheck.notNull(event, "event");
 			if (ActionEvent.isAction(event, "reply"))
@@ -316,7 +316,7 @@ class MailApp implements Application, MonoApp, Actions
 			return false;
     }
 
-			@Override public Action[] getSummaryAreaActions()
+Action[] getSummaryAreaActions()
 			{
 		    return new Action[]{
 			new Action("reply", "Ответить"),
@@ -337,17 +337,17 @@ class MailApp implements Application, MonoApp, Actions
 	return null;
     }
 
-    @Override public void gotoFolders()
+void gotoFolders()
     {
 	luwrain.setActiveArea(foldersArea);
     }
 
-    @Override public void gotoSummary()
+void gotoSummary()
     {
 	luwrain.setActiveArea(summaryArea);
     }
 
-    @Override public void gotoMessage()
+void gotoMessage()
     {
 	switch(mode)
 	{
@@ -360,7 +360,7 @@ class MailApp implements Application, MonoApp, Actions
 	}
     }
 
-    @Override public void closeApp()
+void closeApp()
     {
 	luwrain.closeApp();
     }
