@@ -18,7 +18,7 @@ class Base
     static private final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
 
     private Luwrain luwrain;
-    private Actions actions;
+    private final MailApp app;
     private Strings strings;
     private MailStoring storing;
     private StoredMailFolder currentFolder = null;
@@ -28,19 +28,19 @@ class Base
     private SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
+    Base(MailApp app)
+    {
+	NullCheck.notNull(app, "app");
+	this.app = app;
+    }
+
     boolean init(Luwrain luwrain,
-			Actions actions,
 			Strings strings)
     {
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(strings, "strings");
 	this.luwrain = luwrain;
-	this.actions = actions;
 	this.strings = strings;
-	if (luwrain == null)
-	    throw new NullPointerException("luwrain may not be null");
-	if (actions == null)
-	    throw new NullPointerException("actions may not be null");
-	if (strings == null)
-	    throw new NullPointerException("strings may not be null");
 	final Object obj = luwrain.getSharedObject(SHARED_OBJECT_NAME);
 	if (obj == null || !(obj instanceof org.luwrain.pim.mail.Factory))
 	    return false;

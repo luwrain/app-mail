@@ -22,17 +22,15 @@ import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.*;
 
-class MailApp implements Application, MonoApp, Actions
+class MailApp implements Application, MonoApp
 {
-    static private final String STRINGS_NAME = "luwrain.mail";
-
     private enum Mode {
 	REGULAR,
 	RAW,
     };
 
     private Luwrain luwrain;
-    private final Base base = new Base();
+    private final Base base = new Base(this);
     private Strings strings;
 
     private Mode mode = Mode.REGULAR;
@@ -43,24 +41,18 @@ class MailApp implements Application, MonoApp, Actions
 
     @Override public boolean onLaunch(Luwrain luwrain)
     {
-	final Object o = luwrain.i18n().getStrings(STRINGS_NAME);
+	final Object o = luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
 	    return false;
 	strings = (Strings)o;
 	this.luwrain = luwrain;
-	if (!base.init(luwrain, this, strings))//FIXME:Let user know what happens;
+	if (!base.init(luwrain, strings))//FIXME:Let user know what happens;
 	    return false;
 	createAreas();
 	return true;
     }
 
-    @Override public MonoApp.Result onMonoAppSecondInstance(Application app)
-    {
-	NullCheck.notNull(app, "app");
-	return MonoApp.Result.BRING_FOREGROUND;
-    }
-
-    boolean deleteInSummary()
+    private boolean deleteInSummary()
     {
 	final Object o = summaryArea.getSelectedRow();
 	if (o == null || !(o instanceof StoredMailMessage))
@@ -78,7 +70,7 @@ class MailApp implements Application, MonoApp, Actions
 	luwrain.launchApp("fetch", new String[]{"--MAIL"});
     }
 
-void saveAttachment(String fileName)
+    void saveAttachment(String fileName)
     {
 	base.saveAttachment(fileName);
     }
@@ -97,12 +89,12 @@ void saveAttachment(String fileName)
 	return true;
     }
 
-    void refreshMessages(boolean refreshTableArea)
+    private void refreshMessages(boolean refreshTableArea)
     {
 	summaryArea.refresh();
     }
 
-    void openFolder(StoredMailFolder folder)
+    private void openFolder(StoredMailFolder folder)
     {
 	if (!base.openFolder(folder))
 	    return;
@@ -110,7 +102,7 @@ void saveAttachment(String fileName)
 	gotoSummary();
     }
 
-    boolean onFolderUniRefQuery(AreaQuery query)
+    private boolean onFolderUniRefQuery(AreaQuery query)
     {
 	if (query == null || !(query instanceof ObjectUniRefQuery))
 	    return false;
@@ -120,7 +112,7 @@ void saveAttachment(String fileName)
 	return base.onFolderUniRefQuery((ObjectUniRefQuery)query, (FolderWrapper)selected);
     }
 
-    void clearMessageArea()
+    private void clearMessageArea()
     {
 	base.setCurrentMessage(null);
 	messageArea.show(null);
@@ -130,7 +122,7 @@ void saveAttachment(String fileName)
 	enableMessageMode(Mode.REGULAR);
     }
 
-void showMessage(StoredMailMessage message)
+    private void showMessage(StoredMailMessage message)
     {
 	if (message == null)
 	    return;
@@ -143,9 +135,8 @@ void showMessage(StoredMailMessage message)
 	gotoMessage();
     }
 
-boolean switchToRawMessage()
+    boolean switchToRawMessage()
     {
-	System.out.println("switching");
 	if (!base.hasCurrentMessage())
 	    return false;
 	enableMessageMode(Mode.RAW);
@@ -155,9 +146,6 @@ boolean switchToRawMessage()
 
     private void createAreas()
     {
-	final Actions actions = this;
-	final Strings s = strings;
-
 	final TableClickHandler summaryHandler = new TableClickHandler(){
 		@Override public boolean onClick(TableModel model,
 						 int col,
@@ -186,10 +174,10 @@ boolean switchToRawMessage()
 			switch(event.getSpecial())
 			{
 			case TAB:
-gotoSummary();
+			    gotoSummary();
 			    return true;
 			case F9:
-launchMailFetch();
+			    launchMailFetch();
 			    return true;
 			}
 		    return super.onKeyboardEvent(event);
@@ -200,7 +188,7 @@ launchMailFetch();
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
-closeApp();
+			closeApp();
 			return true;
 		    default:
 			return super.onEnvironmentEvent(event);
@@ -222,7 +210,7 @@ closeApp();
 		    if (obj == null || !(obj instanceof FolderWrapper))
 			return;
 		    final FolderWrapper wrapper = (FolderWrapper)obj;
-openFolder(wrapper.folder());
+		    openFolder(wrapper.folder());
 		}
 	    };
 
@@ -241,10 +229,10 @@ openFolder(wrapper.folder());
 			    gotoMessage();
 			    return true;
 			case BACKSPACE:
-gotoFolders();
+			    gotoFolders();
 			    return true;
 			case F9:
-launchMailFetch();
+			    launchMailFetch();
 			    return true;
 			case F5:
 			    if (getSelectedRow() == null)
@@ -271,7 +259,7 @@ launchMailFetch();
 		    switch(event.getCode())
 		    {
 		    case CLOSE:
-closeApp();
+			closeApp();
 			return true;
 		    case ACTION:
 			return onSummaryAreaAction(event);
@@ -281,7 +269,7 @@ closeApp();
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return getSummaryAreaActions();
+		    return Actions.getSummaryAreaActions();
 		}
 	    };
 
@@ -289,65 +277,44 @@ closeApp();
 	rawMessageArea = new RawMessageArea(luwrain, this, strings);
     }
 
-boolean onSummaryAreaAction(EnvironmentEvent event)
+    private boolean onSummaryAreaAction(EnvironmentEvent event)
     {
 	NullCheck.notNull(event, "event");
-			if (ActionEvent.isAction(event, "reply"))
-			{
-			    if (summaryArea.getSelectedRow() == null)
-				return false;
-			    base.makeReply((StoredMailMessage)summaryArea.getSelectedRow(), false);
-			    return true;
-			}
-			if (ActionEvent.isAction(event, "reply-all"))
-			{
-			    if (summaryArea.getSelectedRow() == null)
-				return false;
-			    base.makeReply((StoredMailMessage)summaryArea.getSelectedRow(), true);
-			    return true;
-			}
-			if (ActionEvent.isAction(event, "forward"))
-			{
-			    if (summaryArea.getSelectedRow() == null)
-				return false;
-			    base.makeForward((StoredMailMessage)summaryArea.getSelectedRow());
-			    return true;
-			}
-			return false;
-    }
-
-Action[] getSummaryAreaActions()
-			{
-		    return new Action[]{
-			new Action("reply", "Ответить"),
-			new Action("reply-all", "Ответить всем"),
-			new Action("forward", "Переслать"),
-		    };
-			}
-
-    @Override  public AreaLayout getAreasToShow()
-    {
-	switch(mode)
+	if (ActionEvent.isAction(event, "reply"))
 	{
-	case REGULAR:
-	return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, messageArea);
-	case RAW:
-	return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, rawMessageArea);
+	    if (summaryArea.getSelectedRow() == null)
+		return false;
+	    base.makeReply((StoredMailMessage)summaryArea.getSelectedRow(), false);
+	    return true;
 	}
-	return null;
+	if (ActionEvent.isAction(event, "reply-all"))
+	{
+	    if (summaryArea.getSelectedRow() == null)
+		return false;
+	    base.makeReply((StoredMailMessage)summaryArea.getSelectedRow(), true);
+	    return true;
+	}
+	if (ActionEvent.isAction(event, "forward"))
+	{
+	    if (summaryArea.getSelectedRow() == null)
+		return false;
+	    base.makeForward((StoredMailMessage)summaryArea.getSelectedRow());
+	    return true;
+	}
+	return false;
     }
 
-void gotoFolders()
+    void gotoFolders()
     {
 	luwrain.setActiveArea(foldersArea);
     }
 
-void gotoSummary()
+    void gotoSummary()
     {
 	luwrain.setActiveArea(summaryArea);
     }
 
-void gotoMessage()
+    private void gotoMessage()
     {
 	switch(mode)
 	{
@@ -360,20 +327,39 @@ void gotoMessage()
 	}
     }
 
-void closeApp()
-    {
-	luwrain.closeApp();
-    }
-    @Override public String getAppName()
-    {
-	return strings.appName();
-    }
-
     private void enableMessageMode(Mode mode)
     {
 	if (this.mode == mode)
 	    return;
 	this.mode = mode;
 	luwrain.onNewAreaLayout();
+    }
+
+    void closeApp()
+    {
+	luwrain.closeApp();
+    }
+
+    @Override public String getAppName()
+    {
+	return strings.appName();
+    }
+
+    @Override  public AreaLayout getAreasToShow()
+    {
+	switch(mode)
+	{
+	case REGULAR:
+	    return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, messageArea);
+	case RAW:
+	    return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, rawMessageArea);
+	}
+	return null;
+    }
+
+    @Override public MonoApp.Result onMonoAppSecondInstance(Application app)
+    {
+	NullCheck.notNull(app, "app");
+	return MonoApp.Result.BRING_FOREGROUND;
     }
 }
