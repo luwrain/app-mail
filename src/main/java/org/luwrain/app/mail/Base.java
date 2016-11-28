@@ -17,10 +17,10 @@ class Base
 {
     static private final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
 
-    private Luwrain luwrain;
+    private final Luwrain luwrain;
     private final MailApp app;
-    private Strings strings;
-    private MailStoring storing;
+    private final Strings strings;
+    private final MailStoring storing;
     private StoredMailFolder currentFolder = null;
     private StoredMailMessage currentMessage;
     private TreeModelSource treeModelSource;
@@ -28,28 +28,20 @@ class Base
     private SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
-    Base(MailApp app)
+    Base(MailApp app, Luwrain luwrain, Strings strings)
     {
 	NullCheck.notNull(app, "app");
-	this.app = app;
-    }
-
-    boolean init(Luwrain luwrain,
-			Strings strings)
-    {
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(strings, "strings");
+	this.app = app;
 	this.luwrain = luwrain;
 	this.strings = strings;
-	final Object obj = luwrain.getSharedObject(SHARED_OBJECT_NAME);
-	if (obj == null || !(obj instanceof org.luwrain.pim.mail.Factory))
-	    return false;
-	final org.luwrain.pim.mail.Factory factory = (org.luwrain.pim.mail.Factory)obj;
-	final Object obj2 = factory.createMailStoring();
-	if (obj2 == null || !(obj2 instanceof MailStoring))
-	    return false;
-	storing = (MailStoring)obj2;
-	return true;
+	this.storing = org.luwrain.pim.mail.Factory.getMailStoring(luwrain);
+    }
+
+    boolean init()
+    {
+	return storing != null;
     }
 
     void setCurrentMessage(StoredMailMessage message)

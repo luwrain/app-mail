@@ -8,7 +8,6 @@ public interface Strings
     static final String NAME = "luwrain.mail";
 
     String appName();
-    String folderTitle(String src);
     String foldersAreaName();
     String summaryAreaName();
     String messageAreaName();

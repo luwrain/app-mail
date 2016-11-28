@@ -30,7 +30,7 @@ class MailApp implements Application, MonoApp
     };
 
     private Luwrain luwrain;
-    private final Base base = new Base(this);
+    private Base base;
     private Strings strings;
 
     private Mode mode = Mode.REGULAR;
@@ -43,10 +43,14 @@ class MailApp implements Application, MonoApp
     {
 	final Object o = luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
+	{
+	    Log.error("mail", "no strings object");
 	    return false;
+	}
 	strings = (Strings)o;
 	this.luwrain = luwrain;
-	if (!base.init(luwrain, strings))//FIXME:Let user know what happens;
+	base = new Base(this, luwrain, strings);
+	if (!base.init())
 	    return false;
 	createAreas();
 	return true;
