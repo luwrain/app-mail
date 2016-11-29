@@ -111,9 +111,9 @@ class MailApp implements Application, MonoApp
 	if (query == null || !(query instanceof ObjectUniRefQuery))
 	    return false;
 	final Object selected = foldersArea.selected();
-	if (selected == null || !(selected instanceof FolderWrapper))
+	if (selected == null || !(selected instanceof StoredMailFolder))
 	    return false;
-	return base.onFolderUniRefQuery((ObjectUniRefQuery)query, (FolderWrapper)selected);
+	return base.onFolderUniRefQuery((ObjectUniRefQuery)query, (StoredMailFolder)selected);
     }
 
     private void clearMessageArea()
@@ -211,10 +211,10 @@ class MailApp implements Application, MonoApp
 		}
 		@Override public void onClick(Object obj)
 		{
-		    if (obj == null || !(obj instanceof FolderWrapper))
+		    if (obj == null || !(obj instanceof StoredMailFolder))
 			return;
-		    final FolderWrapper wrapper = (FolderWrapper)obj;
-		    openFolder(wrapper.folder());
+		    final StoredMailFolder folder = (StoredMailFolder)obj;
+		    openFolder(folder);
 		}
 	    };
 

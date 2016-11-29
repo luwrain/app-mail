@@ -212,14 +212,12 @@ replyTo = Utils.getReplyTo(bytes);
 	}
 	}
 
-    boolean onFolderUniRefQuery(ObjectUniRefQuery query, FolderWrapper wrapper)
+    boolean onFolderUniRefQuery(ObjectUniRefQuery query, StoredMailFolder folder)
     {
 	NullCheck.notNull(query, "query");
-	NullCheck.notNull(wrapper, "wrapper");
-	if (wrapper.folder() == null)
-	    return false;
+	NullCheck.notNull(folder, "folder");
 	try {
-	    final String uniRef = storing.getFolderUniRef(wrapper.folder());
+	    final String uniRef = storing.getFolderUniRef(folder);
 	    if (uniRef == null || uniRef.trim().isEmpty())
 		return false;
 	    query.answer(uniRef);

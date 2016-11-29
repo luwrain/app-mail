@@ -25,10 +25,7 @@ class TreeModelSource implements org.luwrain.controls.CachedTreeModelSource
     @Override public Object getRoot()
     {
 	try {
-	    final StoredMailFolder root = storing.getFoldersRoot();
-	    if (root == null)
-		return null;
-	    return new FolderWrapper(root, root.getTitle());
+	    return storing.getFoldersRoot();
 	}
 	catch (PimException e)
 	{
@@ -40,15 +37,9 @@ class TreeModelSource implements org.luwrain.controls.CachedTreeModelSource
     @Override public Object[] getChildObjs(Object obj)
     {
 	NullCheck.notNull(obj, "obj");
-	final FolderWrapper wrapper = (FolderWrapper)obj;
+	final StoredMailFolder folder = (StoredMailFolder)obj;
 	try {
-	    StoredMailFolder[] folders = storing.getFolders(wrapper.folder());
-	    if (folders == null || folders.length < 1)
-		return new Object[0];
-	    final FolderWrapper[] wrappers= new FolderWrapper[folders.length];
-	    for(int i = 0;i < folders.length;++i)
-		wrappers[i] = new FolderWrapper(folders[i], folders[i].getTitle());
-	    return wrappers;
+return storing.getFolders(folder);
 	}
 	catch(PimException e)
 	{
