@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
-
-   This file is part of the LUWRAIN.
-
-   LUWRAIN is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   LUWRAIN is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.mail;
 
@@ -20,6 +5,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
+import org.luwrain.doctree.control.*;
 import org.luwrain.pim.mail.*;
 
 class MailApp implements Application, MonoApp
@@ -36,11 +22,12 @@ class MailApp implements Application, MonoApp
     private Mode mode = Mode.REGULAR;
     private TreeArea foldersArea;
     private TableArea summaryArea;
-    private MessageArea messageArea;
+    private DoctreeArea messageArea;
     private RawMessageArea rawMessageArea;
 
     @Override public boolean onLaunch(Luwrain luwrain)
     {
+	NullCheck.notNull(luwrain, "luwrain");
 	final Object o = luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
 	{
@@ -119,8 +106,8 @@ class MailApp implements Application, MonoApp
     private void clearMessageArea()
     {
 	base.setCurrentMessage(null);
-	messageArea.show(null);
-	messageArea.setHotPoint(0, 0);
+	//	messageArea.show(null);
+	//messageArea.setHotPoint(0, 0);
 	rawMessageArea.show(null);
 	rawMessageArea.setHotPoint(0, 0);
 	enableMessageMode(Mode.REGULAR);
@@ -131,8 +118,8 @@ class MailApp implements Application, MonoApp
 	if (message == null)
 	    return;
 	base.setCurrentMessage(message);
-	messageArea.show(message);
-	messageArea.setHotPoint(0, 0);
+	//	messageArea.show(message);
+	//	messageArea.setHotPoint(0, 0);
 	rawMessageArea.show(message);
 	rawMessageArea.setHotPoint(0, 0);
 	enableMessageMode(Mode.REGULAR);
@@ -277,7 +264,26 @@ class MailApp implements Application, MonoApp
 		}
 	    };
 
-	messageArea = new MessageArea(luwrain, this, strings);
+messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.doctree.control.Strings)luwrain.i18n().getStrings(org.luwrain.doctree.control.Strings.NAME))){
+
+	@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+	{
+	    NullCheck.notNull(event, "event");
+	    if (event.getType() != EnvironmentEvent.Type.REGULAR)
+		return super.onEnvironmentEvent(event);
+	    switch(event.getCode())
+	    {
+	    case CLOSE:
+		closeApp();
+		return true;
+	    default:
+		return super.onEnvironmentEvent(event);
+	    }
+	}
+    };
+
+
+//	messageArea = new MessageArea(luwrain, this, strings);
 	rawMessageArea = new RawMessageArea(luwrain, this, strings);
     }
 
