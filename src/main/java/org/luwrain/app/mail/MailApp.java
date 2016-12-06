@@ -10,13 +10,14 @@ import org.luwrain.pim.mail.*;
 
 class MailApp implements Application, MonoApp
 {
-    private enum Mode {
+    enum Mode {
 	REGULAR,
 	RAW,
     };
 
     private Luwrain luwrain;
-    private Base base;
+    private Actions actions = null;
+    private Base base = null;
     private Strings strings;
 
     private Mode mode = Mode.REGULAR;
@@ -36,7 +37,8 @@ class MailApp implements Application, MonoApp
 	}
 	strings = (Strings)o;
 	this.luwrain = luwrain;
-	base = new Base(this, luwrain, strings);
+	this.base = new Base(this, luwrain, strings);
+	this.actions = new Actions(luwrain, this);
 	if (!base.init())
 	    return false;
 	createAreas();
@@ -113,18 +115,16 @@ class MailApp implements Application, MonoApp
 	enableMessageMode(Mode.REGULAR);
     }
 
-    private void showMessage(StoredMailMessage message)
+    /*
+void showMessage(StoredMailMessage message)
     {
-	if (message == null)
-	    return;
+	NullCheck.notNull(message, "message");
 	base.setCurrentMessage(message);
-	//	messageArea.show(message);
-	//	messageArea.setHotPoint(0, 0);
-	rawMessageArea.show(message);
-	rawMessageArea.setHotPoint(0, 0);
+	messageArea.setDocument(null, 512);
 	enableMessageMode(Mode.REGULAR);
 	gotoMessage();
     }
+    */
 
     boolean switchToRawMessage()
     {
@@ -137,20 +137,9 @@ class MailApp implements Application, MonoApp
 
     private void createAreas()
     {
-	final TableClickHandler summaryHandler = new TableClickHandler(){
-		@Override public boolean onClick(TableModel model,
-						 int col,
-						 int row,
-						 Object obj)
-		{
-		    if (model == null)
-			return false;
-		    final Object o = model.getRow(row);
-		    if (o == null || !(o instanceof StoredMailMessage))
-			return false;
-		    showMessage((StoredMailMessage)o);
-		    return true;
-		}};
+	NullCheck.notNull(base, "base");
+	NullCheck.notNull(actions, "actions");
+
 
 	final TreeArea.Params treeParams = new TreeArea.Params();
 	treeParams.environment = new DefaultControlEnvironment(luwrain);
@@ -207,7 +196,8 @@ class MailApp implements Application, MonoApp
 
 	summaryArea = new TableArea(new DefaultControlEnvironment(luwrain),
 				    base.getSummaryModel(), base.getSummaryAppearance(),
-				    summaryHandler, strings.summaryAreaName()) { //Click handler;
+null,
+strings.summaryAreaName()) { //Click handler;
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -285,6 +275,8 @@ messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announ
 
 //	messageArea = new MessageArea(luwrain, this, strings);
 	rawMessageArea = new RawMessageArea(luwrain, this, strings);
+
+	summaryArea.setClickHandler(				    (model, col, row, obj)->actions.onSummaryClick(base, model, col, row, messageArea, obj));
     }
 
     private boolean onSummaryAreaAction(EnvironmentEvent event)
@@ -324,7 +316,7 @@ messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announ
 	luwrain.setActiveArea(summaryArea);
     }
 
-    private void gotoMessage()
+void gotoMessage()
     {
 	switch(mode)
 	{
@@ -337,7 +329,7 @@ messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announ
 	}
     }
 
-    private void enableMessageMode(Mode mode)
+    void enableMessageMode(Mode mode)
     {
 	if (this.mode == mode)
 	    return;

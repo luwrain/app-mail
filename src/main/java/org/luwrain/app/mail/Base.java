@@ -8,6 +8,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.*;
+import org.luwrain.doctree.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.util.*;
@@ -15,7 +16,7 @@ import org.luwrain.network.*;
 
 class Base
 {
-    static private final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
+    //    static private final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
 
     private final Luwrain luwrain;
     private final MailApp app;
@@ -52,6 +53,39 @@ class Base
     boolean hasCurrentMessage()
     {
 	return currentMessage != null;
+    }
+
+    Document prepareDocumentForCurrentMessage()
+    {
+	final LinkedList<Node> nodes = new LinkedList<Node>();
+	try {
+	nodes.add(NodeFactory.newPara("ОТ: " + currentMessage.getFrom()));
+	nodes.add(NodeFactory.newPara("Кому: " + listToString(currentMessage.getTo())));
+	nodes.add(NodeFactory.newPara("Копия: " + listToString(currentMessage.getCc())));
+	nodes.add(NodeFactory.newPara("Тема: " + currentMessage.getSubject()));
+	nodes.add(NodeFactory.newPara("Время: " + strings.messageSentDate(currentMessage.getSentDate())));
+	nodes.add(NodeFactory.newPara("Тип данных: " + currentMessage.getMimeContentType()));
+
+	//	    attachments = message.getAttachments();
+
+	for(String line: splitLines(currentMessage.getBaseContent()))
+	    if (!line.isEmpty())//FIXME:
+		nodes.add(NodeFactory.newPara(line));
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
+	    return null;
+	}
+
+
+
+	final Node root = NodeFactory.newNode(Node.Type.ROOT); 
+	root.setSubnodes(nodes.toArray(new Node[nodes.size()]));
+	final Document doc = new Document(root);
+doc.setProperty("url", "http://localhost");
+	return doc;
+
     }
 
     TreeArea.Model getFoldersModel()
@@ -277,4 +311,30 @@ replyTo = Utils.getReplyTo(bytes);
 	}
 	return true;
     }
+
+    static private String listToString(String[] items)
+    {
+	NullCheck.notNullItems(items, "items");
+	if (items.length == 0)
+	    return "";
+	final StringBuilder b = new StringBuilder();
+	b.append(items[0]);
+	for(int i = 1;i < items.length;++i)
+	    b.append("," + items[i]);
+	return new String(b);
+    }
+
+    static private String[] splitLines(String str)
+    {
+	NullCheck.notNull(str, "str");
+	if (str.isEmpty())
+	    return new String[0];
+	final String[] res = str.split("\n", -1);
+	for(int i = 0;i < res.length;++i)
+	    res[i] = res[i].replaceAll("\r", "");
+	return res;
+    }
+
+
+
 }
