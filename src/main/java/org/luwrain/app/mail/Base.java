@@ -65,12 +65,14 @@ class Base
 	nodes.add(NodeFactory.newPara("Тема: " + currentMessage.getSubject()));
 	nodes.add(NodeFactory.newPara("Время: " + strings.messageSentDate(currentMessage.getSentDate())));
 	nodes.add(NodeFactory.newPara("Тип данных: " + currentMessage.getMimeContentType()));
+	nodes.add(NodeFactory.newEmptyLine());
 
 	//	    attachments = message.getAttachments();
 
 	for(String line: splitLines(currentMessage.getBaseContent()))
-	    if (!line.isEmpty())//FIXME:
-		nodes.add(NodeFactory.newPara(line));
+	    if (!line.isEmpty())
+		nodes.add(NodeFactory.newPara(line)); else
+		nodes.add(NodeFactory.newEmptyLine());
 	}
 	catch(PimException e)
 	{
@@ -84,6 +86,7 @@ class Base
 	root.setSubnodes(nodes.toArray(new Node[nodes.size()]));
 	final Document doc = new Document(root);
 doc.setProperty("url", "http://localhost");
+doc.commit();
 	return doc;
 
     }

@@ -5,7 +5,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
-import org.luwrain.doctree.control.*;
+import org.luwrain.controls.doctree.*;
 import org.luwrain.pim.mail.*;
 
 class MailApp implements Application, MonoApp
@@ -254,7 +254,7 @@ strings.summaryAreaName()) { //Click handler;
 		}
 	    };
 
-messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.doctree.control.Strings)luwrain.i18n().getStrings(org.luwrain.doctree.control.Strings.NAME))){
+messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.controls.doctree.Strings)luwrain.i18n().getStrings(org.luwrain.controls.doctree.Strings.NAME))){
 
 	@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 	{

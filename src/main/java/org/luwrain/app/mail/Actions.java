@@ -5,7 +5,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.doctree.*;
-import org.luwrain.doctree.control.*;
+import org.luwrain.controls.doctree.*;
 import org.luwrain.pim.mail.*;
 
 class Actions
