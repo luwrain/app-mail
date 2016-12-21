@@ -36,7 +36,7 @@ class RawMessageArea extends NavigationArea
 	    return true;
 	}
 	try {
-	    final String str = new String(message.getRawMail(), "US-ASCII");
+	    final String str = new String(message.getRawMessage(), "US-ASCII");
 	    System.out.println("strlen " + str.length());
 	content = str.split("\n");
 	this.message = message;

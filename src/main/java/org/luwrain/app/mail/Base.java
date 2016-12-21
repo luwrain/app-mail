@@ -69,7 +69,7 @@ class Base
 
 	//	    attachments = message.getAttachments();
 
-	for(String line: splitLines(currentMessage.getBaseContent()))
+	for(String line: splitLines(currentMessage.getText()))
 	    if (!line.isEmpty())
 		nodes.add(NodeFactory.newPara(line)); else
 		nodes.add(NodeFactory.newEmptyLine());
@@ -142,7 +142,7 @@ doc.commit();
 	    String subject = m.getSubject();
 	    if (!subject.toLowerCase().startsWith("re: "))
 		subject = "Re: " + subject;
-	    final byte[] bytes = m.getRawMail();
+	    final byte[] bytes = m.getRawMessage();
 	    final String from = m.getFrom();
 	    if (from.trim().isEmpty())
 		return false;
@@ -159,7 +159,7 @@ replyTo = Utils.getReplyTo(bytes);
 	    final StringBuilder newBody = new StringBuilder();
 	    newBody.append(strings.replyFirstLine(Utils.getDisplayedAddress(from), m.getSentDate()) + "\n");
 	    newBody.append("\n");
-	    for(String s: m.getBaseContent().split("\n"))
+	    for(String s: m.getText().split("\n"))
 		newBody.append(">" + s + "\n");
 	    if (wideReply)
 	    {
@@ -204,7 +204,7 @@ replyTo = Utils.getReplyTo(bytes);
 	    String subject = m.getSubject();
 	    if (!subject.toLowerCase().startsWith("fwd: "))
 		subject = "Fwd: " + subject;
-	    final byte[] bytes = m.getRawMail();
+	    final byte[] bytes = m.getRawMessage();
 	    final String from = m.getFrom();
 	    final StringBuilder newBody = new StringBuilder();
 	    newBody.append("=== Пересылаемое сообщение ===\n");
@@ -232,7 +232,7 @@ replyTo = Utils.getReplyTo(bytes);
 	    newBody.append("Тема: " + m.getSubject() + "\n");
 	    newBody.append("Дата: " + m.getSentDate() + "\n");
 	    newBody.append("\n");
-	    for(String s: m.getBaseContent().split("\n"))
+	    for(String s: m.getText().split("\n"))
 		newBody.append(s + "\n");
 	    newBody.append("=== Конец пересылаемого сообщения ===");
 	    luwrain.launchApp("message", new String[]{
