@@ -25,4 +25,6 @@ public interface Strings
     String columnFrom();
     String columnSubject();
     String columnSentDate();
+    String actionDeleteMessage();
+
 }

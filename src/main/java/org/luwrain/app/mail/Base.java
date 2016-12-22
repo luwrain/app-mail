@@ -67,9 +67,7 @@ class Base
 	nodes.add(NodeFactory.newPara("Время: " + strings.messageSentDate(currentMessage.getSentDate())));
 	nodes.add(NodeFactory.newPara("Тип данных: " + currentMessage.getMimeContentType()));
 	nodes.add(NodeFactory.newEmptyLine());
-
 	//	    attachments = message.getAttachments();
-
 	for(String line: splitLines(currentMessage.getText()))
 	    if (!line.isEmpty())
 		nodes.add(NodeFactory.newPara(line)); else
@@ -80,47 +78,52 @@ class Base
 	    luwrain.crash(e);
 	    return null;
 	}
-
-
-
 	final Node root = NodeFactory.newNode(Node.Type.ROOT); 
 	root.setSubnodes(nodes.toArray(new Node[nodes.size()]));
 	final Document doc = new Document(root);
 doc.setProperty("url", "http://localhost");
 doc.commit();
 	return doc;
-
     }
 
-    TreeArea.Model getFoldersModel()
+    void updateSummaryModel() throws PimException
     {
-	if (foldersModel != null)
-	    return foldersModel;
-	treeModelSource = new TreeModelSource(luwrain, storing, strings);
-	foldersModel = new CachedTreeModel(treeModelSource);
-	return foldersModel;
+	NullCheck.notNull(currentFolder, "currentFolder");
+	final StoredMailMessage[] allMessages = storing.loadMessages(currentFolder);
+	final LinkedList<StoredMailMessage> res = new LinkedList<StoredMailMessage>();
+	for(StoredMailMessage m: allMessages)
+	    if (m.getState() != MailMessage.State.DELETED)
+		res.add(m);
+	summaryModel.setMessages(res.toArray(new StoredMailMessage[res.size()]));
     }
 
-    SummaryTableModel getSummaryModel()
+    boolean deleteInSummary(StoredMailMessage message, boolean deleteForever)
     {
-	return summaryModel;
+	NullCheck.notNull(message, "message");
+	if (currentFolder == null)
+	    return false;
+	try {
+	    if (deleteForever)
+	    storing.deleteMessage(message); else
+		message.setState(MailMessage.State.DELETED);
+	    updateSummaryModel();
+	}
+	catch(PimException e)
+	{
+	    e.printStackTrace();
+	    luwrain.message("Во время удаления сообщения произошла непредвиденная ошибка:" + e.getMessage());
+	    return false;
+	}
+	return true;
     }
 
-    SummaryTableAppearance getSummaryAppearance()
-    {
-	if (summaryAppearance != null)
-	    return summaryAppearance;
-	summaryAppearance = new SummaryTableAppearance(luwrain, strings);
-	return summaryAppearance;
-    }
 
     boolean openFolder(StoredMailFolder folder)
     {
 	NullCheck.notNull(folder, "folder");
 	currentFolder = folder;
 	try {
-	    final StoredMailMessage[] messages = storing.loadMessages(currentFolder);
-	    summaryModel.setMessages(messages);
+	    updateSummaryModel();
 	    return true;
 	}
 	catch(PimException e)
@@ -247,7 +250,7 @@ utils = new MailUtils(bytes);
 	    luwrain.crash(e);
 	    return false;
 	}
-	}
+    }
 
     boolean onFolderUniRefQuery(ObjectUniRefQuery query, StoredMailFolder folder)
     {
@@ -297,23 +300,28 @@ utils = new MailUtils(bytes);
 	return true;
     }
 
-    boolean deleteInSummary(StoredMailMessage message)
+    TreeArea.Model getFoldersModel()
     {
-	NullCheck.notNull(message, "message");
-	if (currentFolder == null)
-	    return false;
-	try {
-	    storing.deleteMessage(message);
-	summaryModel.setMessages(storing.loadMessages(currentFolder));
-	}
-	catch(Exception e)
-	{
-	    e.printStackTrace();
-	    luwrain.message("Во время удаления сообщения произошла непредвиденная ошибка:" + e.getMessage());
-	    return false;
-	}
-	return true;
+	if (foldersModel != null)
+	    return foldersModel;
+	treeModelSource = new TreeModelSource(luwrain, storing, strings);
+	foldersModel = new CachedTreeModel(treeModelSource);
+	return foldersModel;
     }
+
+    SummaryTableModel getSummaryModel()
+    {
+	return summaryModel;
+    }
+
+    SummaryTableAppearance getSummaryAppearance()
+    {
+	if (summaryAppearance != null)
+	    return summaryAppearance;
+	summaryAppearance = new SummaryTableAppearance(luwrain, strings);
+	return summaryAppearance;
+    }
+
 
     static private String listToString(String[] items)
     {
@@ -337,7 +345,4 @@ utils = new MailUtils(bytes);
 	    res[i] = res[i].replaceAll("\r", "");
 	return res;
     }
-
-
-
 }

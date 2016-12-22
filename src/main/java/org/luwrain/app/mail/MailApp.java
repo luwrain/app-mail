@@ -38,23 +38,10 @@ class MailApp implements Application, MonoApp
 	strings = (Strings)o;
 	this.luwrain = luwrain;
 	this.base = new Base(this, luwrain, strings);
-	this.actions = new Actions(luwrain, this);
+	this.actions = new Actions(luwrain, strings, this);
 	if (!base.init())
 	    return false;
 	createAreas();
-	return true;
-    }
-
-    private boolean deleteInSummary()
-    {
-	final Object o = summaryArea.getSelectedRow();
-	if (o == null || !(o instanceof StoredMailMessage))
-	    return false;
-	final StoredMailMessage message = (StoredMailMessage)o;
-	if (!base.deleteInSummary(message))
-	    return true;
-	summaryArea.refresh();
-	clearMessageArea();
 	return true;
     }
 
@@ -82,7 +69,7 @@ class MailApp implements Application, MonoApp
 	return true;
     }
 
-    private void refreshMessages(boolean refreshTableArea)
+void refreshMessages()
     {
 	summaryArea.refresh();
     }
@@ -105,7 +92,7 @@ class MailApp implements Application, MonoApp
 	return base.onFolderUniRefQuery((ObjectUniRefQuery)query, (StoredMailFolder)selected);
     }
 
-    private void clearMessageArea()
+    void clearMessageArea()
     {
 	base.setCurrentMessage(null);
 	//	messageArea.show(null);
@@ -114,17 +101,6 @@ class MailApp implements Application, MonoApp
 	rawMessageArea.setHotPoint(0, 0);
 	enableMessageMode(Mode.REGULAR);
     }
-
-    /*
-void showMessage(StoredMailMessage message)
-    {
-	NullCheck.notNull(message, "message");
-	base.setCurrentMessage(message);
-	messageArea.setDocument(null, 512);
-	enableMessageMode(Mode.REGULAR);
-	gotoMessage();
-    }
-    */
 
     boolean switchToRawMessage()
     {
@@ -140,13 +116,13 @@ void showMessage(StoredMailMessage message)
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(actions, "actions");
 
-
 	final TreeArea.Params treeParams = new TreeArea.Params();
 	treeParams.environment = new DefaultControlEnvironment(luwrain);
 	treeParams.model = base.getFoldersModel(); 
 	treeParams.name = strings.foldersAreaName();
 
 	foldersArea = new TreeArea(treeParams) {
+
 		@Override public boolean onKeyboardEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -204,36 +180,16 @@ strings.summaryAreaName()) { //Click handler;
 		    if (event.isSpecial() && !event.isModified())
 			switch(event.getSpecial())
 			{
-			case DELETE:
-			    return deleteInSummary();
 			case TAB:
 			    gotoMessage();
 			    return true;
 			case BACKSPACE:
 			    gotoFolders();
 			    return true;
-			case F9:
-			    launchMailFetch();
-			    return true;
-			case F5:
-			    if (getSelectedRow() == null)
-				return false;
-			    return base.makeReply((StoredMailMessage)getSelectedRow(), false);
-			case F6:
-			    if (getSelectedRow() == null)
-				return false;
-			    return base.makeForward((StoredMailMessage)getSelectedRow());
-			}
-		    if (event.isSpecial() && event.withShiftOnly())
-			switch(event.getSpecial())
-			{
-			case F5:
-			    if (getSelectedRow() == null)
-				return false;
-			    return base.makeReply((StoredMailMessage)getSelectedRow(), true);
 			}
 		    return super.onKeyboardEvent(event);
 		}
+
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -248,9 +204,10 @@ strings.summaryAreaName()) { //Click handler;
 			return super.onEnvironmentEvent(event);
 		    }
 		}
+
 		@Override public Action[] getAreaActions()
 		{
-		    return Actions.getSummaryAreaActions();
+		    return actions.getSummaryAreaActions();
 		}
 	    };
 
@@ -288,8 +245,6 @@ messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announ
 	}
     };
 
-
-//	messageArea = new MessageArea(luwrain, this, strings);
 	rawMessageArea = new RawMessageArea(luwrain, this, strings);
 
 	summaryArea.setClickHandler(				    (model, col, row, obj)->actions.onSummaryClick(base, model, col, row, obj, summaryArea, messageArea));
@@ -298,6 +253,10 @@ messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announ
     private boolean onSummaryAreaAction(EnvironmentEvent event)
     {
 	NullCheck.notNull(event, "event");
+	if (ActionEvent.isAction(event, "delete-message"))
+	    return actions.onDeleteInSummary(base, summaryArea, false);
+	if (ActionEvent.isAction(event, "delete-message-forever"))
+	    return actions.onDeleteInSummary(base, summaryArea, false);
 	if (ActionEvent.isAction(event, "reply"))
 	{
 	    if (summaryArea.getSelectedRow() == null)
