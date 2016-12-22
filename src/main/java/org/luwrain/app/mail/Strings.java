@@ -20,11 +20,9 @@ public interface Strings
     String emptySummaryArea();
     String lastSummaryLine();
     String firstSummaryLine();
-    String messageSentDate(Date date);
     String replyFirstLine(String sender, Date sentDate);
     String columnFrom();
     String columnSubject();
     String columnSentDate();
     String actionDeleteMessage();
-
 }

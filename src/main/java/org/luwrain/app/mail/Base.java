@@ -64,7 +64,7 @@ class Base
 	nodes.add(NodeFactory.newPara("Кому: " + listToString(currentMessage.getTo())));
 	nodes.add(NodeFactory.newPara("Копия: " + listToString(currentMessage.getCc())));
 	nodes.add(NodeFactory.newPara("Тема: " + currentMessage.getSubject()));
-	nodes.add(NodeFactory.newPara("Время: " + strings.messageSentDate(currentMessage.getSentDate())));
+	nodes.add(NodeFactory.newPara("Время: " + currentMessage.getSentDate()));
 	nodes.add(NodeFactory.newPara("Тип данных: " + currentMessage.getMimeContentType()));
 	nodes.add(NodeFactory.newEmptyLine());
 	//	    attachments = message.getAttachments();
@@ -104,7 +104,7 @@ doc.commit();
 	    return false;
 	try {
 	    if (deleteForever)
-	    storing.deleteMessage(message); else
+		storing.deleteMessage(message); else
 		message.setState(MailMessage.State.DELETED);
 	    updateSummaryModel();
 	}
@@ -116,7 +116,6 @@ doc.commit();
 	}
 	return true;
     }
-
 
     boolean openFolder(StoredMailFolder folder)
     {
@@ -156,7 +155,7 @@ doc.commit();
     boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
 	NullCheck.notNull(message, "message");
-	    Log.debug("mail", "starting making a reply");
+	Log.debug("mail", "starting making a reply");
 	try {
 	    String subject = message.getSubject();
 	    if (!subject.toLowerCase().startsWith("re: "))
@@ -167,26 +166,26 @@ doc.commit();
 		return false;
 	    final String replyToBase;
 	    try {
-replyToBase = Utils.getReplyTo(bytes);
-	}
-	catch(IOException e)
-	{
-	    luwrain.crash(e);
-	    return false;
-	}
+		replyToBase = getReplyTo(bytes);
+	    }
+	    catch(IOException e)
+	    {
+		luwrain.crash(e);
+		return false;
+	    }
 	    final String replyTo = !replyToBase.trim().isEmpty()?replyToBase:from;
 	    final StringBuilder newBody = new StringBuilder();
-	    newBody.append(strings.replyFirstLine(Utils.getDisplayedAddress(from), message.getSentDate()));
+	    newBody.append(strings.replyFirstLine(MailUtils.extractNameFromAddr(from), message.getSentDate()));
 	    newBody.append("\n");
 	    newBody.append("\n");
 	    if (!message.getText().isEmpty())
-	    for(String s: message.getText().split("\n", -1))
-		newBody.append(">" + s + "\n");
+		for(String s: message.getText().split("\n", -1))
+		    newBody.append(">" + s + "\n");
 	    if (wideReply)
 	    {
 		final MailUtils utils;
 		try {
-utils = new MailUtils(bytes);
+		    utils = new MailUtils(bytes);
 		}
 		catch (IOException e)
 		{
@@ -195,7 +194,7 @@ utils = new MailUtils(bytes);
 		}
 		luwrain.launchApp("message", new String[]{
 			replyTo,
-			utils.getWideReplyCcList(true),
+			utils.getWideReplyCcList(getCcExcludeAddrs(), true),
 			subject,
 			newBody.toString()
 		    });
@@ -292,7 +291,7 @@ utils = new MailUtils(bytes);
     boolean saveAttachment(String fileName)
     {
 	/*
-	if (currentMessage == null)
+	  if (currentMessage == null)
 	    return false;
 	File destFile = new File(luwrain.launchContext().userHomeDirAsFile(), fileName);
 	destFile = Popups.file(luwrain, "Сохранение прикрепления", "Введите имя файла для сохранения прикрепления:", destFile, 0, 0);
@@ -341,6 +340,14 @@ utils = new MailUtils(bytes);
 	return summaryAppearance;
     }
 
+    private String[] getCcExcludeAddrs()
+    {
+	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());
+	final String addr = sett.getDefaultMailAddress("");
+	if (addr.trim().isEmpty())
+	    return new String[0];
+	return new String[]{addr};
+    }
 
     static private String listToString(String[] items)
     {
@@ -363,5 +370,14 @@ utils = new MailUtils(bytes);
 	for(int i = 0;i < res.length;++i)
 	    res[i] = res[i].replaceAll("\r", "");
 	return res;
+    }
+
+    static private String getReplyTo(byte[] bytes) throws PimException, java.io.IOException
+    {
+	final MailUtils utils = new MailUtils(bytes);
+	final String[] res = utils.getReplyTo(true);
+	if (res == null || res.length < 1)
+	    return "";
+	return res[0];
     }
 }

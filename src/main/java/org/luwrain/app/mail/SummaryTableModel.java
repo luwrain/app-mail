@@ -5,6 +5,7 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.network.*;
 
 class SummaryTableModel implements TableArea.Model
 {
@@ -45,7 +46,7 @@ class SummaryTableModel implements TableArea.Model
 	    switch (col)
 	    {
 	    case 0:
-		return Utils.getDisplayedAddress(message.getFrom());
+		return MailUtils.extractNameFromAddr(message.getFrom());
 	    case 1:
 		return message.getSubject();
 	    case 2:

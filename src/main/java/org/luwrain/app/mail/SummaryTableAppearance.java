@@ -5,6 +5,7 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.network.*;
 
 class SummaryTableAppearance implements TableArea.Appearance
 {
@@ -47,7 +48,7 @@ class SummaryTableAppearance implements TableArea.Appearance
 	    default:
 		prefix = "";
 	    }
-	    line = prefix + " " + Utils.getDisplayedAddress(message.getFrom()) + ":" + message.getSubject() + " " + luwrain.i18n().getPastTimeBrief(message.getSentDate());
+	    line = prefix + " " + MailUtils.extractNameFromAddr(message.getFrom()) + ":" + message.getSubject() + " " + luwrain.i18n().getPastTimeBrief(message.getSentDate());
 	}
 	catch(PimException e)
 	{
