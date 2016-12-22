@@ -3,14 +3,21 @@ package org.luwrain.app.mail;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
+import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 
 class SummaryTableModel implements TableArea.Model
 {
+    private final Luwrain luwrain;
+    private final Strings strings;
     private StoredMailMessage[] messages;//null value with existing group means invalid state, empty content should be a valid array with zero length;
 
-    SummaryTableModel()
+    SummaryTableModel(Luwrain luwrain, Strings strings)
     {
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(strings, "strings");
+	this.luwrain = luwrain;
+	this.strings = strings;
     }
 
     void setMessages(StoredMailMessage[] messages)
@@ -42,14 +49,14 @@ class SummaryTableModel implements TableArea.Model
 	    case 1:
 		return message.getSubject();
 	    case 2:
-		return message.getSentDate();
+		return message.getSentDate();//FIXME:
 	    default:
 		return "#InvalidColumn " + col + "!#";
 	    }
 	}
-	catch(Exception e)
+	catch(PimException e)
 	{
-	    e.printStackTrace();
+	    luwrain.crash(e);
 	    return "#StoringError:" + e.getMessage() + "#";
 	}
     }
@@ -61,7 +68,17 @@ class SummaryTableModel implements TableArea.Model
 
     @Override public Object getCol(int index)
     {
-	return "Column";//FIXME:
+	switch(index)
+	{
+	case 0:
+	    return strings.columnFrom();
+	case 1:
+	    return strings.columnSubject();
+	case 2:
+	    return strings.columnSentDate();
+	default:
+	    return "";
+	}
     }
 
     @Override public void refresh()

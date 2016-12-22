@@ -6,6 +6,7 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.doctree.*;
 import org.luwrain.controls.doctree.*;
+import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 
 class Actions
@@ -32,16 +33,28 @@ class Actions
     }
 
     boolean onSummaryClick(Base base, TableArea.Model model,
-			   int col, int row,
-			   DoctreeArea messageArea, Object obj)
+			   int col, int row, Object obj,
+			   TableArea summaryArea, 			   DoctreeArea messageArea)
     {
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(model, "model");
+	NullCheck.notNull(summaryArea, "summaryArea");
 	NullCheck.notNull(messageArea, "messageArea");
 	final Object o = model.getRow(row);
 	if (o == null || !(o instanceof StoredMailMessage))
 	    return false;
 	final StoredMailMessage message = (StoredMailMessage)o;
+	try {
+	    if (message.getState() == MailMessage.State.NEW)
+	    {
+		message.setState(MailMessage.State.READ);
+		summaryArea.refresh();
+	    }
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
+	}
 	base.setCurrentMessage(message);
 	messageArea.setDocument(base.prepareDocumentForCurrentMessage(), 512);
 app.	enableMessageMode(MailApp.Mode.REGULAR);

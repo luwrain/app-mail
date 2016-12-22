@@ -292,7 +292,7 @@ messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announ
 //	messageArea = new MessageArea(luwrain, this, strings);
 	rawMessageArea = new RawMessageArea(luwrain, this, strings);
 
-	summaryArea.setClickHandler(				    (model, col, row, obj)->actions.onSummaryClick(base, model, col, row, messageArea, obj));
+	summaryArea.setClickHandler(				    (model, col, row, obj)->actions.onSummaryClick(base, model, col, row, obj, summaryArea, messageArea));
     }
 
     private boolean onSummaryAreaAction(EnvironmentEvent event)

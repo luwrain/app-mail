@@ -20,7 +20,7 @@ class SummaryTableAppearance implements TableArea.Appearance
     }
 
     @Override public void announceRow(TableArea.Model model,
-				       int index, int flags)
+				      int index, int flags)
     {
 	NullCheck.notNull(model, "model");
 	if (index < 0 || index >= model.getRowCount())
@@ -31,7 +31,23 @@ class SummaryTableAppearance implements TableArea.Appearance
 	final StoredMailMessage message = (StoredMailMessage)obj;
 	final String line;
 	try {
-	    line = message.getState().toString() + " " + Utils.getDisplayedAddress(message.getFrom()) + ":" + message.getSubject() + " " + luwrain.i18n().getPastTimeBrief(message.getSentDate());
+	    final String prefix;
+	    final MailMessage.State state = message.getState();
+	    switch(state)
+	    {
+	    case READ:
+		prefix = strings.readPrefix();
+		break;
+	    case MARKED:
+		prefix = strings.markedPrefix();
+		break;
+	    case DELETED:
+		prefix = strings.deletedPrefix();
+		break;
+	    default:
+		prefix = "";
+	    }
+	    line = prefix + " " + Utils.getDisplayedAddress(message.getFrom()) + ":" + message.getSubject() + " " + luwrain.i18n().getPastTimeBrief(message.getSentDate());
 	}
 	catch(PimException e)
 	{
@@ -47,14 +63,12 @@ class SummaryTableAppearance implements TableArea.Appearance
 	return 2;
     }
 
-    @Override public String getCellText(TableArea.Model model,
-					int col,
-					int row)
+    @Override public String getCellText(TableArea.Model model, int col, int row)
     {
-	if (model == null)
-	    return "#NO MODEL#";
+	NullCheck.notNull(model, "model");
 	final Object cell = model.getCell(col, row);
-	return cell != null?cell.toString():"";
+	NullCheck.notNull(cell, "cell");
+	return cell.toString();
     }
 
     @Override public String getRowPrefix(TableArea.Model model, int index)
@@ -64,6 +78,6 @@ class SummaryTableAppearance implements TableArea.Appearance
 
     @Override public int getColWidth(TableArea.Model model, int  colIndex)
     {
-	return 10;
+	return 15;
     }
 }

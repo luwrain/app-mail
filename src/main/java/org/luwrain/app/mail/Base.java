@@ -26,7 +26,7 @@ class Base
     private StoredMailMessage currentMessage;
     private TreeModelSource treeModelSource;
     private TreeArea.Model foldersModel;
-    private SummaryTableModel summaryModel;
+    private final SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
     Base(MailApp app, Luwrain luwrain, Strings strings)
@@ -38,6 +38,7 @@ class Base
 	this.luwrain = luwrain;
 	this.strings = strings;
 	this.storing = org.luwrain.pim.mail.Factory.getMailStoring(luwrain);
+	this.summaryModel = new SummaryTableModel(luwrain, strings);
     }
 
     boolean init()
@@ -102,9 +103,6 @@ doc.commit();
 
     SummaryTableModel getSummaryModel()
     {
-	if (summaryModel != null)
-	    return summaryModel;
-	summaryModel = new SummaryTableModel();
 	return summaryModel;
     }
 
