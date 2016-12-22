@@ -42,6 +42,8 @@ class MailApp implements Application, MonoApp
 	if (!base.init())
 	    return false;
 	createAreas();
+	if (base.openDefaultFolder())
+	    summaryArea.refresh();
 	return true;
     }
 

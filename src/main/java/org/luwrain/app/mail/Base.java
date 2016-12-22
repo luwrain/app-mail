@@ -133,6 +133,26 @@ doc.commit();
 	}
     }
 
+    boolean openDefaultFolder()
+    {
+	final StoredMailFolder folder;
+	final org.luwrain.pim.Settings.MailFolders sett = org.luwrain.pim.Settings.createMailFolders(luwrain.getRegistry());
+	final String uniRef = sett.getFolderInbox("");
+	if (uniRef.isEmpty())
+	    return false;
+	try {
+	    folder = storing.getFolderByUniRef(uniRef);
+	    if (folder == null)
+		return false;
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
+	    return false;
+	}
+	return openFolder(folder);
+    }
+
     boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
 	NullCheck.notNull(message, "message");
