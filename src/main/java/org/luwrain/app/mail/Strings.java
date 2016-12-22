@@ -19,7 +19,7 @@ public interface Strings
     String emptySummaryArea();
     String lastSummaryLine();
     String firstSummaryLine();
-    String passedTimeBrief(Date date);
+    //    String passedTimeBrief(Date date);
     String messageSentDate(Date date);
     String replyFirstLine(String sender, Date sentDate);
 }

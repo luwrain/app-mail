@@ -30,8 +30,7 @@ class Utils
 
     static String getReplyTo(byte[] bytes) throws PimException, java.io.IOException
     {
-	final MailUtils utils = new MailUtils();
-	utils.load(bytes);
+	final MailUtils utils = new MailUtils(bytes);
 	final String[] res = utils.getReplyTo(true);
 	if (res == null || res.length < 1)
 	    return "";

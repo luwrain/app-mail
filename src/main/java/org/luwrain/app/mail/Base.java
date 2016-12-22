@@ -153,6 +153,7 @@ replyTo = Utils.getReplyTo(bytes);
 	catch(IOException e)
 	{
 	    luwrain.crash(e);
+	    return false;
 	}
 	    if (replyTo.trim().isEmpty())
 		replyTo = from;
@@ -163,17 +164,18 @@ replyTo = Utils.getReplyTo(bytes);
 		newBody.append(">" + s + "\n");
 	    if (wideReply)
 	    {
-		final MailUtils utils = new MailUtils();
+		final MailUtils utils;
 		try {
-		    utils.load(bytes);
+utils = new MailUtils(bytes);
 		}
 		catch (IOException e)
 		{
 		    luwrain.crash(e);
+		    return false;
 		}
 		luwrain.launchApp("message", new String[]{
 			replyTo,
-			utils.constructWideReplyCcList(true),
+			utils.getWideReplyCcList(true),
 			subject,
 			newBody.toString()
 		    });

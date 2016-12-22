@@ -31,7 +31,7 @@ class Actions
 	};
     }
 
-    boolean onSummaryClick(Base base, TableModel model,
+    boolean onSummaryClick(Base base, TableArea.Model model,
 			   int col, int row,
 			   DoctreeArea messageArea, Object obj)
     {

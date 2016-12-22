@@ -5,7 +5,7 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.*;
 
-class SummaryTableModel implements TableModel
+class SummaryTableModel implements TableArea.Model
 {
     private StoredMailMessage[] messages;//null value with existing group means invalid state, empty content should be a valid array with zero length;
 

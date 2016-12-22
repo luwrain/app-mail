@@ -256,6 +256,22 @@ strings.summaryAreaName()) { //Click handler;
 
 messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.controls.doctree.Strings)luwrain.i18n().getStrings(org.luwrain.controls.doctree.Strings.NAME))){
 
+	@Override public boolean onKeyboardEvent(KeyboardEvent event)
+	{
+	    NullCheck.notNull(event, "event");
+	    if (event.isSpecial() && !event.isModified())
+		switch(event.getSpecial())
+		{
+		case TAB:
+		    gotoFolders();
+		    return true;
+		case BACKSPACE:
+		    gotoSummary();
+		    return true;
+		}
+	    return super.onKeyboardEvent(event);
+	}
+
 	@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 	{
 	    NullCheck.notNull(event, "event");

@@ -3,50 +3,51 @@ package org.luwrain.app.mail;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
+import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 
-class SummaryTableAppearance implements TableAppearance
+class SummaryTableAppearance implements TableArea.Appearance
 {
-    private Luwrain luwrain;
-    private Strings strings;
+    private final Luwrain luwrain;
+    private final Strings strings;
 
     SummaryTableAppearance(Luwrain luwrain, Strings strings)
     {
-	this.luwrain = luwrain;
-	this.strings = strings;
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(strings, "strings");
+	this.luwrain = luwrain;
+	this.strings = strings;
     }
 
-    @Override public void introduceRow(TableModel model,
+    @Override public void announceRow(TableArea.Model model,
 				       int index, int flags)
     {
-	if (model == null || index >= model.getRowCount())
+	NullCheck.notNull(model, "model");
+	if (index < 0 || index >= model.getRowCount())
 	    return;
 	final Object obj = model.getRow(index);
 	if (obj == null || !(obj instanceof StoredMailMessage))
 	    return;
 	final StoredMailMessage message = (StoredMailMessage)obj;
-	String line = "";
+	final String line;
 	try {
-	    line = Utils.getDisplayedAddress(message.getFrom()) + ":" + message.getSubject() + " " + strings.passedTimeBrief(message.getSentDate());
+	    line = message.getState().toString() + " " + Utils.getDisplayedAddress(message.getFrom()) + ":" + message.getSubject() + " " + luwrain.i18n().getPastTimeBrief(message.getSentDate());
 	}
-	catch(Exception e)
+	catch(PimException e)
 	{
-	    e.printStackTrace();
-	    luwrain.say("#StorageError!#");
+	    luwrain.crash(e);
 	    return;
 	}
 	luwrain.playSound(Sounds.LIST_ITEM);
 	luwrain.say(line);
     }
 
-    @Override public int getInitialHotPointX(TableModel model)
+    @Override public int getInitialHotPointX(TableArea.Model model)
     {
 	return 2;
     }
 
-    @Override public String getCellText(TableModel model,
+    @Override public String getCellText(TableArea.Model model,
 					int col,
 					int row)
     {
@@ -56,12 +57,12 @@ class SummaryTableAppearance implements TableAppearance
 	return cell != null?cell.toString():"";
     }
 
-    @Override public String getRowPrefix(TableModel model, int index)
+    @Override public String getRowPrefix(TableArea.Model model, int index)
     {
 	return "  ";//FIXME:
     }
 
-    @Override public int getColWidth(TableModel model, int  colIndex)
+    @Override public int getColWidth(TableArea.Model model, int  colIndex)
     {
 	return 10;
     }
