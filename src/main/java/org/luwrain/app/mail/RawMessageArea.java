@@ -59,26 +59,13 @@ class RawMessageArea extends NavigationArea
 	if (event.isSpecial() && !event.isModified())
 	    switch(event.getSpecial())
 	    {
-	    case F9:
-app.launchMailFetch();
-		return true;
 	    case TAB:
 app.gotoFolders();
 	    return true;
 	    case BACKSPACE:
 app.gotoSummary();
 	    return true;
-	    case F5://FIXME:Action
-		    return app.makeReply(null, false);
-	    case F6://FIXME:Action
-		return app.makeForward(null);
 	    }
-	if (event.isSpecial() && event.withShiftOnly())
-	    switch(event.getSpecial())
-	    {
-	    case F5://FIXME:Action
-		    return app.makeReply(null, true);
-}
 	return super.onKeyboardEvent(event);
     }
 
@@ -90,25 +77,6 @@ app.gotoSummary();
 	case CLOSE:
 app.closeApp();
 	    return true;
-	case ACTION:
-	    if (ActionEvent.isAction(event, "reply"))
-	    {
-app.makeReply(null, false);
-		return true;
-	    }
-	    if (ActionEvent.isAction(event, "reply-all"))
-	    {
-app.makeReply(null, true);
-		return true;
-	    }
-	    if (ActionEvent.isAction(event, "forward"))
-	    {
-app.makeForward(null);
-		return true;
-	    }
-	    return false;
-
-
 	default:
 	    return super.onEnvironmentEvent(event);
 	}

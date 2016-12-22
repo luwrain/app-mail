@@ -156,32 +156,31 @@ doc.commit();
     boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
 	NullCheck.notNull(message, "message");
+	    Log.debug("mail", "starting making a reply");
 	try {
-	    if (currentMessage == null)
-		return false;
-	    final StoredMailMessage m = message != null?message:currentMessage;
-	    String subject = m.getSubject();
+	    String subject = message.getSubject();
 	    if (!subject.toLowerCase().startsWith("re: "))
 		subject = "Re: " + subject;
-	    final byte[] bytes = m.getRawMessage();
-	    final String from = m.getFrom();
-	    if (from.trim().isEmpty())
+	    final byte[] bytes = message.getRawMessage();
+	    final String from = message.getFrom();
+	    if (from == null || from.trim().isEmpty())
 		return false;
-	    String replyTo = null;
+	    final String replyToBase;
 	    try {
-replyTo = Utils.getReplyTo(bytes);
+replyToBase = Utils.getReplyTo(bytes);
 	}
 	catch(IOException e)
 	{
 	    luwrain.crash(e);
 	    return false;
 	}
-	    if (replyTo.trim().isEmpty())
-		replyTo = from;
+	    final String replyTo = !replyToBase.trim().isEmpty()?replyToBase:from;
 	    final StringBuilder newBody = new StringBuilder();
-	    newBody.append(strings.replyFirstLine(Utils.getDisplayedAddress(from), m.getSentDate()) + "\n");
+	    newBody.append(strings.replyFirstLine(Utils.getDisplayedAddress(from), message.getSentDate()));
 	    newBody.append("\n");
-	    for(String s: m.getText().split("\n"))
+	    newBody.append("\n");
+	    if (!message.getText().isEmpty())
+	    for(String s: message.getText().split("\n", -1))
 		newBody.append(">" + s + "\n");
 	    if (wideReply)
 	    {

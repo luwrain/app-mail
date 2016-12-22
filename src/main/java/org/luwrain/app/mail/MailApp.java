@@ -47,28 +47,9 @@ class MailApp implements Application, MonoApp
 	return true;
     }
 
-    void launchMailFetch()
-    {
-	luwrain.launchApp("fetch", new String[]{"--MAIL"});
-    }
-
     void saveAttachment(String fileName)
     {
 	base.saveAttachment(fileName);
-    }
-
-    boolean makeReply(StoredMailMessage message, boolean wideReply)
-    {
-	if (!base.makeReply(message, wideReply))
-	    luwrain.message("Во время подготовки ответа произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
-	return true;
-    }
-
-    boolean makeForward(StoredMailMessage message)
-    {
-	if (!base.makeForward(message))
-	    luwrain.message("Во время подготовки перенаправленяи произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
-	return true;
     }
 
 void refreshMessages()
@@ -134,12 +115,10 @@ void refreshMessages()
 			case TAB:
 			    gotoSummary();
 			    return true;
-			case F9:
-			    launchMailFetch();
-			    return true;
 			}
 		    return super.onKeyboardEvent(event);
 		}
+
 		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -259,27 +238,13 @@ messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announ
 	    return actions.onDeleteInSummary(base, summaryArea, false);
 	if (ActionEvent.isAction(event, "delete-message-forever"))
 	    return actions.onDeleteInSummary(base, summaryArea, false);
+
 	if (ActionEvent.isAction(event, "reply"))
-	{
-	    if (summaryArea.getSelectedRow() == null)
-		return false;
-	    base.makeReply((StoredMailMessage)summaryArea.getSelectedRow(), false);
-	    return true;
-	}
+	    return actions.onSummaryReply(base, summaryArea, false);
 	if (ActionEvent.isAction(event, "reply-all"))
-	{
-	    if (summaryArea.getSelectedRow() == null)
-		return false;
-	    base.makeReply((StoredMailMessage)summaryArea.getSelectedRow(), true);
-	    return true;
-	}
-	if (ActionEvent.isAction(event, "forward"))
-	{
-	    if (summaryArea.getSelectedRow() == null)
-		return false;
-	    base.makeForward((StoredMailMessage)summaryArea.getSelectedRow());
-	    return true;
-	}
+	    return actions.onSummaryReply(base, summaryArea, true);
+
+	    //	if (ActionEvent.isAction(event, "forward"))
 	return false;
     }
 

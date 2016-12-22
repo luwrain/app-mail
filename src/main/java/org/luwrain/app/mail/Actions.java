@@ -29,12 +29,10 @@ class Actions
     Action[] getSummaryAreaActions()
     {
 	return new Action[]{
-
-	    new Action("delete-message", strings.actionDeleteMessage(), new KeyboardEvent(KeyboardEvent.Special.DELETE)),
-
-	    new Action("reply", "Ответить"),
+	    new Action("reply", "Ответить", new KeyboardEvent(KeyboardEvent.Special.F5)),
 	    new Action("reply-all", "Ответить всем"),
 	    new Action("forward", "Переслать"),
+	    new Action("delete-message", strings.actionDeleteMessage(), new KeyboardEvent(KeyboardEvent.Special.DELETE)),
 	};
     }
 
@@ -66,7 +64,6 @@ class Actions
 app.	enableMessageMode(MailApp.Mode.REGULAR);
 	app.gotoMessage();
 		    return true;
-
     }
 
     boolean onDeleteInSummary(Base base, TableArea summaryArea, boolean deleteForever)
@@ -84,6 +81,30 @@ app.	enableMessageMode(MailApp.Mode.REGULAR);
 	return true;
     }
 
+    boolean onSummaryReply(Base base, TableArea summaryArea, boolean wideReply)
+    {
+	NullCheck.notNull(base, "base");
+	NullCheck.notNull(summaryArea, "summaryArea");
+	final Object obj = summaryArea.getSelectedRow();
+	if (obj == null || !(obj instanceof StoredMailMessage))
+	    return false;
+	final StoredMailMessage message = (StoredMailMessage)obj;
+	return base.makeReply(message, wideReply);
+    }
+
+    /*
+    boolean makeForward(StoredMailMessage message)
+    {
+	if (!base.makeForward(message))
+	    luwrain.message("Во время подготовки перенаправленяи произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
+	return true;
+    }
+    */
 
 
+
+    void onLaunchMailFetch()
+    {
+	luwrain.launchApp("fetch", new String[]{"--MAIL"});
+    }
 }
