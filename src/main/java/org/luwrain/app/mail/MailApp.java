@@ -41,25 +41,22 @@ class MailApp implements Application, MonoApp
     private DoctreeArea messageArea;
     private RawMessageArea rawMessageArea;
 
-    @Override public boolean onLaunch(Luwrain luwrain)
+    @Override public InitResult onLaunchApp(Luwrain luwrain)
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	final Object o = luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
-	{
-	    Log.error("mail", "no strings object");
-	    return false;
-	}
+	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
 	strings = (Strings)o;
 	this.luwrain = luwrain;
 	this.base = new Base(this, luwrain, strings);
 	this.actions = new Actions(luwrain, strings, this);
 	if (!base.init())
-	    return false;
+	    return new InitResult(InitResult.Type.FAILURE);
 	createAreas();
 	if (base.openDefaultFolder())
 	    summaryArea.refresh();
-	return true;
+	return new InitResult();
     }
 
     void saveAttachment(String fileName)
@@ -294,7 +291,7 @@ void gotoMessage()
 	luwrain.onNewAreaLayout();
     }
 
-    void closeApp()
+    @Override public void closeApp()
     {
 	luwrain.closeApp();
     }
@@ -304,7 +301,7 @@ void gotoMessage()
 	return strings.appName();
     }
 
-    @Override  public AreaLayout getAreasToShow()
+    @Override  public AreaLayout getAreaLayout()
     {
 	switch(mode)
 	{
