@@ -52,7 +52,7 @@ class Base
 	this.app = app;
 	this.luwrain = luwrain;
 	this.strings = strings;
-	this.storing = org.luwrain.pim.mail.Factory.getMailStoring(luwrain);
+	this.storing = org.luwrain.pim.Connections.getMailStoring(luwrain, true);
 	this.summaryModel = new SummaryTableModel(luwrain, strings);
     }
 
@@ -104,7 +104,7 @@ doc.commit();
     void updateSummaryModel() throws PimException
     {
 	NullCheck.notNull(currentFolder, "currentFolder");
-	final StoredMailMessage[] allMessages = storing.loadMessages(currentFolder);
+	final StoredMailMessage[] allMessages = storing.getMessages().load(currentFolder);
 	final LinkedList<StoredMailMessage> res = new LinkedList<StoredMailMessage>();
 	for(StoredMailMessage m: allMessages)
 	    if (m.getState() != MailMessage.State.DELETED)
@@ -119,7 +119,7 @@ doc.commit();
 	    return false;
 	try {
 	    if (deleteForever)
-		storing.deleteMessage(message); else
+		storing.getMessages().delete(message); else
 		message.setState(MailMessage.State.DELETED);
 	    updateSummaryModel();
 	}
@@ -155,7 +155,7 @@ doc.commit();
 	if (uniRef.isEmpty())
 	    return false;
 	try {
-	    folder = storing.getFolderByUniRef(uniRef);
+	    folder = storing.getFolders().loadByUniRef(uniRef);
 	    if (folder == null)
 		return false;
 	}
@@ -290,7 +290,7 @@ doc.commit();
 	NullCheck.notNull(query, "query");
 	NullCheck.notNull(folder, "folder");
 	try {
-	    final String uniRef = storing.getFolderUniRef(folder);
+	    final String uniRef = storing.getFolders().getUniRef(folder);
 	    if (uniRef == null || uniRef.trim().isEmpty())
 		return false;
 	    query.answer(uniRef);

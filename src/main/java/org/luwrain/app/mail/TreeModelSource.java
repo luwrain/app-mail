@@ -40,7 +40,7 @@ class TreeModelSource implements org.luwrain.controls.CachedTreeModelSource
     @Override public Object getRoot()
     {
 	try {
-	    return storing.getFoldersRoot();
+	    return storing.getFolders().getRoot();
 	}
 	catch (PimException e)
 	{
@@ -54,7 +54,7 @@ class TreeModelSource implements org.luwrain.controls.CachedTreeModelSource
 	NullCheck.notNull(obj, "obj");
 	final StoredMailFolder folder = (StoredMailFolder)obj;
 	try {
-return storing.getFolders(folder);
+	    return storing.getFolders().load(folder);
 	}
 	catch(PimException e)
 	{
