@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of LUWRAIN.
 
@@ -23,7 +23,7 @@ import org.luwrain.controls.*;
 import org.luwrain.controls.doctree.*;
 import org.luwrain.pim.mail.*;
 
-class MailApp implements Application, MonoApp
+class App implements Application, MonoApp
 {
     enum Mode {
 	REGULAR,

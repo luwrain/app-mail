@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of LUWRAIN.
 
@@ -34,7 +34,7 @@ class Base
     //    static private final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
 
     private final Luwrain luwrain;
-    private final MailApp app;
+    private final App app;
     private final Strings strings;
     private final MailStoring storing;
     private StoredMailFolder currentFolder = null;
@@ -44,7 +44,7 @@ class Base
     private final SummaryTableModel summaryModel;
     private SummaryTableAppearance summaryAppearance;
 
-    Base(MailApp app, Luwrain luwrain, Strings strings)
+    Base(App app, Luwrain luwrain, Strings strings)
     {
 	NullCheck.notNull(app, "app");
 	NullCheck.notNull(luwrain, "luwrain");

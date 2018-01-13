@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of LUWRAIN.
 
@@ -25,11 +25,11 @@ class RawMessageArea extends NavigationArea
 {
     private final Luwrain luwrain;
     private final Strings strings;
-    private final MailApp app;
+    private final App app;
     private StoredMailMessage message;
     private String[] content = new String[0];
 
-    RawMessageArea(Luwrain luwrain, MailApp app,
+    RawMessageArea(Luwrain luwrain, App app,
 		Strings strings)
     {
 	super(new DefaultControlEnvironment(luwrain));

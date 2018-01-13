@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2016 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
 
    This file is part of LUWRAIN.
 
@@ -28,9 +28,9 @@ class Actions
 {
     private final Luwrain luwrain;
     private final Strings strings;
-    private final MailApp app;
+    private final App app;
 
-    Actions(Luwrain luwrain, Strings strings, MailApp app)
+    Actions(Luwrain luwrain, Strings strings, App app)
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(strings, "strings");
@@ -76,7 +76,7 @@ class Actions
 	}
 	base.setCurrentMessage(message);
 	messageArea.setDocument(base.prepareDocumentForCurrentMessage(), 512);
-app.	enableMessageMode(MailApp.Mode.REGULAR);
+app.	enableMessageMode(App.Mode.REGULAR);
 	app.gotoMessage();
 		    return true;
     }

@@ -1,3 +1,18 @@
+/*
+   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
+
+   This file is part of LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.mail;
 
@@ -21,6 +36,17 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 		}
 	    },
 
+	    new Command(){
+		@Override public String getName()
+		{
+		    return "message";
+		}
+		@Override public void onCommand(Luwrain luwrain)
+		{
+		    luwrain.launchApp("message");
+		}
+	    },
+
 	};
     }
 
@@ -35,7 +61,7 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 		}
 		@Override public Application[] prepareApp(String[] args)
 		{
-		    return new Application[]{new MailApp()};
+		    return new Application[]{new org.luwrain.app.mail.App()};
 		}
 	    },
 
@@ -63,8 +89,6 @@ public class Extension extends org.luwrain.core.extensions.EmptyExtension
 		    return new Application[]{new org.luwrain.app.message.App()};
 		}
 	    }
-
-	    
 
 	};
     }
