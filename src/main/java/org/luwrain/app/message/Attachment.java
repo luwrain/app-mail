@@ -16,20 +16,20 @@
 
 package org.luwrain.app.message;
 
-import java.nio.file.*;
+import java.io.*;
 
 import org.luwrain.core.*;
 
-class Attachment
+final class Attachment
 {
     final String name;
-    final Path path;
+    final File file;
 
-    Attachment(String name, Path path)
+    Attachment(String name, File file)
     {
 	NullCheck.notNull(name, "name");
-	NullCheck.notNull(path, "path");
+	NullCheck.notNull(file, "file");
 	this.name = name;
-	this.path = path;
+	this.file = file;
     }
 }

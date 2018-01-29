@@ -27,15 +27,15 @@ import org.luwrain.pim.mail.*;
 import org.luwrain.pim.contacts.*;
 import org.luwrain.network.*;
 
-class Base
+final class Base
 {
     static private final String USER_AGENT_HEADER_NAME = "User-Agent";
     static private final String USER_AGENT_HEADER_VALUE_BASE = "LUWRAIN mail";
 
     private final Luwrain luwrain;
     private final Strings strings;
-    private final MailStoring mailStoring;
-    private final ContactsStoring contactsStoring;
+    final MailStoring mailStoring;
+    final ContactsStoring contactsStoring;
 
     Base(Luwrain luwrain, Strings strings)
     {
@@ -44,17 +44,12 @@ class Base
 	this.luwrain = luwrain;
 	this.strings = strings;
 	this.mailStoring = org.luwrain.pim.Connections.getMailStoring(luwrain, true);
-	this.contactsStoring = org.luwrain.pim.contacts.Factory.getContactsStoring(luwrain);
+	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(luwrain, true);
     }
 
     boolean isReady()
     {
 	return mailStoring != null && contactsStoring != null;
-    }
-
-    ContactsStoring getContactsStoring()
-    {
-	return contactsStoring;
     }
 
     boolean send(MailMessage msg, boolean fromAnotherAccount)
@@ -74,11 +69,10 @@ class Base
 	    msg.bcc = new String[0];
 	    msg.mimeContentType = "text/plain; charset=utf-8";//FIXME:
 	    msg.extInfo = mailStoring.getAccounts().getUniRef(account);
-	    final MailUtils mail = new MailUtils();
-	    final HashMap<String, String> headers = new HashMap<String, String>();
+	    //	    final MailUtils mail = new MailUtils();
+	    final Map<String, String> headers = new HashMap();
 	    headers.put(USER_AGENT_HEADER_NAME, getUserAgentStr());
-	    mail.loadFrom(msg, headers);
-	    msg.rawMail = mail.saveToByteArray();
+	    msg.rawMail = mailStoring.getMessages().toByteArray(msg, headers);
 	    final StoredMailFolder folder = getFolderForPending();
 	    if (folder == null)
 		throw new IllegalArgumentException("Unable to prepare a folder for pending messages");
@@ -102,7 +96,8 @@ class Base
 	    name = account.getSubstName().trim();
 	if (account.getSubstAddress() != null && !account.getSubstAddress().trim().isEmpty())
 	    mail = account.getSubstAddress().trim();
-	return MailAddress.makeEncodedAddress(name, mail);
+	//	return MailAddress.makeEncodedAddress(name, mail);
+	return "fixme";
     }
 
     private StoredMailAccount chooseAccountToSend() throws PimException
@@ -158,5 +153,18 @@ class Base
     private String getUserAgentStr()
     {
 	return USER_AGENT_HEADER_VALUE_BASE;//FIXME:
+    }
+
+        static String[] splitAddrs(String line)
+    {
+	NullCheck.notNull(line, "line");
+	if (line.trim().isEmpty())
+	    return new String[0];
+	final LinkedList<String> res = new LinkedList<String>();
+	final String[] lines = line.split(",", -1);
+	for(String s: lines)
+	    if (!s.trim().isEmpty())
+		res.add(s.trim());
+	return res.toArray(new String[res.size()]);
     }
 }

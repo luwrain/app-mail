@@ -23,7 +23,6 @@ import java.util.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.MailMessage;
-import org.luwrain.network.MailUtils;
 
 class Area extends FormArea
 {
@@ -85,11 +84,11 @@ void setCc(String value)
 	return lines.getWholeText();
     }
 
-    Path [] getAttachments()
+    File[] getAttachments()
     {
-	final Path[] res = new Path[attachments.size()];
+	final File[] res = new File[attachments.size()];
 	for(int i = 0;i < attachments.size();++i)
-	    res[i] = attachments.get(i).path;
+	    res[i] = attachments.get(i).file;
 	return res;
     }
 
@@ -102,12 +101,12 @@ void setCc(String value)
     {
 	NullCheck.notNull(file, "file");
 	for(Attachment a: attachments)
-	    if (a.path.equals(file.toPath()))
+	    if (a.file.equals(file))
 	    {
 		luwrain.message("Файл " + file.getName() + " уже прикреплён к сообщению", Luwrain.MessageType.ERROR);
 		return;
 	    }
-	final Attachment a = new Attachment(ATTACHMENT + attachmentCounter, file.toPath());
+	final Attachment a = new Attachment(ATTACHMENT + attachmentCounter, file);
 	++attachmentCounter;
 	attachments.add(a);
 	addStatic(a.name, strings.attachment(file), a);
@@ -130,8 +129,8 @@ void setCc(String value)
     MailMessage constructMailMessage()
     {
 	final MailMessage msg = new MailMessage();
-	msg.to = Utils.splitAddrs(getEnteredText(TO_NAME));
-	msg.cc = Utils.splitAddrs(getEnteredText(CC_NAME));
+	msg.to = Base.splitAddrs(getEnteredText(TO_NAME));
+	msg.cc = Base.splitAddrs(getEnteredText(CC_NAME));
 	msg.subject = getEnteredText(SUBJECT_NAME);
 	msg.baseContent = getText();
 	final LinkedList<String> attachments = new LinkedList<String>();
@@ -143,7 +142,7 @@ void setCc(String value)
 	    if (o == null || !(o instanceof Attachment))
 		continue;
 	    final Attachment a = (Attachment)o;
-	    attachments.add(a.path.toString());
+	    attachments.add(a.file.getAbsolutePath());
 	}
 	msg.attachments = attachments.toArray(new String[attachments.size()]);
 	return msg;

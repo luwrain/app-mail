@@ -102,10 +102,10 @@ boolean onDelete(Area area)
 	if (obj == null || !(obj instanceof Attachment))
 	    return false;
 	final Attachment a = (Attachment)obj;
-	if (!Popups.confirmDefaultNo(luwrain, "Удаление прикрепления", "Вы действительно хотите исключить " + a.path.toString() + " из списка прикреплений?"))
+	if (!Popups.confirmDefaultNo(luwrain, "Удаление прикрепления", "Вы действительно хотите исключить " + a.file.getName() + " из списка прикреплений?"))
 	    return true;
 	area.removeAttachment(index, a);
-	luwrain.message("Прикрепление " + a.path.toString() + " исключено из сообщения", Luwrain.MessageType.OK);
+	luwrain.message("Прикрепление " + a.file.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
 	return true;
     }
 
@@ -113,10 +113,10 @@ boolean onDelete(Area area)
     private String editCcList(String initial)
     {
 	NullCheck.notNull(initial, "initial");
-	final String[] items = Utils.splitAddrs(initial);
+	final String[] items = Base.splitAddrs(initial);
 	final CcEditPopup popup;
 	try {
-	    popup = new CcEditPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), base.getContactsStoring(), items);
+	    popup = new CcEditPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), base.contactsStoring, items);
 	}
 	catch(PimException e)
 	{
@@ -142,7 +142,7 @@ boolean onDelete(Area area)
 	NullCheck.notNull(base, "base");
 	final ChooseMailPopup popup;
 	try {
-	    popup = new ChooseMailPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), base.getContactsStoring(), base.getContactsStoring().getFolders().getRoot());
+	    popup = new ChooseMailPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), base.contactsStoring, base.contactsStoring.getFolders().getRoot());
 	}
 	catch(PimException e)
 	{
