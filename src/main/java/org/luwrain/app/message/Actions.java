@@ -109,7 +109,6 @@ boolean onDelete(Area area)
 	return true;
     }
 
-
     private String editCcList(String initial)
     {
 	NullCheck.notNull(initial, "initial");

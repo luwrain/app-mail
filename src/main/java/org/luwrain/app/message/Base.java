@@ -69,7 +69,6 @@ final class Base
 	    msg.bcc = new String[0];
 	    msg.mimeContentType = "text/plain; charset=utf-8";//FIXME:
 	    msg.extInfo = mailStoring.getAccounts().getUniRef(account);
-	    //	    final MailUtils mail = new MailUtils();
 	    final Map<String, String> headers = new HashMap();
 	    headers.put(USER_AGENT_HEADER_NAME, getUserAgentStr());
 	    msg.rawMail = mailStoring.getMessages().toByteArray(msg, headers);
@@ -79,40 +78,41 @@ final class Base
 	    mailStoring.getMessages().save(folder, msg);
 	    return true;
 	}
-	catch(PimException | IOException e)
+	catch(PimException e)
 	{
 	    luwrain.crash(e);
 	    return false;
 	}
     }
 
-    private String prepareFromLine(StoredMailAccount account) throws PimException, UnsupportedEncodingException
+    private String prepareFromLine(StoredMailAccount account) throws PimException
     {
 	NullCheck.notNull(account, "account");
-	final org.luwrain.core.Settings.PersonalInfo settings = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());
-	String mail = settings.getDefaultMailAddress("").trim();
-	String name = settings.getFullName("").trim();
-	if (account.getSubstName() != null && !account.getSubstName().trim().isEmpty())
-	    name = account.getSubstName().trim();
-	if (account.getSubstAddress() != null && !account.getSubstAddress().trim().isEmpty())
-	    mail = account.getSubstAddress().trim();
-	//	return MailAddress.makeEncodedAddress(name, mail);
-	return "fixme";
+	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());
+	final String personal;
+	final String addr;
+	if (!account.getSubstName().trim().isEmpty())
+	    personal = account.getSubstName().trim(); else
+personal = sett.getFullName("").trim();
+		if (!account.getSubstAddress().trim().isEmpty())
+	    addr = account.getSubstAddress().trim(); else
+addr = sett.getDefaultMailAddress("").trim();
+	return mailStoring.combinePersonalAndAddr(personal, addr);
     }
 
     private StoredMailAccount chooseAccountToSend() throws PimException
     {
 	final StoredMailAccount[] accounts = mailStoring.getAccounts().load();
-	final LinkedList items = new LinkedList();
+	final List items = new LinkedList();
 	for(StoredMailAccount a: accounts)
 	    if (a.getType() == MailAccount.Type.SMTP)
 		items.add(a);
 	if (items.isEmpty())
 	{
-	    luwrain.message("Отсутствуют учётные записи для отправки почты", Luwrain.MessageType.ERROR);
+	    luwrain.message("Отсутствуют учётные записи для отправки почты", Luwrain.MessageType.ERROR);//FIXME:
 	    return null;
 	}
-	final Object res = Popups.fixedList(luwrain, "Выберите учётную запись для отправки сообщения", items.toArray(new Object[items.size()]));
+	final Object res = Popups.fixedList(luwrain, "Выберите учётную запись для отправки сообщения", items.toArray(new Object[items.size()]));//FIXME:
 	if (res == null)
 	    return null;
 	return (StoredMailAccount)res;
@@ -125,15 +125,18 @@ final class Base
 	    if (a.getType() == MailAccount.Type.SMTP &&
 		a.getFlags().contains(MailAccount.Flags.DEFAULT))
 		return a;
-	luwrain.message("Отсутствует выбранный по умолчанию сервер исходящей почты", Luwrain.MessageType.ERROR);
+	luwrain.message("Отсутствует выбранный по умолчанию сервер исходящей почты", Luwrain.MessageType.ERROR);//FIXME:
 	return null;
     }
 
     private StoredMailFolder getFolderForPending()
     {
-	final org.luwrain.settings.mail.Settings.MailFolders settings = org.luwrain.settings.mail.Settings.createMailFolders(luwrain.getRegistry());
+	final org.luwrain.settings.mail.Settings.MailFolders sett = org.luwrain.settings.mail.Settings.createMailFolders(luwrain.getRegistry());
+	final String uniRef = sett.getFolderPending("");
+	if (uniRef.trim().isEmpty())
+	    return null;
 	try {
-	    return mailStoring.getFolders().loadByUniRef(settings.getFolderPending(""));
+	    return mailStoring.getFolders().loadByUniRef(uniRef);
 	}
 	catch (PimException e)
 	{
@@ -142,25 +145,17 @@ final class Base
 	}
     }
 
-    private String constructUserName()
-    {
-	final org.luwrain.core.Settings.PersonalInfo settings = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());
-	final String name = settings.getFullName("").trim();
-	final String addr = settings.getDefaultMailAddress("").trim();
-	return name + " <" + addr + ">";
-    }
-
     private String getUserAgentStr()
     {
 	return USER_AGENT_HEADER_VALUE_BASE;//FIXME:
     }
 
-        static String[] splitAddrs(String line)
+    static String[] splitAddrs(String line)
     {
 	NullCheck.notNull(line, "line");
 	if (line.trim().isEmpty())
 	    return new String[0];
-	final LinkedList<String> res = new LinkedList<String>();
+	final List<String> res = new LinkedList();
 	final String[] lines = line.split(",", -1);
 	for(String s: lines)
 	    if (!s.trim().isEmpty())

@@ -20,11 +20,12 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 
-public class App implements Application
+public final class App implements Application
 {
-    private Luwrain luwrain;
-    private Strings strings;
+    private Luwrain luwrain = null;
+    private Strings strings = null;
     private Base base = null;
+    private ActionLists actionLists = null;
     private Actions actions = null;
     private Area messageArea;
 
@@ -53,9 +54,10 @@ public class App implements Application
 	final Object o = luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null)
 	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
-	strings = (Strings)o;
+	this.strings = (Strings)o;
 	this.luwrain = luwrain;
 	this.base = new Base(luwrain, strings);
+	this.actionLists = new ActionLists(strings);
 	this.actions = new Actions(luwrain, base, strings);
 	if (!base.isReady())
 	    return new InitResult(InitResult.Type.FAILURE);
@@ -92,6 +94,9 @@ if (!value.isEmpty())
 			}
 		    case DELETE:
 			return actions.onDelete(this);
+		    case ESCAPE:
+			closeApp();
+			return true;
 		    }
 		    return super.onKeyboardEvent(event);
 		}
@@ -106,24 +111,7 @@ if (!value.isEmpty())
 			closeApp();
 			return true;
 		    case ACTION:
-			return onAction(event);
-		    case OK:
-			return onOk();
-		    default:
-			return super.onEnvironmentEvent(event);
-		    }
-		}
 
-    @Override public Action[] getAreaActions()
-    {
-	return actions.getActions();
-    }
-	    };
-    }
-
-    private boolean onAction(EnvironmentEvent event)
-    {
-	NullCheck.notNull(event, "event");
 			if (ActionEvent.isAction(event, "send"))
 			{
 			    if (actions.onSend(base, messageArea, false))
@@ -142,14 +130,21 @@ if (!value.isEmpty())
 			    return actions.onEditCc(messageArea);
 			if (ActionEvent.isAction(event, "attach-file"))
 			    return actions.onInsert(messageArea);
-			return false;
-    }
 
-    private boolean onOk()
-    {
-	if (actions.onSend(base, messageArea, false))
+			return false;
+		    case OK:
+				if (actions.onSend(base, messageArea, false))
 	    closeApp();
 	return true;
+		    default:
+			return super.onEnvironmentEvent(event);
+		    }
+		}
+    @Override public Action[] getAreaActions()
+    {
+	return actionLists.getActions();
+    }
+	    };
     }
 
 @Override public void closeApp()
