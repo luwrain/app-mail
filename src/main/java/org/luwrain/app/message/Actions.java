@@ -16,21 +16,16 @@
 
 package org.luwrain.app.message;
 
-import java.util.*;
 import java.io.*;
 
 import org.luwrain.core.*;
-import org.luwrain.core.events.*;
-import org.luwrain.popups.*;
-import org.luwrain.pim.*;
-import org.luwrain.pim.contacts.*;
-import org.luwrain.popups.pim.*;
 
 class Actions
 {
     private final Luwrain luwrain;
     private final Base base;
     private final Strings strings;
+    final Conversations conv;
 
     Actions(Luwrain luwrain, Base base, Strings strings)
     {
@@ -40,17 +35,7 @@ class Actions
 	this.luwrain = luwrain;
 	this.base = base;
 	this.strings = strings;
-    }
-
-    Action[] getActions()
-    {
-	return new Action[]{
-	    new Action("send", "Отправить"),
-	    new Action("send-another-account", "Отправить через учётную запись"),
-	    new Action("choose-to", "Выбрать получателя из списка"),
-	    new Action("choose-cc", "Выбрать получателей копии из списка"),
-	    new Action("attach-file", "Прикрепить файл", new KeyboardEvent(KeyboardEvent.Special.INSERT)),//FIXME:
-	};
+	this.conv = new Conversations(luwrain, base, strings);
     }
 
     boolean onSend(Base base, Area area, boolean useAnotherAccount)
@@ -65,7 +50,7 @@ class Actions
     boolean onEditTo(Area area)
     {
 	NullCheck.notNull(area, "area");
-	final String res = selectFromContacts(base);
+	final String res = conv.editTo();
 	if (res != null)
 	    area.setTo(res);
 	return true;
@@ -74,25 +59,23 @@ class Actions
     boolean onEditCc(Area area)
     {
 	NullCheck.notNull(area, "area");
-	final String res = editCcList(area.getCc());
+	final String res = conv.editCc(area.getCc());
 	if (res != null)
 	    area.setCc(res);
 	return true;
     }
 
-    boolean onInsert(Area area)
+    boolean onAttachFile(Area area)
     {
 	NullCheck.notNull(area, "area");
-	final File file = Popups.path(luwrain, strings.attachmentPopupName(), strings.attachmentPopupPrefix(), (fileToCheck,announcement)->{
-		return true;
-	    });
+	final File file = conv.attachment();
 	if (file == null)
 	    return true;
 	area.addAttachment(file);
 	return true;
     }
 
-boolean onDelete(Area area)
+boolean onDeleteAttachment(Area area)
     {
 	NullCheck.notNull(area, "area");
 	final int index = area.getHotPointY();
@@ -102,64 +85,10 @@ boolean onDelete(Area area)
 	if (obj == null || !(obj instanceof Attachment))
 	    return false;
 	final Attachment a = (Attachment)obj;
-	if (!Popups.confirmDefaultNo(luwrain, "Удаление прикрепления", "Вы действительно хотите исключить " + a.file.getName() + " из списка прикреплений?"))
+	if (!conv.confirmAttachmentDeleting(a.file))
 	    return true;
 	area.removeAttachment(index, a);
 	luwrain.message("Прикрепление " + a.file.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
 	return true;
-    }
-
-    private String editCcList(String initial)
-    {
-	NullCheck.notNull(initial, "initial");
-	final String[] items = Base.splitAddrs(initial);
-	final CcEditPopup popup;
-	try {
-	    popup = new CcEditPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), base.contactsStoring, items);
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return null;
-	}
-	luwrain.popup(popup);
-	if (popup.wasCancelled())
-	    return null;
-	final String[] newItems = popup.result();
-	NullCheck.notNullItems(newItems, "newItems");
-	if (newItems.length == 0)
-	    return "";
-	final StringBuilder b = new StringBuilder();
-	b.append((String)newItems[0]);
-	for(int i = 1;i < newItems.length;++i)
-	    b.append("," + (String)newItems[i]);
-	return b.toString();
-    }
-
-    String selectFromContacts(Base base)
-    {
-	NullCheck.notNull(base, "base");
-	final ChooseMailPopup popup;
-	try {
-	    popup = new ChooseMailPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), base.contactsStoring, base.contactsStoring.getFolders().getRoot());
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return null;
-	}
-	luwrain.popup(popup);
-	if (popup.wasCancelled())
-	    return null;
-	return popup.result();
-    }
-
-    private boolean mayRemove(Object item)
-    {
-	final YesNoPopup popup = new YesNoPopup(luwrain, "Удаление адреса получателя", "Вы действительно хотите удалить получателя копии \"" + item.toString() + "\"?", false, Popups.DEFAULT_POPUP_FLAGS);
-	luwrain.popup(popup);
-	if (popup.wasCancelled())
-	    return false;
-	return popup.result();
     }
 }

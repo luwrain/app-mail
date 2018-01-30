@@ -93,7 +93,7 @@ if (!value.isEmpty())
 			    return super.onKeyboardEvent(event);
 			}
 		    case DELETE:
-			return actions.onDelete(this);
+			return actions.onDeleteAttachment(this);
 		    case ESCAPE:
 			closeApp();
 			return true;
@@ -129,7 +129,7 @@ if (!value.isEmpty())
 			if (ActionEvent.isAction(event, "choose-cc"))
 			    return actions.onEditCc(messageArea);
 			if (ActionEvent.isAction(event, "attach-file"))
-			    return actions.onInsert(messageArea);
+			    return actions.onAttachFile(messageArea);
 
 			return false;
 		    case OK:
