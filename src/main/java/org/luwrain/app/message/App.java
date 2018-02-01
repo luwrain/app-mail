@@ -115,7 +115,7 @@ if (!value.isEmpty())
 			{
 			    if (actions.onSend(base, messageArea, false))
 			    {
-				//luwrain.runWorker();
+				luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
 				closeApp();
 			    }
 			    return true;
@@ -124,7 +124,7 @@ if (!value.isEmpty())
 			{
 			    if (actions.onSend(base, messageArea, true))
 			    {
-				//runWorker();
+				luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
 				closeApp();
 			    }
 			    return true;
@@ -135,13 +135,12 @@ if (!value.isEmpty())
 			    return actions.onEditCc(messageArea);
 			if (ActionEvent.isAction(event, "attach-file"))
 			    return actions.onAttachFile(messageArea);
-
 			return false;
 		    case OK:
 				if (actions.onSend(base, messageArea, false))
 				{
-				    //				    luwrain.runWorker("luwrain.pim.mail.");
-	    closeApp();
+				    luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
+				    closeApp();
 				}
 	return true;
 		    default:
