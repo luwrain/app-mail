@@ -111,17 +111,22 @@ if (!value.isEmpty())
 			closeApp();
 			return true;
 		    case ACTION:
-
 			if (ActionEvent.isAction(event, "send"))
 			{
 			    if (actions.onSend(base, messageArea, false))
+			    {
+				//luwrain.runWorker();
 				closeApp();
+			    }
 			    return true;
 			}
 			if (ActionEvent.isAction(event, "send-another-account"))
 			{
 			    if (actions.onSend(base, messageArea, true))
+			    {
+				//runWorker();
 				closeApp();
+			    }
 			    return true;
 			}
 			if (ActionEvent.isAction(event, "choose-to"))
@@ -134,11 +139,18 @@ if (!value.isEmpty())
 			return false;
 		    case OK:
 				if (actions.onSend(base, messageArea, false))
+				{
+				    //				    luwrain.runWorker("luwrain.pim.mail.");
 	    closeApp();
+				}
 	return true;
 		    default:
 			return super.onEnvironmentEvent(event);
 		    }
+		}
+		@Override public String getAreaName()
+		{
+		    return strings.appName();
 		}
     @Override public Action[] getAreaActions()
     {

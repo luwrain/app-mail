@@ -52,16 +52,11 @@ final class Base
 	return mailStoring != null && contactsStoring != null;
     }
 
-    boolean send(MailMessage msg, boolean fromAnotherAccount)
+    boolean send(StoredMailAccount account, MailMessage msg)
     {
+	NullCheck.notNull(account, "account");
 	NullCheck.notNull(msg, "msg");
 	try {
-	    final StoredMailAccount account;
-	    if (fromAnotherAccount)
-		account = chooseAccountToSend(); else
-		account = getDefaultAccount();
-	    if (account == null)
-		return false;
 	    msg.from = prepareFromLine(account);
 	    if (msg.from == null || msg.from.trim().isEmpty())
 		throw new IllegalArgumentException("No sender address");//FIXME:
@@ -98,35 +93,6 @@ personal = sett.getFullName("").trim();
 	    addr = account.getSubstAddress().trim(); else
 addr = sett.getDefaultMailAddress("").trim();
 	return mailStoring.combinePersonalAndAddr(personal, addr);
-    }
-
-    private StoredMailAccount chooseAccountToSend() throws PimException
-    {
-	final StoredMailAccount[] accounts = mailStoring.getAccounts().load();
-	final List items = new LinkedList();
-	for(StoredMailAccount a: accounts)
-	    if (a.getType() == MailAccount.Type.SMTP)
-		items.add(a);
-	if (items.isEmpty())
-	{
-	    luwrain.message("Отсутствуют учётные записи для отправки почты", Luwrain.MessageType.ERROR);//FIXME:
-	    return null;
-	}
-	final Object res = Popups.fixedList(luwrain, "Выберите учётную запись для отправки сообщения", items.toArray(new Object[items.size()]));//FIXME:
-	if (res == null)
-	    return null;
-	return (StoredMailAccount)res;
-    }
-
-    private StoredMailAccount getDefaultAccount() throws PimException
-    {
-	final StoredMailAccount[] accounts = mailStoring.getAccounts().load();
-	for(StoredMailAccount a: accounts)
-	    if (a.getType() == MailAccount.Type.SMTP &&
-		a.getFlags().contains(MailAccount.Flags.DEFAULT))
-		return a;
-	luwrain.message("Отсутствует выбранный по умолчанию сервер исходящей почты", Luwrain.MessageType.ERROR);//FIXME:
-	return null;
     }
 
     private StoredMailFolder getFolderForPending()

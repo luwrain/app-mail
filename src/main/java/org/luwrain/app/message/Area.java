@@ -35,10 +35,10 @@ class Area extends FormArea
     private final Strings strings;
 
     private final MutableLinesImpl lines = new MutableLinesImpl();
-    private final Vector<Attachment> attachments = new Vector<Attachment>();
+    private final List<Attachment> attachments = new Vector();
     private int attachmentCounter = 0;
 
-Area(Luwrain luwrain, Strings strings, MessageContent msg)
+    Area(Luwrain luwrain, Strings strings, MessageContent msg)
     {
 	super(new DefaultControlEnvironment(luwrain));
 	NullCheck.notNull(luwrain, "luwrain");
@@ -63,12 +63,17 @@ Area(Luwrain luwrain, Strings strings, MessageContent msg)
 	setEnteredText(value, "value");
     }
 
+    void focusTo()
+    {
+	setHotPoint(0, 0);
+    }
+
     String getCc()
     {
 	return getEnteredText(CC_NAME);
     }
 
-void setCc(String value)
+    void setCc(String value)
     {
 	NullCheck.notNull(value, "value");
 	setEnteredText(CC_NAME, value);
@@ -77,6 +82,11 @@ void setCc(String value)
     String getSubject()
     {
 	return getEnteredText(SUBJECT_NAME);
+    }
+
+    void focusSubject()
+    {
+	setHotPoint(0, 2);
     }
 
     String getText()
@@ -92,18 +102,13 @@ void setCc(String value)
 	return res;
     }
 
-    @Override public String getAreaName()
-    {
-	return strings.appName();
-    }
-
     void addAttachment(File file)
     {
 	NullCheck.notNull(file, "file");
 	for(Attachment a: attachments)
 	    if (a.file.equals(file))
 	    {
-		luwrain.message("Файл " + file.getName() + " уже прикреплён к сообщению", Luwrain.MessageType.ERROR);
+		luwrain.message("Файл " + file.getName() + " уже прикреплён к сообщению", Luwrain.MessageType.ERROR);//FIXME:
 		return;
 	    }
 	final Attachment a = new Attachment(ATTACHMENT + attachmentCounter, file);
@@ -124,7 +129,6 @@ void setCc(String value)
 	    return;
 	attachments.remove(k);
     }
-
 
     MailMessage constructMailMessage()
     {
@@ -147,25 +151,6 @@ void setCc(String value)
 	msg.attachments = attachments.toArray(new String[attachments.size()]);
 	return msg;
     }
-
-    boolean isReadyForSending()
-    {
-	if (getEnteredText(TO_NAME).trim().isEmpty())
-	{
-	    luwrain.message("Не указан получатель сообщения", Luwrain.MessageType.ERROR);
-	    setHotPoint(0, 0);
-	    return false;
-	}
-	if (getEnteredText(SUBJECT_NAME).trim().isEmpty())
-	{
-	    luwrain.message("Не указана тема сообщения", Luwrain.MessageType.ERROR);
-	    setHotPoint(0, 2);
-	    return false;
-	}
-	return true;
-    }
-
-
 
     private MultilineEdit.Model createMultilineEditModel(String[] initialText)
     {

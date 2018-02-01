@@ -19,8 +19,10 @@ package org.luwrain.app.message;
 import java.io.*;
 
 import org.luwrain.core.*;
+import org.luwrain.pim.*;
+import org.luwrain.pim.mail.*;
 
-class Actions
+final class Actions
 {
     private final Luwrain luwrain;
     private final Base base;
@@ -42,9 +44,37 @@ class Actions
     {
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(area, "area");
-	if (!area.isReadyForSending())
+	if (!isReadyForSending(area))
 	    return false;
-	return base.send(area.constructMailMessage(), useAnotherAccount);
+	final StoredMailAccount account;
+	try {
+	    if (base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP) == null)
+	    {
+		if (useAnotherAccount)
+		    return false;
+		if (!conv.confirmLaunchingAccountWizard())
+		    return false;
+		if (!(new org.luwrain.pim.wizards.Mail(luwrain).start()))
+		    return false;
+	    	account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
+		if (account == null)
+		    return false;
+	    } else
+	    {
+		//There is the default account
+		if (useAnotherAccount)
+		    account = conv.accountToSend(); else
+		    account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
+		if (account == null)
+		    return false;
+	    }
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
+	    return false;
+	}
+	return base.send(account, area.constructMailMessage());
     }
 
     boolean onEditTo(Area area)
@@ -75,7 +105,7 @@ class Actions
 	return true;
     }
 
-boolean onDeleteAttachment(Area area)
+    boolean onDeleteAttachment(Area area)
     {
 	NullCheck.notNull(area, "area");
 	final int index = area.getHotPointY();
@@ -91,4 +121,24 @@ boolean onDeleteAttachment(Area area)
 	luwrain.message("Прикрепление " + a.file.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
 	return true;
     }
+
+        private boolean isReadyForSending(Area area)
+    {
+	NullCheck.notNull(area, "area");
+	if (area.getTo().trim().isEmpty())
+	{
+	    luwrain.message("Не указан получатель сообщения", Luwrain.MessageType.ERROR);//FIXME:
+	    area.focusTo();
+	    return false;
+	}
+	if (area.getSubject().trim().isEmpty())
+	{
+	    luwrain.message("Не указана тема сообщения", Luwrain.MessageType.ERROR);
+	    area.focusSubject();
+	    return false;
+	}
+	return true;
+    }
+
+
 }

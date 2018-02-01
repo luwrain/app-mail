@@ -23,6 +23,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.popups.*;
 import org.luwrain.pim.*;
+import org.luwrain.pim.mail.*;
 import org.luwrain.pim.contacts.*;
 import org.luwrain.popups.pim.*;
 
@@ -114,4 +115,24 @@ return Popups.path(luwrain,
 	return popup.result();
     }
     */
+
+    boolean confirmLaunchingAccountWizard()
+    {
+	return Popups.confirmDefaultYes(luwrain, "Отправление сообщения", "Учётные записи для отправления почты отсутствуют. Вы хотите добавить новую сейчас?");//FIXME:
+    }
+
+    StoredMailAccount accountToSend() throws PimException
+    {
+	final StoredMailAccount[] accounts = base.mailStoring.getAccounts().load();
+	final List items = new LinkedList();
+	for(StoredMailAccount a: accounts)
+	    if (a.getType() == MailAccount.Type.SMTP && a.getFlags().contains(MailAccount.Flags.ENABLED))
+		items.add(a);
+	if (items.isEmpty())
+	    return null;
+	final Object res = Popups.fixedList(luwrain, "Выберите учётную запись для отправки сообщения:", items.toArray(new Object[items.size()]));//FIXME:
+	if (res == null)
+	    return null;
+	return (StoredMailAccount)res;
+    }
 }
