@@ -38,7 +38,7 @@ class App implements Application, MonoApp
     private Mode mode = Mode.REGULAR;
     private TreeArea foldersArea;
     private TableArea summaryArea;
-    private DoctreeArea messageArea;
+    private DocumentArea messageArea;
     private RawMessageArea rawMessageArea;
 
     @Override public InitResult onLaunchApp(Luwrain luwrain)
@@ -204,7 +204,7 @@ strings.summaryAreaName()) { //Click handler;
 		}
 	    };
 
-messageArea = new DoctreeArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.controls.doctree.Strings)luwrain.i18n().getStrings(org.luwrain.controls.doctree.Strings.NAME))){
+messageArea = new DocumentArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.controls.doctree.Strings)luwrain.i18n().getStrings(org.luwrain.controls.doctree.Strings.NAME))){
 
 	@Override public boolean onKeyboardEvent(KeyboardEvent event)
 	{

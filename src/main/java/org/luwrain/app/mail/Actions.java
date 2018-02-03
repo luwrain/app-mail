@@ -53,7 +53,7 @@ class Actions
 
     boolean onSummaryClick(Base base, TableArea.Model model,
 			   int col, int row, Object obj,
-			   TableArea summaryArea, 			   DoctreeArea messageArea)
+			   TableArea summaryArea, 			   DocumentArea messageArea)
     {
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(model, "model");
