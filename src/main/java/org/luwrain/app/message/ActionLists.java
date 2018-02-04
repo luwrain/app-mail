@@ -16,27 +16,62 @@
 
 package org.luwrain.app.message;
 
+import java.util.*;
+
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
+import org.luwrain.pim.*;
+import org.luwrain.pim.mail.*;
 
 final class ActionLists
 {
+    private final Luwrain luwrain;
+        private final Base base;
     private final Strings strings;
+    private final boolean severalAccounts;
 
-    ActionLists(Strings strings)
+    ActionLists(Luwrain luwrain, Base base, Strings strings)
     {
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(base, "base");
 NullCheck.notNull(strings, "strings");
+this.luwrain = luwrain;
+this.base = base;
 	this.strings = strings;
+	this.severalAccounts = severalAccountsAvailable();
     }
 
     Action[] getActions()
     {
-	return new Action[]{
-	    new Action("send", "Отправить"),
-	    new Action("send-another-account", "Отправить через учётную запись"),
-	    new Action("choose-to", "Выбрать получателя из списка"),
-	    new Action("choose-cc", "Выбрать получателей копии из списка"),
-	    new Action("attach-file", "Прикрепить файл", new KeyboardEvent(KeyboardEvent.Special.INSERT)),//FIXME:
-	};
+	final List<Action> res = new LinkedList();
+	res.add(new Action("send", "Отправить"));
+	if (severalAccounts)
+	    res.add(new Action("send-another-account", "Отправить через учётную запись"));
+	res.add(new Action("choose-to", "Выбрать получателя из списка"));
+	res.add(new Action("choose-cc", "Выбрать получателей копии из списка"));
+					res.add(new Action("attach-file", "Прикрепить файл", new KeyboardEvent(KeyboardEvent.Special.INSERT)));//FIXME:
+					return res.toArray(new Action[res.size()]);
+    }
+
+    private boolean severalAccountsAvailable()
+    {
+	try {
+	    final StoredMailAccount[] accounts = base.mailStoring.getAccounts().load();
+	    int count = 0;
+	    for(StoredMailAccount a: accounts)
+	    {
+		if (a.getType() != MailAccount.Type.SMTP)
+		    continue;
+		if (!a.getFlags().contains(MailAccount.Flags.ENABLED))
+		    continue;
+		++count;
+	    }
+	    return count >= 2;
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
+	    return false;
+	}
     }
 }

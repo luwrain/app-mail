@@ -57,7 +57,7 @@ public final class App implements Application
 	this.strings = (Strings)o;
 	this.luwrain = luwrain;
 	this.base = new Base(luwrain, strings);
-	this.actionLists = new ActionLists(strings);
+	this.actionLists = new ActionLists(luwrain, base, strings);
 	this.actions = new Actions(luwrain, base, strings);
 	if (!base.isReady())
 	    return new InitResult(InitResult.Type.FAILURE);
