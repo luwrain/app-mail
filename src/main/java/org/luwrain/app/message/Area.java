@@ -35,7 +35,7 @@ class Area extends FormArea
     private final Strings strings;
 
     private final MutableLinesImpl lines = new MutableLinesImpl();
-    private final List<Attachment> attachments = new Vector();
+    //    private final List<Attachment> attachments = new Vector();
     private int attachmentCounter = 0;
 
     Area(Luwrain luwrain, Strings strings, MessageContent msg)
@@ -94,18 +94,34 @@ class Area extends FormArea
 	return lines.getWholeText();
     }
 
-    File[] getAttachments()
+    Attachment[] getAttachments()
     {
-	final File[] res = new File[attachments.size()];
-	for(int i = 0;i < attachments.size();++i)
-	    res[i] = attachments.get(i).file;
+	final List<Attachment> res = new LinkedList();
+		for(int i = 0;i < getItemCount();++i)
+	{
+	    if (getItemTypeOnLine(i) != FormArea.Type.STATIC)
+		continue;
+	    final Object o = getItemObjOnLine(i);
+	    if (o == null || !(o instanceof Attachment))
+		continue;
+	    res.add((Attachment)o);
+	}
+		return res.toArray(new Attachment[res.size()]);
+    }
+
+    File[] getAttachmentFiles()
+    {
+	final Attachment[] attachments = getAttachments();
+	final File[] res = new File[attachments.length];
+	for(int i = 0;i < attachments.length;++i)
+	    res[i] = attachments[i].file;
 	return res;
     }
 
     void addAttachment(File file)
     {
 	NullCheck.notNull(file, "file");
-	for(Attachment a: attachments)
+	for(Attachment a: getAttachments())
 	    if (a.file.equals(file))
 	    {
 		luwrain.message("Файл " + file.getName() + " уже прикреплён к сообщению", Luwrain.MessageType.ERROR);//FIXME:
@@ -113,7 +129,7 @@ class Area extends FormArea
 	    }
 	final Attachment a = new Attachment(ATTACHMENT + attachmentCounter, file);
 	++attachmentCounter;
-	attachments.add(a);
+	//	attachments.add(a);
 	addStatic(a.name, strings.attachment(file), a);
     }
 
@@ -121,6 +137,7 @@ class Area extends FormArea
     {
 	NullCheck.notNull(attachment, "attachment");
 	removeItemOnLine(lineIndex);
+	/*
 	int k;
 	for(k = 0;k < attachments.size();++k)
 	    if (attachments.get(k).name.equals(attachment.name))
@@ -128,6 +145,7 @@ class Area extends FormArea
 	if (k >= attachments.size())//Should never happen
 	    return;
 	attachments.remove(k);
+	*/
     }
 
     MailMessage constructMailMessage()
@@ -137,7 +155,7 @@ class Area extends FormArea
 	msg.cc = Base.splitAddrs(getEnteredText(CC_NAME));
 	msg.subject = getEnteredText(SUBJECT_NAME);
 	msg.baseContent = getText();
-	final LinkedList<String> attachments = new LinkedList<String>();
+	final List<String> attachments = new LinkedList();
 	for(int i = 0;i < getItemCount();++i)
 	{
 	    if (getItemTypeOnLine(i) != FormArea.Type.STATIC)
