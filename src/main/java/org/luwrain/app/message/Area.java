@@ -33,9 +33,7 @@ class Area extends FormArea
 
     private final Luwrain luwrain;
     private final Strings strings;
-
     private final MutableLinesImpl lines = new MutableLinesImpl();
-    //    private final List<Attachment> attachments = new Vector();
     private int attachmentCounter = 0;
 
     Area(Luwrain luwrain, Strings strings, MessageContent msg)
@@ -129,23 +127,12 @@ class Area extends FormArea
 	    }
 	final Attachment a = new Attachment(ATTACHMENT + attachmentCounter, file);
 	++attachmentCounter;
-	//	attachments.add(a);
 	addStatic(a.name, strings.attachment(file), a);
     }
 
-    void removeAttachment(int lineIndex, Attachment attachment)
+    void removeAttachment(int lineIndex)
     {
-	NullCheck.notNull(attachment, "attachment");
 	removeItemOnLine(lineIndex);
-	/*
-	int k;
-	for(k = 0;k < attachments.size();++k)
-	    if (attachments.get(k).name.equals(attachment.name))
-		break;
-	if (k >= attachments.size())//Should never happen
-	    return;
-	attachments.remove(k);
-	*/
     }
 
     MailMessage constructMailMessage()
@@ -156,16 +143,8 @@ class Area extends FormArea
 	msg.subject = getEnteredText(SUBJECT_NAME);
 	msg.baseContent = getText();
 	final List<String> attachments = new LinkedList();
-	for(int i = 0;i < getItemCount();++i)
-	{
-	    if (getItemTypeOnLine(i) != FormArea.Type.STATIC)
-		continue;
-	    final Object o = getItemObjOnLine(i);
-	    if (o == null || !(o instanceof Attachment))
-		continue;
-	    final Attachment a = (Attachment)o;
-	    attachments.add(a.file.getAbsolutePath());
-	}
+	for(File f: getAttachmentFiles())
+	    attachments.add(f.getAbsolutePath());
 	msg.attachments = attachments.toArray(new String[attachments.size()]);
 	return msg;
     }

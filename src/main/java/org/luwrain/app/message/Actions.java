@@ -117,7 +117,7 @@ final class Actions
 	final Attachment a = (Attachment)obj;
 	if (!conv.confirmAttachmentDeleting(a.file))
 	    return true;
-	area.removeAttachment(index, a);
+	area.removeAttachment(index);
 	luwrain.message("Прикрепление " + a.file.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
 	return true;
     }
