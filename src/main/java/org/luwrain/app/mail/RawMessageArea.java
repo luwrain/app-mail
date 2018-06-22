@@ -68,7 +68,7 @@ class RawMessageArea extends NavigationArea
 	}
     }
 
-    @Override public boolean onKeyboardEvent(KeyboardEvent event)
+    @Override public boolean onInputEvent(KeyboardEvent event)
     {
 	NullCheck.notNull(event, "event");
 	if (event.isSpecial() && !event.isModified())
@@ -81,7 +81,7 @@ app.gotoFolders();
 app.gotoSummary();
 	    return true;
 	    }
-	return super.onKeyboardEvent(event);
+	return super.onInputEvent(event);
     }
 
     @Override public boolean onSystemEvent(EnvironmentEvent event)

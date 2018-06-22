@@ -118,7 +118,7 @@ void refreshMessages()
 
 	foldersArea = new TreeArea(treeParams) {
 
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.isSpecial() && !event.isModified())
@@ -128,7 +128,7 @@ void refreshMessages()
 			    gotoSummary();
 			    return true;
 			}
-		    return super.onKeyboardEvent(event);
+		    return super.onInputEvent(event);
 		}
 
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
@@ -167,7 +167,7 @@ void refreshMessages()
 				    base.getSummaryModel(), base.getSummaryAppearance(),
 null,
 strings.summaryAreaName()) { //Click handler;
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.isSpecial() && !event.isModified())
@@ -180,7 +180,7 @@ strings.summaryAreaName()) { //Click handler;
 			    gotoFolders();
 			    return true;
 			}
-		    return super.onKeyboardEvent(event);
+		    return super.onInputEvent(event);
 		}
 
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
@@ -206,7 +206,7 @@ strings.summaryAreaName()) { //Click handler;
 
 messageArea = new DocumentArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.controls.doctree.Strings)luwrain.i18n().getStrings(org.luwrain.controls.doctree.Strings.NAME))){
 
-	@Override public boolean onKeyboardEvent(KeyboardEvent event)
+	@Override public boolean onInputEvent(KeyboardEvent event)
 	{
 	    NullCheck.notNull(event, "event");
 	    if (event.isSpecial() && !event.isModified())
@@ -219,7 +219,7 @@ messageArea = new DocumentArea(new DefaultControlEnvironment(luwrain), new Annou
 		    gotoSummary();
 		    return true;
 		}
-	    return super.onKeyboardEvent(event);
+	    return super.onInputEvent(event);
 	}
 
 	@Override public boolean onSystemEvent(EnvironmentEvent event)

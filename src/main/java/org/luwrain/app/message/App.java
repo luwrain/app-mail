@@ -75,7 +75,7 @@ if (!value.isEmpty())
     private void createArea()
     {
 	messageArea = new Area(luwrain,  strings, startingMessage) {
-		@Override public boolean onKeyboardEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.isSpecial() && !event.isModified())
@@ -85,12 +85,12 @@ if (!value.isEmpty())
 			{
 			    final String name = getItemNameOnLine(getHotPointY());
 			    if (name == null)
-				return super.onKeyboardEvent(event);
+				return super.onInputEvent(event);
 			    if (name.equals(Area.TO_NAME))
 				return actions.onEditTo(this);
 			    if (name.equals(Area.CC_NAME))
 				return actions.onEditCc(this);
-			    return super.onKeyboardEvent(event);
+			    return super.onInputEvent(event);
 			}
 		    case DELETE:
 			return actions.onDeleteAttachment(this);
@@ -98,7 +98,7 @@ if (!value.isEmpty())
 			closeApp();
 			return true;
 		    }
-		    return super.onKeyboardEvent(event);
+		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
