@@ -131,7 +131,7 @@ void refreshMessages()
 		    return super.onKeyboardEvent(event);
 		}
 
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    switch(event.getCode())
@@ -140,7 +140,7 @@ void refreshMessages()
 			closeApp();
 			return true;
 		    default:
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    }
 		}
 		@Override public boolean onAreaQuery(AreaQuery query)
@@ -183,7 +183,7 @@ strings.summaryAreaName()) { //Click handler;
 		    return super.onKeyboardEvent(event);
 		}
 
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    switch(event.getCode())
@@ -194,7 +194,7 @@ strings.summaryAreaName()) { //Click handler;
 		    case ACTION:
 			return onSummaryAreaAction(event);
 		    default:
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    }
 		}
 
@@ -222,18 +222,18 @@ messageArea = new DocumentArea(new DefaultControlEnvironment(luwrain), new Annou
 	    return super.onKeyboardEvent(event);
 	}
 
-	@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+	@Override public boolean onSystemEvent(EnvironmentEvent event)
 	{
 	    NullCheck.notNull(event, "event");
 	    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-		return super.onEnvironmentEvent(event);
+		return super.onSystemEvent(event);
 	    switch(event.getCode())
 	    {
 	    case CLOSE:
 		closeApp();
 		return true;
 	    default:
-		return super.onEnvironmentEvent(event);
+		return super.onSystemEvent(event);
 	    }
 	}
     };

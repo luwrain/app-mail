@@ -84,7 +84,7 @@ app.gotoSummary();
 	return super.onKeyboardEvent(event);
     }
 
-    @Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+    @Override public boolean onSystemEvent(EnvironmentEvent event)
     {
 	NullCheck.notNull(event, "event");
 	switch (event.getCode())
@@ -93,7 +93,7 @@ app.gotoSummary();
 app.closeApp();
 	    return true;
 	default:
-	    return super.onEnvironmentEvent(event);
+	    return super.onSystemEvent(event);
 	}
     }
 

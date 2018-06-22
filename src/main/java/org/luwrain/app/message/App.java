@@ -100,11 +100,11 @@ if (!value.isEmpty())
 		    }
 		    return super.onKeyboardEvent(event);
 		}
-		@Override public boolean onEnvironmentEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    switch (event.getCode())
 		    {
 		    case CLOSE:
@@ -144,7 +144,7 @@ if (!value.isEmpty())
 				}
 	return true;
 		    default:
-			return super.onEnvironmentEvent(event);
+			return super.onSystemEvent(event);
 		    }
 		}
 		@Override public String getAreaName()
