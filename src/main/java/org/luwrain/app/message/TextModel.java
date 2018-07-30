@@ -28,15 +28,16 @@ class TextModel extends MultilineEditModelTranslator
 	super(lines, hotPoint);
     }
 
-    @Override public  void insertChars(int pos , int lineIndex, String str)
+    @Override public  boolean insertChars(int pos , int lineIndex, String str)
     {
-	super.insertChars(pos, lineIndex, str);
+	if (!super.insertChars(pos, lineIndex, str))
+	    return false;
 	processLine(lineIndex);
+	return true;
     }
 
     private void processLine(int index)
     {
-
 	final String line = getLine(index);
 	if (line == null || line.length() <= maxLineLen)
 	    return;
@@ -53,7 +54,8 @@ class TextModel extends MultilineEditModelTranslator
 	}
 	if (pos + 1 >= line.length())
 	    return;
-	splitLines(pos, index);
+	if (splitLine(pos, index) == null)
+	    return;
 	while(true)
 	{
 	final String newLine = getLine(index + 1);
