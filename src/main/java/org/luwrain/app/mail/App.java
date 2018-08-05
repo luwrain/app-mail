@@ -79,12 +79,12 @@ void refreshMessages()
 
     private boolean onFolderUniRefQuery(AreaQuery query)
     {
-	if (query == null || !(query instanceof ObjectUniRefQuery))
+	if (query == null || !(query instanceof UniRefAreaQuery))
 	    return false;
 	final Object selected = foldersArea.selected();
 	if (selected == null || !(selected instanceof StoredMailFolder))
 	    return false;
-	return base.onFolderUniRefQuery((ObjectUniRefQuery)query, (StoredMailFolder)selected);
+	return base.onFolderUniRefQuery((UniRefAreaQuery)query, (StoredMailFolder)selected);
     }
 
     void clearMessageArea()
@@ -148,7 +148,7 @@ void refreshMessages()
 		    NullCheck.notNull(query, "query");
 		    switch(query.getQueryCode())
 		    {
-		    case AreaQuery.OBJECT_UNIREF:
+		    case AreaQuery.UNIREF_AREA:
 			return onFolderUniRefQuery(query);
 		    default:
 			return super.onAreaQuery(query);

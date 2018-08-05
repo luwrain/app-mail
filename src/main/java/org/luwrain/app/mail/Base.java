@@ -285,7 +285,7 @@ doc.commit();
 	}
     }
 
-    boolean onFolderUniRefQuery(ObjectUniRefQuery query, StoredMailFolder folder)
+    boolean onFolderUniRefQuery(UniRefAreaQuery query, StoredMailFolder folder)
     {
 	NullCheck.notNull(query, "query");
 	NullCheck.notNull(folder, "folder");
