@@ -20,7 +20,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
-import org.luwrain.controls.doctree.*;
+import org.luwrain.controls.doc.*;
 import org.luwrain.pim.mail.*;
 
 class App implements Application, MonoApp
@@ -204,7 +204,7 @@ strings.summaryAreaName()) { //Click handler;
 		}
 	    };
 
-messageArea = new DocumentArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.controls.doctree.Strings)luwrain.i18n().getStrings(org.luwrain.controls.doctree.Strings.NAME))){
+messageArea = new DocumentArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.controls.doc.Strings)luwrain.i18n().getStrings(org.luwrain.controls.doc.Strings.NAME))){
 
 	@Override public boolean onInputEvent(KeyboardEvent event)
 	{
