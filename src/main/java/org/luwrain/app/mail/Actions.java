@@ -19,8 +19,8 @@ package org.luwrain.app.mail;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
-import org.luwrain.doctree.*;
-import org.luwrain.controls.doc.*;
+import org.luwrain.reader.*;
+import org.luwrain.controls.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 
@@ -53,7 +53,7 @@ class Actions
 
     boolean onSummaryClick(Base base, TableArea.Model model,
 			   int col, int row, Object obj,
-			   TableArea summaryArea, 			   DocumentArea messageArea)
+			   TableArea summaryArea, 			   ReaderArea messageArea)
     {
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(model, "model");

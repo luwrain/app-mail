@@ -23,7 +23,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.*;
-import org.luwrain.doctree.*;
+import org.luwrain.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.util.*;
