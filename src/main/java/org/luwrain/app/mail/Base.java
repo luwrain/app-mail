@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
-
-   This file is part of LUWRAIN.
-
-   LUWRAIN is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   LUWRAIN is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.mail;
 
@@ -29,20 +14,17 @@ import org.luwrain.pim.mail.*;
 import org.luwrain.util.*;
 import org.luwrain.network.*;
 
-class Base
+final class Base
 {
-    //    static private final String SHARED_OBJECT_NAME = "luwrain.pim.mail";
-
-    private final Luwrain luwrain;
+    final Luwrain luwrain;
     private final App app;
-    private final Strings strings;
+    final Strings strings;
     private final MailStoring storing;
     private StoredMailFolder currentFolder = null;
     private StoredMailMessage currentMessage;
     private TreeModelSource treeModelSource;
     private TreeArea.Model foldersModel;
-    private final SummaryTableModel summaryModel;
-    private SummaryTableAppearance summaryAppearance;
+    private Object[] summaryItems = new Object[0];
 
     Base(App app, Luwrain luwrain, Strings strings)
     {
@@ -53,7 +35,6 @@ class Base
 	this.luwrain = luwrain;
 	this.strings = strings;
 	this.storing = org.luwrain.pim.Connections.getMailStoring(luwrain, true);
-	this.summaryModel = new SummaryTableModel(luwrain, strings);
     }
 
     boolean init()
@@ -109,7 +90,7 @@ doc.commit();
 	for(StoredMailMessage m: allMessages)
 	    if (m.getState() != MailMessage.State.DELETED)
 		res.add(m);
-	summaryModel.setMessages(res.toArray(new StoredMailMessage[res.size()]));
+	//	summaryModel.setMessages(res.toArray(new StoredMailMessage[res.size()]));
     }
 
     boolean deleteInSummary(StoredMailMessage message, boolean deleteForever)
@@ -342,17 +323,9 @@ doc.commit();
 	return foldersModel;
     }
 
-    SummaryTableModel getSummaryModel()
+    ListArea.Model getSummaryModel()
     {
-	return summaryModel;
-    }
-
-    SummaryTableAppearance getSummaryAppearance()
-    {
-	if (summaryAppearance != null)
-	    return summaryAppearance;
-	summaryAppearance = new SummaryTableAppearance(luwrain, strings);
-	return summaryAppearance;
+	return new SummaryListModel();
     }
 
     private String[] getCcExcludeAddrs()
@@ -394,5 +367,20 @@ doc.commit();
 	if (res == null || res.length < 1)
 	    return "";
 	return res[0];
+    }
+
+    private final class SummaryListModel implements ListArea.Model
+    {
+	@Override public int getItemCount()
+	{
+	    return summaryItems.length;
+	}
+	@Override public Object getItem(int index)
+	{
+	    return summaryItems[index];
+	}
+	@Override public void refresh()
+	{
+	}
     }
 }

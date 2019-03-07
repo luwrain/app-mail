@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2018 Michael Pozhidaev <michael.pozhidaev@gmail.com>
-
-   This file is part of LUWRAIN.
-
-   LUWRAIN is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   LUWRAIN is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.mail;
 
@@ -23,7 +8,7 @@ import org.luwrain.controls.*;
 import org.luwrain.controls.reader.*;
 import org.luwrain.pim.mail.*;
 
-class App implements Application, MonoApp
+final class App implements Application, MonoApp
 {
     enum Mode {
 	REGULAR,
@@ -37,7 +22,7 @@ class App implements Application, MonoApp
 
     private Mode mode = Mode.REGULAR;
     private TreeArea foldersArea;
-    private TableArea summaryArea;
+    private ListArea summaryArea;
     private ReaderArea messageArea;
     private RawMessageArea rawMessageArea;
 
@@ -50,7 +35,7 @@ class App implements Application, MonoApp
 	strings = (Strings)o;
 	this.luwrain = luwrain;
 	this.base = new Base(this, luwrain, strings);
-	this.actions = new Actions(luwrain, strings, this);
+	this.actions = new Actions(base, this);
 	if (!base.init())
 	    return new InitResult(InitResult.Type.FAILURE);
 	createAreas();
@@ -108,16 +93,11 @@ void refreshMessages()
 
     private void createAreas()
     {
-	NullCheck.notNull(base, "base");
-	NullCheck.notNull(actions, "actions");
-
 	final TreeArea.Params treeParams = new TreeArea.Params();
 	treeParams.environment = new DefaultControlEnvironment(luwrain);
 	treeParams.model = base.getFoldersModel(); 
 	treeParams.name = strings.foldersAreaName();
-
-	foldersArea = new TreeArea(treeParams) {
-
+	this.foldersArea = new TreeArea(treeParams) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -130,7 +110,6 @@ void refreshMessages()
 			}
 		    return super.onInputEvent(event);
 		}
-
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -163,10 +142,17 @@ void refreshMessages()
 		}
 	    };
 
-	summaryArea = new TableArea(new DefaultControlEnvironment(luwrain),
-				    base.getSummaryModel(), base.getSummaryAppearance(),
-null,
-strings.summaryAreaName()) { //Click handler;
+	final ListArea.Params summaryParams = new ListArea.Params();
+	summaryParams.context = new DefaultControlEnvironment(luwrain);
+	summaryParams.name = strings.summaryAreaName();
+	summaryParams.model = base.getSummaryModel();
+	summaryParams.appearance = new ListUtils.DoubleLevelAppearance(summaryParams.context){
+			@Override public boolean isSectionItem(Object item)
+		{
+		    return false;
+		}
+	    };
+	this.summaryArea = new ListArea(summaryParams) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -240,21 +226,28 @@ messageArea = new ReaderArea(new DefaultControlEnvironment(luwrain), new Announc
 
 	rawMessageArea = new RawMessageArea(luwrain, this, strings);
 
-	summaryArea.setClickHandler(				    (model, col, row, obj)->actions.onSummaryClick(base, model, col, row, obj, summaryArea, messageArea));
+	summaryArea.setListClickHandler(				    (area,index,obj)->{return false;});
     }
 
     private boolean onSummaryAreaAction(EnvironmentEvent event)
     {
 	NullCheck.notNull(event, "event");
+	/*
 	if (ActionEvent.isAction(event, "delete-message"))
 	    return actions.onDeleteInSummary(base, summaryArea, false);
+	*/
+	/*
 	if (ActionEvent.isAction(event, "delete-message-forever"))
 	    return actions.onDeleteInSummary(base, summaryArea, false);
-
+	*/
+	/*
 	if (ActionEvent.isAction(event, "reply"))
 	    return actions.onSummaryReply(base, summaryArea, false);
+	*/
+	/*
 	if (ActionEvent.isAction(event, "reply-all"))
 	    return actions.onSummaryReply(base, summaryArea, true);
+	*/
 
 	    //	if (ActionEvent.isAction(event, "forward"))
 	return false;
