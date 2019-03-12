@@ -46,7 +46,8 @@ final class Base
 	for(StoredMailMessage m: allMessages)
 	    if (m.getState() != MailMessage.State.DELETED)
 		res.add(m);
-	this.summaryItems = res.toArray(new Object[res.size()]);
+	final Hooks hooks = new Hooks(luwrain);
+	this.summaryItems = hooks.organizeSummary(res.toArray(new StoredMailMessage[res.size()]));
 	Log.debug("proba", "loaded " + summaryItems.length + " items");
     }
 
