@@ -36,7 +36,7 @@ final class App implements Application, MonoApp
 	this.luwrain = luwrain;
 	this.base = new Base(this, luwrain, strings);
 	this.actions = new Actions(base, this);
-	if (!base.init())
+	if (base.storing == null)
 	    return new InitResult(InitResult.Type.FAILURE);
 	createAreas();
 	if (base.openDefaultFolder())
@@ -54,13 +54,6 @@ void refreshMessages()
 	summaryArea.refresh();
     }
 
-    private void openFolder(StoredMailFolder folder)
-    {
-	if (!base.openFolder(folder))
-	    return;
-	summaryArea.refresh();
-	gotoSummary();
-    }
 
     private boolean onFolderUniRefQuery(AreaQuery query)
     {
@@ -94,7 +87,7 @@ void refreshMessages()
     private void createAreas()
     {
 	final TreeArea.Params treeParams = new TreeArea.Params();
-	treeParams.environment = new DefaultControlEnvironment(luwrain);
+	treeParams.context = new DefaultControlEnvironment(luwrain);
 	treeParams.model = base.getFoldersModel(); 
 	treeParams.name = strings.foldersAreaName();
 	this.foldersArea = new TreeArea(treeParams) {
@@ -138,7 +131,7 @@ void refreshMessages()
 		    if (obj == null || !(obj instanceof StoredMailFolder))
 			return;
 		    final StoredMailFolder folder = (StoredMailFolder)obj;
-		    openFolder(folder);
+actions.openFolder(folder, summaryArea);
 		}
 	    };
 

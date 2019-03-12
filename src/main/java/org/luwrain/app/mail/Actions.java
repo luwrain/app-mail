@@ -26,6 +26,24 @@ class Actions
 	this.app = app;
     }
 
+    boolean openFolder(StoredMailFolder folder, ListArea summaryArea)
+    {
+	NullCheck.notNull(folder, "folder");
+	NullCheck.notNull(summaryArea, "summaryArea");
+	try {
+	base.updateSummaryMessages(folder);
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
+	    return true;
+	}
+	summaryArea.refresh();
+	luwrain.setActiveArea(summaryArea);
+	return true;
+    }
+
+
 
     Action[] getSummaryAreaActions()
     {

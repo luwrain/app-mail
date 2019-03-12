@@ -17,14 +17,14 @@ import org.luwrain.network.*;
 final class Base
 {
     final Luwrain luwrain;
+        final Strings strings;
+        final MailStoring storing;
     private final App app;
-    final Strings strings;
-    private final MailStoring storing;
-    private StoredMailFolder currentFolder = null;
+    private StoredMailFolder folder = null;
+    private Object[] summaryItems = new Object[0];
     private StoredMailMessage currentMessage;
     private TreeModelSource treeModelSource;
     private TreeArea.Model foldersModel;
-    private Object[] summaryItems = new Object[0];
 
     Base(App app, Luwrain luwrain, Strings strings)
     {
@@ -37,10 +37,19 @@ final class Base
 	this.storing = org.luwrain.pim.Connections.getMailStoring(luwrain, true);
     }
 
-    boolean init()
+        void updateSummaryMessages(StoredMailFolder folder) throws PimException
     {
-	return storing != null;
+	NullCheck.notNull(folder, "folder");
+	this.folder = folder;
+	final StoredMailMessage[] allMessages = storing.getMessages().load(folder);
+	final LinkedList<StoredMailMessage> res = new LinkedList<StoredMailMessage>();
+	for(StoredMailMessage m: allMessages)
+	    if (m.getState() != MailMessage.State.DELETED)
+		res.add(m);
+	this.summaryItems = res.toArray(new Object[res.size()]);
+	Log.debug("proba", "loaded " + summaryItems.length + " items");
     }
+
 
     void setCurrentMessage(StoredMailMessage message)
     {
@@ -82,19 +91,10 @@ doc.commit();
 	return doc;
     }
 
-    void updateSummaryModel() throws PimException
-    {
-	NullCheck.notNull(currentFolder, "currentFolder");
-	final StoredMailMessage[] allMessages = storing.getMessages().load(currentFolder);
-	final LinkedList<StoredMailMessage> res = new LinkedList<StoredMailMessage>();
-	for(StoredMailMessage m: allMessages)
-	    if (m.getState() != MailMessage.State.DELETED)
-		res.add(m);
-	//	summaryModel.setMessages(res.toArray(new StoredMailMessage[res.size()]));
-    }
 
     boolean deleteInSummary(StoredMailMessage message, boolean deleteForever)
     {
+	/*
 	NullCheck.notNull(message, "message");
 	if (currentFolder == null)
 	    return false;
@@ -110,26 +110,13 @@ doc.commit();
 	    luwrain.message("Во время удаления сообщения произошла непредвиденная ошибка:" + e.getMessage());
 	    return false;
 	}
+	*/
 	return true;
-    }
-
-    boolean openFolder(StoredMailFolder folder)
-    {
-	NullCheck.notNull(folder, "folder");
-	currentFolder = folder;
-	try {
-	    updateSummaryModel();
-	    return true;
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return false;
-	}
     }
 
     boolean openDefaultFolder()
     {
+	/*
 	final StoredMailFolder folder;
 	final org.luwrain.pim.Settings.MailFolders sett = org.luwrain.pim.Settings.createMailFolders(luwrain.getRegistry());
 	final String uniRef = sett.getFolderInbox("");
@@ -146,10 +133,13 @@ doc.commit();
 	    return false;
 	}
 	return openFolder(folder);
+	*/
+	return false;
     }
 
     boolean makeReply(StoredMailMessage message, boolean wideReply)
     {
+	/*
 	NullCheck.notNull(message, "message");
 	Log.debug("mail", "starting making a reply");
 	try {
@@ -171,7 +161,7 @@ doc.commit();
 	    }
 	    final String replyTo = !replyToBase.trim().isEmpty()?replyToBase:from;
 	    final StringBuilder newBody = new StringBuilder();
-	    newBody.append(strings.replyFirstLine(MailUtils.extractNameFromAddr(from), message.getSentDate()));
+	    //newBody.append(strings.replyFirstLine(MailUtils.extractNameFromAddr(from), message.getSentDate()));
 	    newBody.append("\n");
 	    newBody.append("\n");
 	    if (!message.getText().isEmpty())
@@ -209,6 +199,8 @@ doc.commit();
 	    luwrain.crash(e);
 	    return false;
 	}
+	*/
+	return false;
     }
 
     boolean makeForward(StoredMailMessage message)
@@ -362,11 +354,14 @@ doc.commit();
 
     static private String getReplyTo(byte[] bytes) throws PimException, java.io.IOException
     {
+	return "";
+	/*
 	final MailUtils utils = new MailUtils(bytes);
 	final String[] res = utils.getReplyTo(true);
 	if (res == null || res.length < 1)
 	    return "";
 	return res[0];
+	*/
     }
 
     private final class SummaryListModel implements ListArea.Model
