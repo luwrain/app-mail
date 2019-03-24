@@ -183,7 +183,11 @@ actions.openFolder(folder, summaryArea);
 		}
 	    };
 
-messageArea = new ReaderArea(new DefaultControlEnvironment(luwrain), new Announcement(new DefaultControlEnvironment(luwrain), (org.luwrain.controls.reader.Strings)luwrain.i18n().getStrings(org.luwrain.controls.reader.Strings.NAME))){
+	final ReaderArea.Params messageParams = new ReaderArea.Params();
+
+	messageParams.context = new DefaultControlContext(luwrain);
+
+messageArea = new ReaderArea(messageParams){
 
 	@Override public boolean onInputEvent(KeyboardEvent event)
 	{
