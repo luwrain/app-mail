@@ -64,28 +64,27 @@ final class Base
 
     Document prepareDocumentForCurrentMessage()
     {
-	final LinkedList<Node> nodes = new LinkedList<Node>();
+	final NodeBuilder builder = new NodeBuilder();
 	try {
-	nodes.add(NodeFactory.newPara("ОТ: " + currentMessage.getFrom()));
-	nodes.add(NodeFactory.newPara("Кому: " + listToString(currentMessage.getTo())));
-	nodes.add(NodeFactory.newPara("Копия: " + listToString(currentMessage.getCc())));
-	nodes.add(NodeFactory.newPara("Тема: " + currentMessage.getSubject()));
-	nodes.add(NodeFactory.newPara("Время: " + currentMessage.getSentDate()));
-	nodes.add(NodeFactory.newPara("Тип данных: " + currentMessage.getMimeContentType()));
-	nodes.add(NodeFactory.newEmptyLine());
+	    builder.addParagraph("ОТ: " + currentMessage.getFrom());
+	builder.addParagraph("Кому: " + listToString(currentMessage.getTo()));
+	builder.addParagraph("Копия: " + listToString(currentMessage.getCc()));
+	builder.addParagraph("Тема: " + currentMessage.getSubject());
+	builder.addParagraph("Время: " + currentMessage.getSentDate());
+	builder.addParagraph("Тип данных: " + currentMessage.getMimeContentType());
+	//nodes.add(NodeFactory.newEmptyLine());
 	//	    attachments = message.getAttachments();
 	for(String line: splitLines(currentMessage.getText()))
 	    if (!line.isEmpty())
-		nodes.add(NodeFactory.newPara(line)); else
-		nodes.add(NodeFactory.newEmptyLine());
+		builder.addParagraph(line); else
+	builder.addEmptyLine();
 	}
 	catch(PimException e)
 	{
 	    luwrain.crash(e);
 	    return null;
 	}
-	final Node root = NodeFactory.newNode(Node.Type.ROOT); 
-	root.setSubnodes(nodes.toArray(new Node[nodes.size()]));
+	final Node root = builder.newRoot(); 
 	final Document doc = new Document(root);
 doc.setProperty("url", "http://localhost");
 doc.commit();
