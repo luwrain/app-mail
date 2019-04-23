@@ -17,7 +17,7 @@ class RawMessageArea extends NavigationArea
     RawMessageArea(Luwrain luwrain, App app,
 		Strings strings)
     {
-	super(new DefaultControlEnvironment(luwrain));
+	super(new DefaultControlContext(luwrain));
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(app, "app");
 	NullCheck.notNull(strings, "strings");

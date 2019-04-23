@@ -38,7 +38,7 @@ class Area extends FormArea
 
     Area(Luwrain luwrain, Strings strings, MessageContent msg)
     {
-	super(new DefaultControlEnvironment(luwrain));
+	super(new DefaultControlContext(luwrain));
 	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(strings, "strings");
 	NullCheck.notNull(msg, "msg");
