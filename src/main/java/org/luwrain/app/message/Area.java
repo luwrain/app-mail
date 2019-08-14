@@ -33,7 +33,7 @@ class Area extends FormArea
 
     private final Luwrain luwrain;
     private final Strings strings;
-    private final MutableLinesImpl lines = new MutableLinesImpl();
+    private final MutableLinesImpl lines;
     private int attachmentCounter = 0;
 
     Area(Luwrain luwrain, Strings strings, MessageContent msg)
@@ -44,10 +44,12 @@ class Area extends FormArea
 	NullCheck.notNull(msg, "msg");
 	this.luwrain = luwrain;
 	this.strings = strings;
+		this.lines = new MutableLinesImpl(msg.textLines());
 	addEdit(TO_NAME, strings.to(), msg.to);
 	addEdit(CC_NAME, strings.cc(), msg.cc);
 	addEdit(SUBJECT_NAME, strings.subject(), msg.subject);
-	activateMultilineEdit(strings.enterMessageBelow(), createMultilineEditModel(msg.textLines()), true);
+
+	activateMultilineEdit(strings.enterMessageBelow(), lines, createEditParams(), true);
     }
 
     String getTo()
@@ -149,10 +151,9 @@ class Area extends FormArea
 	return msg;
     }
 
-    private MultilineEdit.Model createMultilineEditModel(String[] initialText)
+    private MultilineEdit2.Params createEditParams()
     {
-	NullCheck.notNullItems(initialText, "initialText");
-	lines.setLines(initialText);
-	return new TextModel(lines, getMultilineEditHotPointControl());
+	final MultilineEdit2.Params params = createMultilineEditParams(context, lines);
+	return params;
     }
 }
