@@ -26,6 +26,8 @@ import org.luwrain.pim.mail.MailMessage;
 
 class Area extends FormArea
 {
+    static private final String HOOKS_PREFIX = "luwrain.message.edit";
+    
     static final String TO_NAME = "to";
     static final String CC_NAME = "cc";
     static final String SUBJECT_NAME = "subject";
@@ -154,6 +156,8 @@ class Area extends FormArea
     private MultilineEdit2.Params createEditParams()
     {
 	final MultilineEdit2.Params params = createMultilineEditParams(context, lines);
+	final MultilineEditCorrector2 corrector = (MultilineEditCorrector2)params.model;
+	params.model = new DirectScriptMultilineEditCorrector(context, corrector, HOOKS_PREFIX);
 	return params;
     }
 }
