@@ -30,8 +30,6 @@ import org.luwrain.network.*;
 final class Base
 {
     static private final String USER_AGENT_HEADER_NAME = "User-Agent";
-    static private final String USER_AGENT_HEADER_VALUE_BASE = "LUWRAIN mail";
-
     private final Luwrain luwrain;
     private final Strings strings;
     final MailStoring mailStoring;
@@ -113,8 +111,11 @@ addr = sett.getDefaultMailAddress("").trim();
 
     private String getUserAgentStr()
     {
-	return USER_AGENT_HEADER_VALUE_BASE;//FIXME:
-    }
+	final String ver = luwrain.getProperty("luwrain.version");
+	if (!ver.isEmpty())
+	    return "LUWRAIN v" + ver;
+	return "LUWRAIN";
+	    }
 
     static String[] splitAddrs(String line)
     {
