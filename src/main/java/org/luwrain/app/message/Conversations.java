@@ -45,15 +45,9 @@ final class Conversations
 
     File attachment()
     {
-return Popups.path(luwrain,
-		   strings.attachmentPopupName(),
-		   strings.attachmentPopupPrefix(),
-		   (fileToCheck,announcement)->{
-		       //FIXME:
-		return true;
-	    });
+	return Popups.existingFile(luwrain, strings.attachmentPopupName(), strings.attachmentPopupPrefix(), new String[0]);
     }
-
+    
 	boolean confirmAttachmentDeleting(File file)
 	{
 	    NullCheck.notNull(file, "file");
