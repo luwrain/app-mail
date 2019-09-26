@@ -27,7 +27,6 @@ import org.luwrain.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.util.*;
-import org.luwrain.network.*;
 
 final class Base extends Utils
 {

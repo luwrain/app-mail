@@ -25,7 +25,6 @@ import org.luwrain.popups.*;
 import org.luwrain.pim.PimException;
 import org.luwrain.pim.mail.*;
 import org.luwrain.pim.contacts.*;
-import org.luwrain.network.*;
 
 final class Base
 {

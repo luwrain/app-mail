@@ -25,18 +25,15 @@ import org.luwrain.pim.mail.*;
 
 final class App implements Application, MonoApp
 {
-    enum Mode { REGULAR, RAW };
-
     private Luwrain luwrain = null;
     private Actions actions = null;
     private Base base = null;
     private Strings strings = null;
 
-    private Mode mode = Mode.REGULAR;
     private TreeArea foldersArea = null;
     private ListArea summaryArea = null;
     private ReaderArea messageArea = null;
-    private RawMessageArea rawMessageArea = null;
+    private AreaLayoutHelper layout = null;
 
     @Override public InitResult onLaunchApp(Luwrain luwrain)
     {
@@ -53,6 +50,10 @@ final class App implements Application, MonoApp
 	createAreas();
 	if (base.openDefaultFolder())
 	    summaryArea.refresh();
+		this.layout = new AreaLayoutHelper(()->{
+		luwrain.onNewAreaLayout();
+		luwrain.announceActiveArea();
+		    }, new AreaLayout(AreaLayout.LEFT_RIGHT, foldersArea, summaryArea));
 	return new InitResult();
     }
 
@@ -168,22 +169,6 @@ final class App implements Application, MonoApp
 		    }
 		}
 	    };
-
-	this.rawMessageArea = new RawMessageArea(luwrain, this, strings){
-		@Override public boolean onInputEvent(KeyboardEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case TAB:
-			    return AreaLayoutHelper.activateNextArea(luwrain, getAreaLayout(), this);
-			case BACKSPACE:
-			    return AreaLayoutHelper.activatePrevArea(luwrain, getAreaLayout(), this);
-			}
-		    return super.onInputEvent(event);
-		}
-	    };
     }
 
     void saveAttachment(String fileName)
@@ -211,25 +196,13 @@ final class App implements Application, MonoApp
 	base.setCurrentMessage(null);
 	//	messageArea.show(null);
 	//messageArea.setHotPoint(0, 0);
-	rawMessageArea.show(null);
-	rawMessageArea.setHotPoint(0, 0);
-	enableMessageMode(Mode.REGULAR);
     }
 
     boolean switchToRawMessage()
     {
 	if (!base.hasCurrentMessage())
 	    return false;
-	enableMessageMode(Mode.RAW);
 	return true;
-    }
-
-    void enableMessageMode(Mode mode)
-    {
-	if (this.mode == mode)
-	    return;
-	this.mode = mode;
-	luwrain.onNewAreaLayout();
     }
 
     @Override public void closeApp()
@@ -244,14 +217,7 @@ final class App implements Application, MonoApp
 
     @Override  public AreaLayout getAreaLayout()
     {
-	switch(mode)
-	{
-	case REGULAR:
-	    return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, messageArea);
-	case RAW:
-	    return new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, rawMessageArea);
-	}
-	return null;
+	return layout.getLayout();
     }
 
     @Override public MonoApp.Result onMonoAppSecondInstance(Application app)
