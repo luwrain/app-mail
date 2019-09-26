@@ -1,3 +1,18 @@
+/*
+   Copyright 2012-2019 Michael Pozhidaev <msp@luwrain.org>
+
+   This file is part of LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.mail;
 
@@ -14,7 +29,7 @@ import org.luwrain.pim.mail.*;
 import org.luwrain.util.*;
 import org.luwrain.network.*;
 
-final class Base
+final class Base extends Utils
 {
     final Luwrain luwrain;
         final Strings strings;
@@ -306,7 +321,7 @@ doc.commit();
 	return true;
     }
 
-    TreeArea.Model getFoldersModel()
+    private TreeArea.Model getFoldersModel()
     {
 	if (foldersModel != null)
 	    return foldersModel;
@@ -329,40 +344,15 @@ doc.commit();
 	return new String[]{addr};
     }
 
-    static private String listToString(String[] items)
+    TreeArea.Params createFoldersTreeParams()
     {
-	NullCheck.notNullItems(items, "items");
-	if (items.length == 0)
-	    return "";
-	final StringBuilder b = new StringBuilder();
-	b.append(items[0]);
-	for(int i = 1;i < items.length;++i)
-	    b.append("," + items[i]);
-	return new String(b);
+	final TreeArea.Params params = new TreeArea.Params();
+	params.context = new DefaultControlContext(luwrain);
+	params.model = getFoldersModel(); 
+	params.name = strings.foldersAreaName();
+	return params;
     }
 
-    static private String[] splitLines(String str)
-    {
-	NullCheck.notNull(str, "str");
-	if (str.isEmpty())
-	    return new String[0];
-	final String[] res = str.split("\n", -1);
-	for(int i = 0;i < res.length;++i)
-	    res[i] = res[i].replaceAll("\r", "");
-	return res;
-    }
-
-    static private String getReplyTo(byte[] bytes) throws PimException, java.io.IOException
-    {
-	return "";
-	/*
-	final MailUtils utils = new MailUtils(bytes);
-	final String[] res = utils.getReplyTo(true);
-	if (res == null || res.length < 1)
-	    return "";
-	return res[0];
-	*/
-    }
 
     private final class SummaryListModel implements ListArea.Model
     {

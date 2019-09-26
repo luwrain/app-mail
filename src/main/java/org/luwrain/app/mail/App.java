@@ -1,3 +1,18 @@
+/*
+   Copyright 2012-2019 Michael Pozhidaev <msp@luwrain.org>
+
+   This file is part of LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.mail;
 
@@ -10,21 +25,18 @@ import org.luwrain.pim.mail.*;
 
 final class App implements Application, MonoApp
 {
-    enum Mode {
-	REGULAR,
-	RAW,
-    };
+    enum Mode { REGULAR, RAW };
 
-    private Luwrain luwrain;
+    private Luwrain luwrain = null;
     private Actions actions = null;
     private Base base = null;
-    private Strings strings;
+    private Strings strings = null;
 
     private Mode mode = Mode.REGULAR;
-    private TreeArea foldersArea;
-    private ListArea summaryArea;
-    private ReaderArea messageArea;
-    private RawMessageArea rawMessageArea;
+    private TreeArea foldersArea = null;
+    private ListArea summaryArea = null;
+    private ReaderArea messageArea = null;
+    private RawMessageArea rawMessageArea = null;
 
     @Override public InitResult onLaunchApp(Luwrain luwrain)
     {
@@ -32,7 +44,7 @@ final class App implements Application, MonoApp
 	final Object o = luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null || !(o instanceof Strings))
 	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
-	strings = (Strings)o;
+	this.strings = (Strings)o;
 	this.luwrain = luwrain;
 	this.base = new Base(this, luwrain, strings);
 	this.actions = new Actions(base, this);
@@ -44,53 +56,9 @@ final class App implements Application, MonoApp
 	return new InitResult();
     }
 
-    void saveAttachment(String fileName)
-    {
-	base.saveAttachment(fileName);
-    }
-
-void refreshMessages()
-    {
-	summaryArea.refresh();
-    }
-
-
-    private boolean onFolderUniRefQuery(AreaQuery query)
-    {
-	if (query == null || !(query instanceof UniRefAreaQuery))
-	    return false;
-	final Object selected = foldersArea.selected();
-	if (selected == null || !(selected instanceof StoredMailFolder))
-	    return false;
-	return base.onFolderUniRefQuery((UniRefAreaQuery)query, (StoredMailFolder)selected);
-    }
-
-    void clearMessageArea()
-    {
-	base.setCurrentMessage(null);
-	//	messageArea.show(null);
-	//messageArea.setHotPoint(0, 0);
-	rawMessageArea.show(null);
-	rawMessageArea.setHotPoint(0, 0);
-	enableMessageMode(Mode.REGULAR);
-    }
-
-    boolean switchToRawMessage()
-    {
-	if (!base.hasCurrentMessage())
-	    return false;
-	enableMessageMode(Mode.RAW);
-	gotoMessage();
-	return true;
-    }
-
     private void createAreas()
     {
-	final TreeArea.Params treeParams = new TreeArea.Params();
-	treeParams.context = new DefaultControlContext(luwrain);
-	treeParams.model = base.getFoldersModel(); 
-	treeParams.name = strings.foldersAreaName();
-	this.foldersArea = new TreeArea(treeParams) {
+	this.foldersArea = new TreeArea(base.createFoldersTreeParams()) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -249,6 +217,47 @@ messageArea = new ReaderArea(messageParams){
 	    //	if (ActionEvent.isAction(event, "forward"))
 	return false;
     }
+
+        void saveAttachment(String fileName)
+    {
+	base.saveAttachment(fileName);
+    }
+
+void refreshMessages()
+    {
+	summaryArea.refresh();
+    }
+
+
+    private boolean onFolderUniRefQuery(AreaQuery query)
+    {
+	if (query == null || !(query instanceof UniRefAreaQuery))
+	    return false;
+	final Object selected = foldersArea.selected();
+	if (selected == null || !(selected instanceof StoredMailFolder))
+	    return false;
+	return base.onFolderUniRefQuery((UniRefAreaQuery)query, (StoredMailFolder)selected);
+    }
+
+    void clearMessageArea()
+    {
+	base.setCurrentMessage(null);
+	//	messageArea.show(null);
+	//messageArea.setHotPoint(0, 0);
+	rawMessageArea.show(null);
+	rawMessageArea.setHotPoint(0, 0);
+	enableMessageMode(Mode.REGULAR);
+    }
+
+    boolean switchToRawMessage()
+    {
+	if (!base.hasCurrentMessage())
+	    return false;
+	enableMessageMode(Mode.RAW);
+	gotoMessage();
+	return true;
+    }
+
 
     void gotoFolders()
     {
