@@ -34,12 +34,12 @@ final class Base extends Utils
     final Luwrain luwrain;
         final Strings strings;
         final MailStoring storing;
+        private final FoldersModelSource foldersModelSource;
+    private final TreeArea.Model foldersModel;
     private final App app;
     private StoredMailFolder folder = null;
     private Object[] summaryItems = new Object[0];
     private StoredMailMessage currentMessage;
-    private TreeModelSource treeModelSource;
-    private TreeArea.Model foldersModel;
 
     Base(App app, Luwrain luwrain, Strings strings)
     {
@@ -50,6 +50,8 @@ final class Base extends Utils
 	this.luwrain = luwrain;
 	this.strings = strings;
 	this.storing = org.luwrain.pim.Connections.getMailStoring(luwrain, true);
+	this.foldersModelSource = new FoldersModelSource();
+	this.foldersModel = new CachedTreeModel(foldersModelSource);
     }
 
         void updateSummaryMessages(StoredMailFolder folder) throws PimException
@@ -321,15 +323,6 @@ doc.commit();
 	return true;
     }
 
-    private TreeArea.Model getFoldersModel()
-    {
-	if (foldersModel != null)
-	    return foldersModel;
-	treeModelSource = new TreeModelSource(luwrain, storing, strings);
-	foldersModel = new CachedTreeModel(treeModelSource);
-	return foldersModel;
-    }
-
     ListArea.Model getSummaryModel()
     {
 	return new SummaryListModel();
@@ -348,7 +341,7 @@ doc.commit();
     {
 	final TreeArea.Params params = new TreeArea.Params();
 	params.context = new DefaultControlContext(luwrain);
-	params.model = getFoldersModel(); 
+	params.model = foldersModel;
 	params.name = strings.foldersAreaName();
 	return params;
     }
@@ -366,6 +359,34 @@ doc.commit();
 	}
 	@Override public void refresh()
 	{
+	}
+    }
+
+    private class FoldersModelSource implements org.luwrain.controls.CachedTreeModelSource
+    {
+	@Override public Object getRoot()
+	{
+	    try {
+		return storing.getFolders().getRoot();
+	    }
+	    catch (PimException e)
+	    {
+		luwrain.crash(e);
+		return null;
+	    }
+	}
+	@Override public Object[] getChildObjs(Object obj)
+	{
+	    NullCheck.notNull(obj, "obj");
+	    final StoredMailFolder folder = (StoredMailFolder)obj;
+	    try {
+		return storing.getFolders().load(folder);
+	    }
+	    catch(PimException e)
+	    {
+		luwrain.crash(e);
+		return new Object[0];
+	    }
 	}
     }
 }
