@@ -96,7 +96,7 @@ class Actions
 	base.setCurrentMessage(message);
 	messageArea.setDocument(base.prepareDocumentForCurrentMessage(), 512);
 app.	enableMessageMode(App.Mode.REGULAR);
-	app.gotoMessage();
+//	app.gotoMessage();
 		    return true;
     }
 

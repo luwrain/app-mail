@@ -323,11 +323,6 @@ doc.commit();
 	return true;
     }
 
-    ListArea.Model getSummaryModel()
-    {
-	return new SummaryListModel();
-    }
-
     private String[] getCcExcludeAddrs()
     {
 	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());
@@ -346,6 +341,20 @@ doc.commit();
 	return params;
     }
 
+    ListArea.Params createSummaryParams()
+    {
+	final ListArea.Params params = new ListArea.Params();
+	params.context = new DefaultControlContext(luwrain);
+	params.name = strings.summaryAreaName();
+	params.model = new SummaryListModel();
+	params.appearance = new ListUtils.DoubleLevelAppearance(params.context){
+		@Override public boolean isSectionItem(Object item)
+		{
+		    return false;
+		}
+	    };
+	return params;
+    }
 
     private final class SummaryListModel implements ListArea.Model
     {

@@ -66,8 +66,7 @@ final class App implements Application, MonoApp
 			switch(event.getSpecial())
 			{
 			case TAB:
-			    gotoSummary();
-			    return true;
+			    return AreaLayoutHelper.activateNextArea(luwrain, getAreaLayout(), this);
 			}
 		    return super.onInputEvent(event);
 		}
@@ -99,21 +98,11 @@ final class App implements Application, MonoApp
 		    if (obj == null || !(obj instanceof StoredMailFolder))
 			return;
 		    final StoredMailFolder folder = (StoredMailFolder)obj;
-actions.openFolder(folder, summaryArea);
+		    actions.openFolder(folder, summaryArea);
 		}
 	    };
 
-	final ListArea.Params summaryParams = new ListArea.Params();
-	summaryParams.context = new DefaultControlContext(luwrain);
-	summaryParams.name = strings.summaryAreaName();
-	summaryParams.model = base.getSummaryModel();
-	summaryParams.appearance = new ListUtils.DoubleLevelAppearance(summaryParams.context){
-			@Override public boolean isSectionItem(Object item)
-		{
-		    return false;
-		}
-	    };
-	this.summaryArea = new ListArea(summaryParams) {
+	this.summaryArea = new ListArea(base.createSummaryParams()) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -121,15 +110,13 @@ actions.openFolder(folder, summaryArea);
 			switch(event.getSpecial())
 			{
 			case TAB:
-			    gotoMessage();
-			    return true;
+			    return AreaLayoutHelper.activateNextArea(luwrain, getAreaLayout(), this);
 			case BACKSPACE:
-			    gotoFolders();
+			    AreaLayoutHelper.activatePrevArea(luwrain, getAreaLayout(), this);
 			    return true;
 			}
 		    return super.onInputEvent(event);
 		}
-
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -139,12 +126,11 @@ actions.openFolder(folder, summaryArea);
 			closeApp();
 			return true;
 		    case ACTION:
-			return onSummaryAreaAction(event);
+			return false;
 		    default:
 			return super.onSystemEvent(event);
 		    }
 		}
-
 		@Override public Action[] getAreaActions()
 		{
 		    return actions.getSummaryAreaActions();
@@ -152,82 +138,63 @@ actions.openFolder(folder, summaryArea);
 	    };
 
 	final ReaderArea.Params messageParams = new ReaderArea.Params();
-
 	messageParams.context = new DefaultControlContext(luwrain);
-
-messageArea = new ReaderArea(messageParams){
-
-	@Override public boolean onInputEvent(KeyboardEvent event)
-	{
-	    NullCheck.notNull(event, "event");
-	    if (event.isSpecial() && !event.isModified())
-		switch(event.getSpecial())
+	this.messageArea = new ReaderArea(messageParams){
+		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
-		case TAB:
-		    gotoFolders();
-		    return true;
-		case BACKSPACE:
-		    gotoSummary();
-		    return true;
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case TAB:
+			    return AreaLayoutHelper.activateNextArea(luwrain, getAreaLayout(), this);
+			case BACKSPACE:
+			    return AreaLayoutHelper.activatePrevArea(luwrain, getAreaLayout(), this);
+			}
+		    return super.onInputEvent(event);
 		}
-	    return super.onInputEvent(event);
-	}
+		@Override public boolean onSystemEvent(EnvironmentEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
+			return super.onSystemEvent(event);
+		    switch(event.getCode())
+		    {
+		    case CLOSE:
+			closeApp();
+			return true;
+		    default:
+			return super.onSystemEvent(event);
+		    }
+		}
+	    };
 
-	@Override public boolean onSystemEvent(EnvironmentEvent event)
-	{
-	    NullCheck.notNull(event, "event");
-	    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-		return super.onSystemEvent(event);
-	    switch(event.getCode())
-	    {
-	    case CLOSE:
-		closeApp();
-		return true;
-	    default:
-		return super.onSystemEvent(event);
-	    }
-	}
-    };
-
-	rawMessageArea = new RawMessageArea(luwrain, this, strings);
-
-	summaryArea.setListClickHandler(				    (area,index,obj)->{return false;});
+	this.rawMessageArea = new RawMessageArea(luwrain, this, strings){
+		@Override public boolean onInputEvent(KeyboardEvent event)
+		{
+		    NullCheck.notNull(event, "event");
+		    if (event.isSpecial() && !event.isModified())
+			switch(event.getSpecial())
+			{
+			case TAB:
+			    return AreaLayoutHelper.activateNextArea(luwrain, getAreaLayout(), this);
+			case BACKSPACE:
+			    return AreaLayoutHelper.activatePrevArea(luwrain, getAreaLayout(), this);
+			}
+		    return super.onInputEvent(event);
+		}
+	    };
     }
 
-    private boolean onSummaryAreaAction(EnvironmentEvent event)
-    {
-	NullCheck.notNull(event, "event");
-	/*
-	if (ActionEvent.isAction(event, "delete-message"))
-	    return actions.onDeleteInSummary(base, summaryArea, false);
-	*/
-	/*
-	if (ActionEvent.isAction(event, "delete-message-forever"))
-	    return actions.onDeleteInSummary(base, summaryArea, false);
-	*/
-	/*
-	if (ActionEvent.isAction(event, "reply"))
-	    return actions.onSummaryReply(base, summaryArea, false);
-	*/
-	/*
-	if (ActionEvent.isAction(event, "reply-all"))
-	    return actions.onSummaryReply(base, summaryArea, true);
-	*/
-
-	    //	if (ActionEvent.isAction(event, "forward"))
-	return false;
-    }
-
-        void saveAttachment(String fileName)
+    void saveAttachment(String fileName)
     {
 	base.saveAttachment(fileName);
     }
 
-void refreshMessages()
+    void refreshMessages()
     {
 	summaryArea.refresh();
     }
-
 
     private boolean onFolderUniRefQuery(AreaQuery query)
     {
@@ -254,32 +221,7 @@ void refreshMessages()
 	if (!base.hasCurrentMessage())
 	    return false;
 	enableMessageMode(Mode.RAW);
-	gotoMessage();
 	return true;
-    }
-
-
-    void gotoFolders()
-    {
-	luwrain.setActiveArea(foldersArea);
-    }
-
-    void gotoSummary()
-    {
-	luwrain.setActiveArea(summaryArea);
-    }
-
-void gotoMessage()
-    {
-	switch(mode)
-	{
-	case REGULAR:
-	    luwrain.setActiveArea(messageArea);
-	    return;
-	case RAW:
-	    luwrain.setActiveArea(rawMessageArea);
-	    return;
-	}
     }
 
     void enableMessageMode(Mode mode)

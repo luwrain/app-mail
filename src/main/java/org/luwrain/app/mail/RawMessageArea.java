@@ -68,22 +68,6 @@ class RawMessageArea extends NavigationArea
 	}
     }
 
-    @Override public boolean onInputEvent(KeyboardEvent event)
-    {
-	NullCheck.notNull(event, "event");
-	if (event.isSpecial() && !event.isModified())
-	    switch(event.getSpecial())
-	    {
-	    case TAB:
-app.gotoFolders();
-	    return true;
-	    case BACKSPACE:
-app.gotoSummary();
-	    return true;
-	    }
-	return super.onInputEvent(event);
-    }
-
     @Override public boolean onSystemEvent(EnvironmentEvent event)
     {
 	NullCheck.notNull(event, "event");
