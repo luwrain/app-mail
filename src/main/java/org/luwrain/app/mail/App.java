@@ -43,7 +43,7 @@ final class App implements Application, MonoApp
 	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
 	this.strings = (Strings)o;
 	this.luwrain = luwrain;
-	this.base = new Base(this, luwrain, strings);
+	this.base = new Base(luwrain, strings);
 	this.actions = new Actions(base, this);
 	if (base.storing == null)
 	    return new InitResult(InitResult.Type.FAILURE);
@@ -173,7 +173,7 @@ final class App implements Application, MonoApp
 
     void saveAttachment(String fileName)
     {
-	base.saveAttachment(fileName);
+	actions.saveAttachment(fileName);
     }
 
     void refreshMessages()
@@ -188,7 +188,7 @@ final class App implements Application, MonoApp
 	final Object selected = foldersArea.selected();
 	if (selected == null || !(selected instanceof StoredMailFolder))
 	    return false;
-	return base.onFolderUniRefQuery((UniRefAreaQuery)query, (StoredMailFolder)selected);
+	return actions.onFolderUniRefQuery((UniRefAreaQuery)query, (StoredMailFolder)selected);
     }
 
     void clearMessageArea()
