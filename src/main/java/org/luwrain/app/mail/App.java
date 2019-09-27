@@ -55,6 +55,7 @@ final class App implements Application, MonoApp
 		luwrain.onNewAreaLayout();
 		luwrain.announceActiveArea();
 		    }, new AreaLayout(AreaLayout.LEFT_RIGHT, foldersArea, summaryArea));
+			luwrain.runWorker(org.luwrain.pim.workers.Pop3.NAME);
 	return new InitResult();
     }
 
