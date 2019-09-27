@@ -20,13 +20,9 @@ import java.util.*;
 import java.io.*;
 
 import org.luwrain.core.*;
-import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
-import org.luwrain.popups.*;
-import org.luwrain.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
-import org.luwrain.util.*;
 
 final class Base extends Utils
 {
@@ -82,57 +78,6 @@ final class Base extends Utils
     boolean hasOpenedMessage()
     {
 	return this.openedMessage != null;
-    }
-
-    Document prepareDocumentForCurrentMessage()
-    {
-	final NodeBuilder builder = new NodeBuilder();
-	try {
-	    builder.addParagraph("ОТ: " + openedMessage.getFrom());
-	builder.addParagraph("Кому: " + listToString(openedMessage.getTo()));
-	builder.addParagraph("Копия: " + listToString(openedMessage.getCc()));
-	builder.addParagraph("Тема: " + openedMessage.getSubject());
-	builder.addParagraph("Время: " + openedMessage.getSentDate());
-	builder.addParagraph("Тип данных: " + openedMessage.getMimeContentType());
-	//nodes.add(NodeFactory.newEmptyLine());
-	//	    attachments = message.getAttachments();
-	for(String line: splitLines(openedMessage.getText()))
-	    if (!line.isEmpty())
-		builder.addParagraph(line); else
-	builder.addEmptyLine();
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return null;
-	}
-	final Node root = builder.newRoot(); 
-	final Document doc = new Document(root);
-doc.setProperty("url", "http://localhost");
-doc.commit();
-	return doc;
-    }
-
-    boolean deleteInSummary(StoredMailMessage message, boolean deleteForever)
-    {
-	/*
-	NullCheck.notNull(message, "message");
-	if (currentFolder == null)
-	    return false;
-	try {
-	    if (deleteForever)
-		storing.getMessages().delete(message); else
-		message.setState(MailMessage.State.DELETED);
-	    updateSummaryModel();
-	}
-	catch(PimException e)
-	{
-	    e.printStackTrace();
-	    luwrain.message("Во время удаления сообщения произошла непредвиденная ошибка:" + e.getMessage());
-	    return false;
-	}
-	*/
-	return true;
     }
 
     boolean openDefaultFolder()

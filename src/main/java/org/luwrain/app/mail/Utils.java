@@ -5,7 +5,9 @@ import java.util.*;
 import java.io.*;
 
 import org.luwrain.core.*;
+import org.luwrain.reader.*;
 import org.luwrain.pim.*;
+import org.luwrain.pim.mail.*;
 
 class Utils
 {
@@ -43,4 +45,28 @@ class Utils
 	return res[0];
 	*/
     }
+
+	    static Document prepareDocForMsg(StoredMailMessage message) throws PimException
+    {
+	NullCheck.notNull(message, "message");
+	final NodeBuilder builder = new NodeBuilder();
+	    builder.addParagraph("ОТ: " + message.getFrom());
+	builder.addParagraph("Кому: " + listToString(message.getTo()));
+	builder.addParagraph("Копия: " + listToString(message.getCc()));
+	builder.addParagraph("Тема: " + message.getSubject());
+	builder.addParagraph("Время: " + message.getSentDate());
+	builder.addParagraph("Тип данных: " + message.getMimeContentType());
+	//nodes.add(NodeFactory.newEmptyLine());
+	//	    attachments = message.getAttachments();
+	for(String line: splitLines(message.getText()))
+	    if (!line.isEmpty())
+		builder.addParagraph(line); else
+	builder.addEmptyLine();
+	final Node root = builder.newRoot(); 
+	final Document doc = new Document(root);
+doc.setProperty("url", "http://localhost");
+doc.commit();
+	return doc;
+    }
+
 }

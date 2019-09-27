@@ -25,7 +25,7 @@ import org.luwrain.controls.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 
-class Actions
+final class Actions extends Utils
 {
     private final Luwrain luwrain;
     private final Strings strings;
@@ -95,7 +95,14 @@ class Actions
 	    luwrain.crash(e);
 	}
 	base.openMessage(message);
-	messageArea.setDocument(base.prepareDocumentForCurrentMessage(), 512);
+	try {
+	messageArea.setDocument(prepareDocForMsg(base.getOpenedMessage()), 512);
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
+	    return true;
+	}
 //	app.gotoMessage();
 		    return true;
     }
@@ -108,7 +115,7 @@ class Actions
 	if (o == null || !(o instanceof StoredMailMessage))
 	    return false;
 	final StoredMailMessage message = (StoredMailMessage)o;
-	if (!base.deleteInSummary(message, deleteForever))
+	if (!deleteInSummary(message, deleteForever))
 	    return true;
 	summaryArea.refresh();
 	app.clearMessageArea();
@@ -301,5 +308,28 @@ class Actions
 	    return new String[0];
 	return new String[]{addr};
     }
+
+        boolean deleteInSummary(StoredMailMessage message, boolean deleteForever)
+    {
+	/*
+	NullCheck.notNull(message, "message");
+	if (currentFolder == null)
+	    return false;
+	try {
+	    if (deleteForever)
+		storing.getMessages().delete(message); else
+		message.setState(MailMessage.State.DELETED);
+	    updateSummaryModel();
+	}
+	catch(PimException e)
+	{
+	    e.printStackTrace();
+	    luwrain.message("Во время удаления сообщения произошла непредвиденная ошибка:" + e.getMessage());
+	    return false;
+	}
+	*/
+	return true;
+    }
+
 
 }
