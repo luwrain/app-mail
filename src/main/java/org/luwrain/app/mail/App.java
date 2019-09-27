@@ -21,6 +21,7 @@ import org.luwrain.core.events.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.controls.reader.*;
+import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 
 final class App implements Application, MonoApp
@@ -89,7 +90,24 @@ final class App implements Application, MonoApp
 		    switch(query.getQueryCode())
 		    {
 		    case AreaQuery.UNIREF_AREA:
-			return onFolderUniRefQuery(query);
+			{
+			    final Object selected = foldersArea.selected();
+			    if (selected == null || !(selected instanceof StoredMailFolder) || !(query instanceof UniRefAreaQuery))
+				return false;
+			    final UniRefAreaQuery uniRefQuery = (UniRefAreaQuery)query;
+			    final StoredMailFolder folder = (StoredMailFolder)selected;
+			    try {
+				final String uniRef = base.storing.getFolders().getUniRef(folder);
+				if (uniRef == null || uniRef.trim().isEmpty())
+				    return false;
+				uniRefQuery.answer(uniRef);
+			    }
+			    catch(PimException e)
+			    {
+				luwrain.crash(e);
+				return false;
+			    }
+			}
 		    default:
 			return super.onAreaQuery(query);
 		    }
@@ -179,16 +197,6 @@ final class App implements Application, MonoApp
     void refreshMessages()
     {
 	summaryArea.refresh();
-    }
-
-    private boolean onFolderUniRefQuery(AreaQuery query)
-    {
-	if (query == null || !(query instanceof UniRefAreaQuery))
-	    return false;
-	final Object selected = foldersArea.selected();
-	if (selected == null || !(selected instanceof StoredMailFolder))
-	    return false;
-	return actions.onFolderUniRefQuery((UniRefAreaQuery)query, (StoredMailFolder)selected);
     }
 
     void clearMessageArea()

@@ -263,24 +263,6 @@ class Actions
 	}
     }
 
-    boolean onFolderUniRefQuery(UniRefAreaQuery query, StoredMailFolder folder)
-    {
-	NullCheck.notNull(query, "query");
-	NullCheck.notNull(folder, "folder");
-	try {
-	    final String uniRef = base.storing.getFolders().getUniRef(folder);
-	    if (uniRef == null || uniRef.trim().isEmpty())
-		return false;
-	    query.answer(uniRef);
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return false;
-	}
-	return true;
-    }
-
     boolean saveAttachment(String fileName)
     {
 	/*
