@@ -201,14 +201,14 @@ final class App implements Application, MonoApp
 
     void clearMessageArea()
     {
-	base.setCurrentMessage(null);
+	base.openMessage(null);//FIXME:closeMessage()
 	//	messageArea.show(null);
 	//messageArea.setHotPoint(0, 0);
     }
 
     boolean switchToRawMessage()
     {
-	if (!base.hasCurrentMessage())
+	if (!base.hasOpenedMessage())
 	    return false;
 	return true;
     }

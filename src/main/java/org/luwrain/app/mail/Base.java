@@ -37,9 +37,9 @@ final class Base extends Utils
     final MailStoring storing;
     private final FoldersModelSource foldersModelSource;
     private final TreeArea.Model foldersModel;
-    private StoredMailFolder folder = null;
+    private StoredMailFolder openedFolder = null;
     private Object[] summaryItems = new Object[0];
-    private StoredMailMessage currentMessage;
+    private StoredMailMessage openedMessage;
 
     Base(Luwrain luwrain, Strings strings)
     {
@@ -55,10 +55,10 @@ final class Base extends Utils
 	this.foldersModel = new CachedTreeModel(foldersModelSource);
     }
 
-        void updateSummaryMessages(StoredMailFolder folder) throws PimException
+        void openFolder(StoredMailFolder folder) throws PimException
     {
 	NullCheck.notNull(folder, "folder");
-	this.folder = folder;
+	this.openedFolder = folder;
 	final StoredMailMessage[] allMessages = storing.getMessages().load(folder);
 	final List<StoredMailMessage> res = new LinkedList();
 	for(StoredMailMessage m: allMessages)
@@ -66,38 +66,37 @@ final class Base extends Utils
 		res.add(m);
 	final Hooks hooks = new Hooks(luwrain);
 	this.summaryItems = hooks.organizeSummary(res.toArray(new StoredMailMessage[res.size()]));
-	Log.debug("proba", "loaded " + summaryItems.length + " items");
+	Log.debug(LOG_COMPONENT, "loaded " + summaryItems.length + " items");
     }
 
-
-    void setCurrentMessage(StoredMailMessage message)
+    void openMessage(StoredMailMessage message)
     {
-	this.currentMessage = message;
+	this.openedMessage = message;
     }
 
-    StoredMailMessage getCurrentMessage()
+    StoredMailMessage getOpenedMessage()
     {
-	return currentMessage;
+	return this.openedMessage;
     }
 
-    boolean hasCurrentMessage()
+    boolean hasOpenedMessage()
     {
-	return currentMessage != null;
+	return this.openedMessage != null;
     }
 
     Document prepareDocumentForCurrentMessage()
     {
 	final NodeBuilder builder = new NodeBuilder();
 	try {
-	    builder.addParagraph("ОТ: " + currentMessage.getFrom());
-	builder.addParagraph("Кому: " + listToString(currentMessage.getTo()));
-	builder.addParagraph("Копия: " + listToString(currentMessage.getCc()));
-	builder.addParagraph("Тема: " + currentMessage.getSubject());
-	builder.addParagraph("Время: " + currentMessage.getSentDate());
-	builder.addParagraph("Тип данных: " + currentMessage.getMimeContentType());
+	    builder.addParagraph("ОТ: " + openedMessage.getFrom());
+	builder.addParagraph("Кому: " + listToString(openedMessage.getTo()));
+	builder.addParagraph("Копия: " + listToString(openedMessage.getCc()));
+	builder.addParagraph("Тема: " + openedMessage.getSubject());
+	builder.addParagraph("Время: " + openedMessage.getSentDate());
+	builder.addParagraph("Тип данных: " + openedMessage.getMimeContentType());
 	//nodes.add(NodeFactory.newEmptyLine());
 	//	    attachments = message.getAttachments();
-	for(String line: splitLines(currentMessage.getText()))
+	for(String line: splitLines(openedMessage.getText()))
 	    if (!line.isEmpty())
 		builder.addParagraph(line); else
 	builder.addEmptyLine();

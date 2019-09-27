@@ -47,7 +47,7 @@ class Actions
 	NullCheck.notNull(folder, "folder");
 	NullCheck.notNull(summaryArea, "summaryArea");
 	try {
-	base.updateSummaryMessages(folder);
+	base.openFolder(folder);
 	}
 	catch(PimException e)
 	{
@@ -94,7 +94,7 @@ class Actions
 	{
 	    luwrain.crash(e);
 	}
-	base.setCurrentMessage(message);
+	base.openMessage(message);
 	messageArea.setDocument(base.prepareDocumentForCurrentMessage(), 512);
 //	app.gotoMessage();
 		    return true;
@@ -212,9 +212,9 @@ class Actions
     {
 	NullCheck.notNull(message, "message");
 	try {
-	    if (base.getCurrentMessage() == null)
+	    if (!base.hasOpenedMessage())
 		return false;
-	    final StoredMailMessage m = message != null?message:base.getCurrentMessage();
+	    final StoredMailMessage m = message != null?message:base.getOpenedMessage();
 	    String subject = m.getSubject();
 	    if (!subject.toLowerCase().startsWith("fwd: "))
 		subject = "Fwd: " + subject;
