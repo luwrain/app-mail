@@ -58,7 +58,7 @@ public final class App implements Application
 	this.luwrain = luwrain;
 	this.base = new Base(luwrain, strings);
 	this.actionLists = new ActionLists(luwrain, base, strings);
-	this.actions = new Actions(luwrain, base, strings);
+	this.actions = new Actions(base);
 	if (!base.isReady())
 	    return new InitResult(InitResult.Type.FAILURE);
 	if (startingMessage.text.isEmpty())
@@ -113,7 +113,7 @@ if (!value.isEmpty())
 		    case ACTION:
 			if (ActionEvent.isAction(event, "send"))
 			{
-			    if (actions.onSend(base, messageArea, false))
+			    if (actions.onSend(messageArea, false))
 			    {
 				luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
 				closeApp();
@@ -122,7 +122,7 @@ if (!value.isEmpty())
 			}
 			if (ActionEvent.isAction(event, "send-another-account"))
 			{
-			    if (actions.onSend(base, messageArea, true))
+			    if (actions.onSend(messageArea, true))
 			    {
 				luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
 				closeApp();
@@ -137,7 +137,7 @@ if (!value.isEmpty())
 			    return actions.onAttachFile(messageArea);
 			return false;
 		    case OK:
-				if (actions.onSend(base, messageArea, false))
+				if (actions.onSend( messageArea, false))
 				{
 				    luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
 				    closeApp();

@@ -26,11 +26,12 @@ import org.luwrain.pim.PimException;
 import org.luwrain.pim.mail.*;
 import org.luwrain.pim.contacts.*;
 
-final class Base
+final class Base extends Utils
 {
     static private final String USER_AGENT_HEADER_NAME = "User-Agent";
-    private final Luwrain luwrain;
-    private final Strings strings;
+
+    final Luwrain luwrain;
+    final Strings strings;
     final MailStoring mailStoring;
     final ContactsStoring contactsStoring;
 
@@ -44,37 +45,29 @@ final class Base
 	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(luwrain, true);
     }
 
-    boolean isReady()
-    {
-	return mailStoring != null && contactsStoring != null;
-    }
-
-    boolean send(StoredMailAccount account, MailMessage msg)
+    boolean send(StoredMailAccount account, MailMessage msg) throws PimException
     {
 	NullCheck.notNull(account, "account");
 	NullCheck.notNull(msg, "msg");
-	try {
-	    msg.setFrom(prepareFromLine(account));
-	    if (msg.getFrom().trim().isEmpty())
-		throw new IllegalArgumentException("No sender address");//FIXME:
-	    msg.setSentDate(new Date());
-	    msg.setBcc(new String[0]);
-	    msg.setContentType("text/plain; charset=utf-8");//FIXME:
-	    msg.setExtInfo(mailStoring.getAccounts().getUniRef(account));
-	    final Map<String, String> headers = new HashMap();
-	    headers.put(USER_AGENT_HEADER_NAME, getUserAgentStr());
-	    msg.setRawMessage(mailStoring.getMessages().toByteArray(msg, headers));
-	    final StoredMailFolder folder = getFolderForPending();
-	    if (folder == null)
-		throw new IllegalArgumentException("Unable to prepare a folder for pending messages");
-	    mailStoring.getMessages().save(folder, msg);
-	    return true;
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return false;
-	}
+	msg.setFrom(prepareFromLine(account));
+	if (msg.getFrom().trim().isEmpty())
+	    throw new RuntimeException("No sender address");//FIXME:
+	msg.setSentDate(new Date());
+	msg.setContentType("text/plain; charset=utf-8");//FIXME:
+	msg.setExtInfo(mailStoring.getAccounts().getUniRef(account));
+	final Map<String, String> headers = new HashMap();
+	headers.put(USER_AGENT_HEADER_NAME, getUserAgentStr());
+	msg.setRawMessage(mailStoring.getMessages().toByteArray(msg, headers));
+	final StoredMailFolder folder = getFolderForPending();
+	if (folder == null)
+	    throw new RuntimeException("Unable to prepare a folder for pending messages");
+	mailStoring.getMessages().save(folder, msg);
+	return true;
+    }
+
+        boolean isReady()
+    {
+	return mailStoring != null && contactsStoring != null;
     }
 
     private String prepareFromLine(StoredMailAccount account) throws PimException
@@ -116,16 +109,4 @@ addr = sett.getDefaultMailAddress("").trim();
 	return "LUWRAIN";
 	    }
 
-    static String[] splitAddrs(String line)
-    {
-	NullCheck.notNull(line, "line");
-	if (line.trim().isEmpty())
-	    return new String[0];
-	final List<String> res = new LinkedList();
-	final String[] lines = line.split(",", -1);
-	for(String s: lines)
-	    if (!s.trim().isEmpty())
-		res.add(s.trim());
-	return res.toArray(new String[res.size()]);
-    }
 }

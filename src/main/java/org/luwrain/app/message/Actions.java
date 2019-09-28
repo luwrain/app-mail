@@ -29,44 +29,40 @@ final class Actions
     private final Strings strings;
     final Conversations conv;
 
-    Actions(Luwrain luwrain, Base base, Strings strings)
+    Actions(Base base)
     {
-	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(base, "base");
-	NullCheck.notNull(strings, "strings");
-	this.luwrain = luwrain;
+	this.luwrain = base.luwrain;
 	this.base = base;
-	this.strings = strings;
+	this.strings = base.strings;
 	this.conv = new Conversations(luwrain, base, strings);
     }
 
-    boolean onSend(Base base, Area area, boolean useAnotherAccount)
+    //Returns true, if the message is successfully saved in the pending queue, the sending worker will be launched
+    boolean onSend(Area area, boolean useAnotherAccount)
     {
-	NullCheck.notNull(base, "base");
 	NullCheck.notNull(area, "area");
 	if (!isReadyForSending(area))
 	    return false;
 	try {
 	    final StoredMailAccount account;
-	    if (base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP) == null)
+	    final StoredMailAccount defaultAccount = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
+	    if (useAnotherAccount)
 	    {
-		if (useAnotherAccount)
-		    return false;
-		if (!conv.confirmLaunchingAccountWizard())
-		    return false;
-		if (!(new org.luwrain.pim.wizards.Mail(luwrain).start()))
-		    return false;
-		account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
+		account = conv.accountToSend();
 		if (account == null)
 		    return false;
-	    } else
+	    }else
 	    {
-		//There is the default account
-		if (useAnotherAccount)
-		    account = conv.accountToSend(); else
+		if (defaultAccount == null)
+		{
+		    if (!conv.confirmLaunchingAccountWizard())
+			return false;
+		    if (!(new org.luwrain.pim.wizards.Mail(luwrain).start()))
+			return false;
 		    account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
-		if (account == null)
-		    return false;
+		} else
+		    account = defaultAccount;
 	    }
 	    return base.send(account, area.constructMailMessage());
 	}
@@ -139,6 +135,4 @@ final class Actions
 	}
 	return true;
     }
-
-
 }
