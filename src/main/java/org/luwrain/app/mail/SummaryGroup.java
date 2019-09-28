@@ -23,9 +23,9 @@ import org.luwrain.pim.mail.*;
 final class SummaryGroup
 {
     final String title;
-    final StoredMailMessage[] messages;
+    final MailMessage[] messages;
 
-    SummaryGroup(String title, StoredMailMessage[] messages)
+    SummaryGroup(String title, MailMessage[] messages)
     {
 	NullCheck.notNull(title, "title");
 	NullCheck.notNullItems(messages, "messages");

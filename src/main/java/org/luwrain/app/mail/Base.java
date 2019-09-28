@@ -35,7 +35,7 @@ final class Base extends Utils
     private final TreeArea.Model foldersModel;
     private StoredMailFolder openedFolder = null;
     private Object[] summaryItems = new Object[0];
-    private StoredMailMessage openedMessage;
+    private MailMessage openedMessage;
 
     Base(Luwrain luwrain, Strings strings)
     {
@@ -55,22 +55,22 @@ final class Base extends Utils
     {
 	NullCheck.notNull(folder, "folder");
 	this.openedFolder = folder;
-	final StoredMailMessage[] allMessages = storing.getMessages().load(folder);
-	final List<StoredMailMessage> res = new LinkedList();
-	for(StoredMailMessage m: allMessages)
+	final MailMessage[] allMessages = storing.getMessages().load(folder);
+	final List<MailMessage> res = new LinkedList();
+	for(MailMessage m: allMessages)
 	    if (m.getState() != MailMessage.State.DELETED)
 		res.add(m);
 	final Hooks hooks = new Hooks(luwrain);
-	this.summaryItems = hooks.organizeSummary(res.toArray(new StoredMailMessage[res.size()]));
+	this.summaryItems = hooks.organizeSummary(res.toArray(new MailMessage[res.size()]));
 	Log.debug(LOG_COMPONENT, "loaded " + summaryItems.length + " items");
     }
 
-    void openMessage(StoredMailMessage message)
+    void openMessage(MailMessage message)
     {
 	this.openedMessage = message;
     }
 
-    StoredMailMessage getOpenedMessage()
+    MailMessage getOpenedMessage()
     {
 	return this.openedMessage;
     }

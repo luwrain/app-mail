@@ -35,7 +35,7 @@ final class Hooks
 	this.luwrain = luwrain;
     }
 
-    Object[] organizeSummary(StoredMailMessage[] messages)
+    Object[] organizeSummary(MailMessage[] messages)
     {
 	NullCheck.notNullItems(messages, "messages");
 	final MessageHookObject[] hookObjs = new MessageHookObject[messages.length];

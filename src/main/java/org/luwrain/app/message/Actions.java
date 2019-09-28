@@ -46,8 +46,8 @@ final class Actions
 	NullCheck.notNull(area, "area");
 	if (!isReadyForSending(area))
 	    return false;
-	final StoredMailAccount account;
 	try {
+	    final StoredMailAccount account;
 	    if (base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP) == null)
 	    {
 		if (useAnotherAccount)
@@ -56,7 +56,7 @@ final class Actions
 		    return false;
 		if (!(new org.luwrain.pim.wizards.Mail(luwrain).start()))
 		    return false;
-	    	account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
+		account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
 		if (account == null)
 		    return false;
 	    } else
@@ -68,13 +68,13 @@ final class Actions
 		if (account == null)
 		    return false;
 	    }
+	    return base.send(account, area.constructMailMessage());
 	}
 	catch(PimException e)
 	{
 	    luwrain.crash(e);
 	    return false;
 	}
-	return base.send(account, area.constructMailMessage());
     }
 
     boolean onEditTo(Area area)

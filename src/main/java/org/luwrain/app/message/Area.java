@@ -139,17 +139,17 @@ class Area extends FormArea
 	removeItemOnLine(lineIndex);
     }
 
-    MailMessage constructMailMessage()
+    MailMessage constructMailMessage() throws org.luwrain.pim.PimException
     {
 	final MailMessage msg = new MailMessage();
-	msg.to = Base.splitAddrs(getEnteredText(TO_NAME));
-	msg.cc = Base.splitAddrs(getEnteredText(CC_NAME));
-	msg.subject = getEnteredText(SUBJECT_NAME);
-	msg.baseContent = getText();
+	msg.setTo(Base.splitAddrs(getEnteredText(TO_NAME)));
+	msg.setCc(Base.splitAddrs(getEnteredText(CC_NAME)));
+	msg.setSubject(getEnteredText(SUBJECT_NAME));
+	msg.setText(getText());
 	final List<String> attachments = new LinkedList();
 	for(File f: getAttachmentFiles())
 	    attachments.add(f.getAbsolutePath());
-	msg.attachments = attachments.toArray(new String[attachments.size()]);
+	msg.setAttachments(attachments.toArray(new String[attachments.size()]));
 	return msg;
     }
 

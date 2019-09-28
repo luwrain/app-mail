@@ -80,9 +80,9 @@ final class Actions extends Utils
 	NullCheck.notNull(summaryArea, "summaryArea");
 	NullCheck.notNull(messageArea, "messageArea");
 	final Object o = model.getRow(row);
-	if (o == null || !(o instanceof StoredMailMessage))
+	if (o == null || !(o instanceof MailMessage))
 	    return false;
-	final StoredMailMessage message = (StoredMailMessage)o;
+	final MailMessage message = (MailMessage)o;
 	try {
 	    if (message.getState() == MailMessage.State.NEW)
 	    {
@@ -112,9 +112,9 @@ final class Actions extends Utils
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(summaryArea, "summaryArea");
 	final Object o = summaryArea.getSelectedRow();
-	if (o == null || !(o instanceof StoredMailMessage))
+	if (o == null || !(o instanceof MailMessage))
 	    return false;
-	final StoredMailMessage message = (StoredMailMessage)o;
+	final MailMessage message = (MailMessage)o;
 	if (!deleteInSummary(message, deleteForever))
 	    return true;
 	summaryArea.refresh();
@@ -127,9 +127,9 @@ final class Actions extends Utils
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(summaryArea, "summaryArea");
 	final Object obj = summaryArea.getSelectedRow();
-	if (obj == null || !(obj instanceof StoredMailMessage))
+	if (obj == null || !(obj instanceof MailMessage))
 	    return false;
-	final StoredMailMessage message = (StoredMailMessage)obj;
+	final MailMessage message = (MailMessage)obj;
 	return makeReply(message, wideReply);
     }
 
@@ -149,7 +149,7 @@ final class Actions extends Utils
 	luwrain.launchApp("fetch", new String[]{"--MAIL"});
     }
 
-        boolean makeReply(StoredMailMessage message, boolean wideReply)
+        boolean makeReply(MailMessage message, boolean wideReply)
     {
 	/*
 	NullCheck.notNull(message, "message");
@@ -215,13 +215,13 @@ final class Actions extends Utils
 	return false;
     }
 
-    boolean makeForward(StoredMailMessage message)
+    boolean makeForward(MailMessage message)
     {
 	NullCheck.notNull(message, "message");
 	try {
 	    if (!base.hasOpenedMessage())
 		return false;
-	    final StoredMailMessage m = message != null?message:base.getOpenedMessage();
+	    final MailMessage m = message != null?message:base.getOpenedMessage();
 	    String subject = m.getSubject();
 	    if (!subject.toLowerCase().startsWith("fwd: "))
 		subject = "Fwd: " + subject;
@@ -309,7 +309,7 @@ final class Actions extends Utils
 	return new String[]{addr};
     }
 
-        boolean deleteInSummary(StoredMailMessage message, boolean deleteForever)
+        boolean deleteInSummary(MailMessage message, boolean deleteForever)
     {
 	/*
 	NullCheck.notNull(message, "message");

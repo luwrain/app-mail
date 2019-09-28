@@ -46,7 +46,7 @@ class Utils
 	*/
     }
 
-    static Document prepareDocForMsg(StoredMailMessage message) throws PimException
+    static Document prepareDocForMsg(MailMessage message) throws PimException
     {
 	NullCheck.notNull(message, "message");
 	final NodeBuilder builder = new NodeBuilder();
@@ -55,7 +55,7 @@ class Utils
 	builder.addParagraph("Копия: " + listToString(message.getCc()));
 	builder.addParagraph("Тема: " + message.getSubject());
 	builder.addParagraph("Время: " + message.getSentDate());
-	builder.addParagraph("Тип данных: " + message.getMimeContentType());
+	builder.addParagraph("Тип данных: " + message.getContentType());
 	//nodes.add(NodeFactory.newEmptyLine());
 	//attachments = message.getAttachments();
 	for(String line: splitLines(message.getText()))

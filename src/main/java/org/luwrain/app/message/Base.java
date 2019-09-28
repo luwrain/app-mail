@@ -54,16 +54,16 @@ final class Base
 	NullCheck.notNull(account, "account");
 	NullCheck.notNull(msg, "msg");
 	try {
-	    msg.from = prepareFromLine(account);
-	    if (msg.from == null || msg.from.trim().isEmpty())
+	    msg.setFrom(prepareFromLine(account));
+	    if (msg.getFrom().trim().isEmpty())
 		throw new IllegalArgumentException("No sender address");//FIXME:
-	    msg.sentDate = new Date();
-	    msg.bcc = new String[0];
-	    msg.mimeContentType = "text/plain; charset=utf-8";//FIXME:
-	    msg.extInfo = mailStoring.getAccounts().getUniRef(account);
+	    msg.setSentDate(new Date());
+	    msg.setBcc(new String[0]);
+	    msg.setContentType("text/plain; charset=utf-8");//FIXME:
+	    msg.setExtInfo(mailStoring.getAccounts().getUniRef(account));
 	    final Map<String, String> headers = new HashMap();
 	    headers.put(USER_AGENT_HEADER_NAME, getUserAgentStr());
-	    msg.rawMail = mailStoring.getMessages().toByteArray(msg, headers);
+	    msg.setRawMessage(mailStoring.getMessages().toByteArray(msg, headers));
 	    final StoredMailFolder folder = getFolderForPending();
 	    if (folder == null)
 		throw new IllegalArgumentException("Unable to prepare a folder for pending messages");
