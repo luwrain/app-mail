@@ -58,7 +58,7 @@ final class Base extends Utils
 	final Map<String, String> headers = new HashMap();
 	headers.put(USER_AGENT_HEADER_NAME, getUserAgentStr());
 	msg.setRawMessage(mailStoring.getMessages().toByteArray(msg, headers));
-	final StoredMailFolder folder = getFolderForPending();
+	final MailFolder folder = getFolderForPending();
 	if (folder == null)
 	    throw new RuntimeException("Unable to prepare a folder for pending messages");
 	mailStoring.getMessages().save(folder, msg);
@@ -85,7 +85,7 @@ addr = sett.getDefaultMailAddress("").trim();
 	return mailStoring.combinePersonalAndAddr(personal, addr);
     }
 
-    private StoredMailFolder getFolderForPending()
+    private MailFolder getFolderForPending()
     {
 	final org.luwrain.settings.mail.Settings.MailFolders sett = org.luwrain.settings.mail.Settings.createMailFolders(luwrain.getRegistry());
 	final String uniRef = sett.getFolderPending("");

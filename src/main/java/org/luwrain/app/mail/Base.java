@@ -33,7 +33,7 @@ final class Base extends Utils
     final MailStoring storing;
     private final FoldersModelSource foldersModelSource;
     private final TreeArea.Model foldersModel;
-    private StoredMailFolder openedFolder = null;
+    private MailFolder openedFolder = null;
     private Object[] summaryItems = new Object[0];
     private MailMessage openedMessage;
 
@@ -51,7 +51,7 @@ final class Base extends Utils
 	this.foldersModel = new CachedTreeModel(foldersModelSource);
     }
 
-        void openFolder(StoredMailFolder folder) throws PimException
+        void openFolder(MailFolder folder) throws PimException
     {
 	NullCheck.notNull(folder, "folder");
 	this.openedFolder = folder;
@@ -158,7 +158,7 @@ final class Base extends Utils
 	@Override public Object[] getChildObjs(Object obj)
 	{
 	    NullCheck.notNull(obj, "obj");
-	    final StoredMailFolder folder = (StoredMailFolder)obj;
+	    final MailFolder folder = (MailFolder)obj;
 	    try {
 		return storing.getFolders().load(folder);
 	    }

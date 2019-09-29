@@ -42,7 +42,7 @@ final class Actions extends Utils
 	this.app = app;
     }
 
-    boolean openFolder(StoredMailFolder folder, ListArea summaryArea)
+    boolean openFolder(MailFolder folder, ListArea summaryArea)
     {
 	NullCheck.notNull(folder, "folder");
 	NullCheck.notNull(summaryArea, "summaryArea");

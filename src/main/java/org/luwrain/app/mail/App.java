@@ -93,10 +93,10 @@ final class App implements Application, MonoApp
 		    case AreaQuery.UNIREF_AREA:
 			{
 			    final Object selected = foldersArea.selected();
-			    if (selected == null || !(selected instanceof StoredMailFolder) || !(query instanceof UniRefAreaQuery))
+			    if (selected == null || !(selected instanceof MailFolder) || !(query instanceof UniRefAreaQuery))
 				return false;
 			    final UniRefAreaQuery uniRefQuery = (UniRefAreaQuery)query;
-			    final StoredMailFolder folder = (StoredMailFolder)selected;
+			    final MailFolder folder = (MailFolder)selected;
 			    try {
 				final String uniRef = base.storing.getFolders().getUniRef(folder);
 				if (uniRef == null || uniRef.trim().isEmpty())
@@ -115,9 +115,9 @@ final class App implements Application, MonoApp
 		}
 		@Override public void onClick(Object obj)
 		{
-		    if (obj == null || !(obj instanceof StoredMailFolder))
+		    if (obj == null || !(obj instanceof MailFolder))
 			return;
-		    final StoredMailFolder folder = (StoredMailFolder)obj;
+		    final MailFolder folder = (MailFolder)obj;
 		    actions.openFolder(folder, summaryArea);
 		}
 	    };

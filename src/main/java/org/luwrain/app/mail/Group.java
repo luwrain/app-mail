@@ -22,9 +22,9 @@ import org.luwrain.pim.mail.*;
 
 class Group
 {
-    final StoredMailFolder folder;
+    final MailFolder folder;
 
-    Group(StoredMailFolder folder)
+    Group(MailFolder folder)
     {
 	NullCheck.notNull(folder, "folder");
 	this.folder = folder;
