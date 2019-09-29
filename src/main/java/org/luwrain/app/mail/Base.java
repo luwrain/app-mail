@@ -51,7 +51,7 @@ final class Base extends Utils
 	this.foldersModel = new CachedTreeModel(foldersModelSource);
     }
 
-        void openFolder(MailFolder folder) throws PimException
+    void openFolder(MailFolder folder) throws PimException
     {
 	NullCheck.notNull(folder, "folder");
 	this.openedFolder = folder;
@@ -62,7 +62,6 @@ final class Base extends Utils
 		res.add(m);
 	final Hooks hooks = new Hooks(luwrain);
 	this.summaryItems = hooks.organizeSummary(res.toArray(new MailMessage[res.size()]));
-	Log.debug(LOG_COMPONENT, "loaded " + summaryItems.length + " items");
     }
 
     void openMessage(MailMessage message)
@@ -103,12 +102,14 @@ final class Base extends Utils
 	return false;
     }
 
-    TreeArea.Params createFoldersTreeParams()
+    TreeArea.Params createFoldersTreeParams(TreeArea.ClickHandler clickHandler)
     {
+	NullCheck.notNull(clickHandler, "clickHandler");
 	final TreeArea.Params params = new TreeArea.Params();
 	params.context = new DefaultControlContext(luwrain);
 	params.model = foldersModel;
 	params.name = strings.foldersAreaName();
+	params.clickHandler = clickHandler;
 	return params;
     }
 

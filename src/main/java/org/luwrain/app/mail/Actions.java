@@ -42,12 +42,12 @@ final class Actions extends Utils
 	this.app = app;
     }
 
-    boolean openFolder(MailFolder folder, ListArea summaryArea)
+    boolean onOpenFolder(MailFolder folder, ListArea summaryArea)
     {
 	NullCheck.notNull(folder, "folder");
 	NullCheck.notNull(summaryArea, "summaryArea");
 	try {
-	base.openFolder(folder);
+	    base.openFolder(folder);
 	}
 	catch(PimException e)
 	{
@@ -55,6 +55,7 @@ final class Actions extends Utils
 	    return true;
 	}
 	summaryArea.refresh();
+	summaryArea.reset(false);
 	luwrain.setActiveArea(summaryArea);
 	return true;
     }

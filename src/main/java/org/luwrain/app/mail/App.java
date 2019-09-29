@@ -61,7 +61,12 @@ final class App implements Application, MonoApp
 
     private void createAreas()
     {
-	this.foldersArea = new TreeArea(base.createFoldersTreeParams()) {
+	this.foldersArea = new TreeArea(base.createFoldersTreeParams((area, obj)->{
+		    if (obj == null || !(obj instanceof MailFolder))
+			return false;
+		    final MailFolder folder = (MailFolder)obj;
+		    return actions.onOpenFolder(folder, summaryArea);
+		})) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -112,13 +117,6 @@ final class App implements Application, MonoApp
 		    default:
 			return super.onAreaQuery(query);
 		    }
-		}
-		@Override public void onClick(Object obj)
-		{
-		    if (obj == null || !(obj instanceof MailFolder))
-			return;
-		    final MailFolder folder = (MailFolder)obj;
-		    actions.openFolder(folder, summaryArea);
 		}
 	    };
 
