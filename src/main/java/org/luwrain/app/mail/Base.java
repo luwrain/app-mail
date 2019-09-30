@@ -35,7 +35,7 @@ final class Base extends Utils
     private final FoldersModelSource foldersModelSource;
     private final TreeArea.Model foldersModel;
     private MailFolder openedFolder = null;
-    private Object[] summaryItems = new Object[0];
+    private SummaryItem[] summaryItems = new SummaryItem[0];
     private MailMessage openedMessage;
 
     Base(Luwrain luwrain, Strings strings)
@@ -123,7 +123,21 @@ final class Base extends Utils
 	params.appearance = new ListUtils.DoubleLevelAppearance(params.context){
 		@Override public boolean isSectionItem(Object item)
 		{
-		    return false;
+		    NullCheck.notNull(item, "item");
+		    if (!(item instanceof SummaryItem))
+			return false;
+		    final SummaryItem summaryItem = (SummaryItem)item;
+		    return summaryItem.type == SummaryItem.Type.SECTION;
+		}
+	    };
+	params.transition = new ListUtils.DoubleLevelTransition(params.model){
+		@Override public boolean isSectionItem(Object item)
+		{
+		    NullCheck.notNull(item, "item");
+		    if (!(item instanceof SummaryItem))
+			return false;
+		    final SummaryItem summaryItem = (SummaryItem)item;
+		    return summaryItem.type == SummaryItem.Type.SECTION;
 		}
 	    };
 	return params;

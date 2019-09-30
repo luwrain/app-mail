@@ -102,10 +102,12 @@ final class Actions extends Utils
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(summaryArea, "summaryArea");
 	final Object obj = summaryArea.selected();
-	if (obj == null || !(obj instanceof MailMessage))
+	if (obj == null || !(obj instanceof SummaryItem))
 	    return false;
-	final MailMessage message = (MailMessage)obj;
-	return base.hooks.makeReply(message);
+	final SummaryItem summaryItem = (SummaryItem)obj;
+	if (summaryItem.message == null)
+	    return false;
+	return base.hooks.makeReply(summaryItem.message);
     }
 
     void onLaunchMailFetch()

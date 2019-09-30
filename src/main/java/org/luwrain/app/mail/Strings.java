@@ -23,22 +23,10 @@ public interface Strings
     static final String NAME = "luwrain.mail";
 
     String appName();
-    String foldersAreaName();
-    String summaryAreaName();
-    String messageAreaName();
-    String readPrefix();
-    String markedPrefix();
-    String deletedPrefix();
-    String emptySummaryArea();
-    String lastSummaryLine();
-    String firstSummaryLine();
-    String replyFirstLine(String sender, Date sentDate);
-    String columnFrom();
-    String columnSubject();
-    String columnSentDate();
     String actionDeleteMessage();
-
+    String actionForward();
     String actionReply();
     String actionReplyAll();
-    String actionForward();
+    String foldersAreaName();
+    String summaryAreaName();
 }

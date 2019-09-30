@@ -46,7 +46,7 @@ final class SummaryItem
 	final Object messageObj = ScriptUtils.getMember(obj, "message");
 	if (messageObj != null && messageObj instanceof MessageHookObject)
 	{
-	    final MessageHookObject messageHookObj = (MessageHookObject)obj;
+	    final MessageHookObject messageHookObj = (MessageHookObject)messageObj;
 	    this.type = Type.MESSAGE;
 	    this.message = messageHookObj.getNativeMessageObj();
 	    final Object titleObj = ScriptUtils.getMember(obj, "title");

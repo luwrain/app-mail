@@ -41,7 +41,7 @@ final class Hooks
 	this.luwrain = luwrain;
     }
 
-    Object[] organizeSummary(MailMessage[] messages)
+    SummaryItem[] organizeSummary(MailMessage[] messages)
     {
 	NullCheck.notNullItems(messages, "messages");
 	final MessageHookObject[] hookObjs = new MessageHookObject[messages.length];
@@ -55,14 +55,17 @@ final class Hooks
 	catch(RuntimeException e)
 	{
 	    Log.error(LOG_COMPONENT, "unable to run the " + ORGANIZE_SUMMARY_HOOK_NAME + ":" + e.getClass().getName() + ":" + e.getMessage());
-	    return new Object[0];
+	    return new SummaryItem[0];
 	}
 	if (res == null)
-	    return new Object[0];
+	    return new SummaryItem[0];
 	final List array = ScriptUtils.getArray(res);
 	if (array == null)
-	    return new Object[0];
-	return array.toArray(new Object[array.size()]);
+	    return new SummaryItem[0];
+	final List<SummaryItem> items = new LinkedList();
+	for(Object o: array)
+	    items.add(new SummaryItem(o));
+	return items.toArray(new SummaryItem[items.size()]);
     }
 
     boolean makeReply(MailMessage message)
