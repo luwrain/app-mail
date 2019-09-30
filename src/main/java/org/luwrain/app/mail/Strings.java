@@ -22,11 +22,12 @@ public interface Strings
 {
     static final String NAME = "luwrain.mail";
 
-    String appName();
+
     String actionDeleteMessage();
     String actionForward();
     String actionReply();
     String actionReplyAll();
+    String appName();
     String foldersAreaName();
     String summaryAreaName();
 }
