@@ -37,4 +37,8 @@ public interface Strings
     String columnSubject();
     String columnSentDate();
     String actionDeleteMessage();
+
+    String actionReply();
+    String actionReplyAll();
+    String actionForward();
 }

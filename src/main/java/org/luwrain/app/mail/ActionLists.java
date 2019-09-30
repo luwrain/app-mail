@@ -36,6 +36,16 @@ final class ActionLists
 	this.strings = base.strings;
     }
 
+    Action[] getSummaryAreaActions()
+    {
+	return new Action[]{
+	    new Action("reply", strings.actionReply(), new KeyboardEvent(KeyboardEvent.Special.F5)),
+	    new Action("reply-all", strings.actionReplyAll()),
+	    new Action("forward", strings.actionForward()),
+	    new Action("delete-message", strings.actionDeleteMessage(), new KeyboardEvent(KeyboardEvent.Special.DELETE)),
+	};
+    }
+
     Action[] getRawMessageActions()
     {
 	return new Action[]{

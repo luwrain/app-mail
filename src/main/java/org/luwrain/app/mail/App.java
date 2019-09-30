@@ -28,6 +28,7 @@ final class App implements Application, MonoApp
 {
     private Luwrain luwrain = null;
     private Actions actions = null;
+    private ActionLists actionLists = null;
     private Base base = null;
     private Strings strings = null;
 
@@ -46,6 +47,7 @@ final class App implements Application, MonoApp
 	this.luwrain = luwrain;
 	this.base = new Base(luwrain, strings);
 	this.actions = new Actions(base, this);
+	this.actionLists = new ActionLists(base);
 	if (base.storing == null)
 	    return new InitResult(InitResult.Type.FAILURE);
 	createAreas();
@@ -144,6 +146,8 @@ final class App implements Application, MonoApp
 			closeApp();
 			return true;
 		    case ACTION:
+			if (ActionEvent.isAction(event, "reply"))
+			    return actions.onSummaryReply(this);
 			return false;
 		    default:
 			return super.onSystemEvent(event);
@@ -151,7 +155,7 @@ final class App implements Application, MonoApp
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return actions.getSummaryAreaActions();
+		    return actionLists.getSummaryAreaActions();
 		}
 	    };
 

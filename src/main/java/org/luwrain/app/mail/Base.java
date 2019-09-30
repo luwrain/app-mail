@@ -31,6 +31,7 @@ final class Base extends Utils
     final Luwrain luwrain;
     final Strings strings;
     final MailStoring storing;
+    final Hooks hooks;
     private final FoldersModelSource foldersModelSource;
     private final TreeArea.Model foldersModel;
     private MailFolder openedFolder = null;
@@ -49,6 +50,7 @@ final class Base extends Utils
 	    Log.debug(LOG_COMPONENT, "no mail storing");
 	this.foldersModelSource = new FoldersModelSource();
 	this.foldersModel = new CachedTreeModel(foldersModelSource);
+	this.hooks = new Hooks(luwrain);
     }
 
     void openFolder(MailFolder folder) throws PimException
@@ -60,7 +62,6 @@ final class Base extends Utils
 	for(MailMessage m: allMessages)
 	    if (m.getState() != MailMessage.State.DELETED)
 		res.add(m);
-	final Hooks hooks = new Hooks(luwrain);
 	this.summaryItems = hooks.organizeSummary(res.toArray(new MailMessage[res.size()]));
     }
 

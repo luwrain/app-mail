@@ -60,27 +60,10 @@ final class Actions extends Utils
 	return true;
     }
 
-
-
-    Action[] getSummaryAreaActions()
+    boolean onSummaryClick(ListArea summaryArea)
     {
-	return new Action[]{
-	    new Action("reply", "Ответить", new KeyboardEvent(KeyboardEvent.Special.F5)),
-	    new Action("reply-all", "Ответить всем"),
-	    new Action("forward", "Переслать"),
-	    new Action("delete-message", strings.actionDeleteMessage(), new KeyboardEvent(KeyboardEvent.Special.DELETE)),
-	};
-    }
-
-    boolean onSummaryClick(Base base, TableArea.Model model,
-			   int col, int row, Object obj,
-			   TableArea summaryArea, 			   ReaderArea messageArea)
-    {
-	NullCheck.notNull(base, "base");
-	NullCheck.notNull(model, "model");
 	NullCheck.notNull(summaryArea, "summaryArea");
-	NullCheck.notNull(messageArea, "messageArea");
-	final Object o = model.getRow(row);
+	final Object o = summaryArea.selected();
 	if (o == null || !(o instanceof MailMessage))
 	    return false;
 	final MailMessage message = (MailMessage)o;
@@ -96,19 +79,10 @@ final class Actions extends Utils
 	    luwrain.crash(e);
 	}
 	base.openMessage(message);
-	try {
-	messageArea.setDocument(prepareDocForMsg(base.getOpenedMessage()), 512);
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return true;
-	}
-//	app.gotoMessage();
 		    return true;
     }
 
-    boolean onDeleteInSummary(Base base, TableArea summaryArea, boolean deleteForever)
+    boolean onSummaryDelete(Base base, TableArea summaryArea, boolean deleteForever)
     {
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(summaryArea, "summaryArea");
@@ -123,152 +97,20 @@ final class Actions extends Utils
 	return true;
     }
 
-    boolean onSummaryReply(Base base, TableArea summaryArea, boolean wideReply)
+    boolean onSummaryReply(ListArea summaryArea)
     {
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(summaryArea, "summaryArea");
-	final Object obj = summaryArea.getSelectedRow();
+	final Object obj = summaryArea.selected();
 	if (obj == null || !(obj instanceof MailMessage))
 	    return false;
 	final MailMessage message = (MailMessage)obj;
-	return makeReply(message, wideReply);
+	return base.hooks.makeReply(message);
     }
-
-    /*
-    boolean makeForward(StoredMailMessage message)
-    {
-	if (!base.makeForward(message))
-	    luwrain.message("Во время подготовки перенаправленяи произошла непредвиденная ошибка", Luwrain.MESSAGE_ERROR);
-	return true;
-    }
-    */
-
-
 
     void onLaunchMailFetch()
     {
 	luwrain.launchApp("fetch", new String[]{"--MAIL"});
-    }
-
-        boolean makeReply(MailMessage message, boolean wideReply)
-    {
-	/*
-	NullCheck.notNull(message, "message");
-	Log.debug("mail", "starting making a reply");
-	try {
-	    String subject = message.getSubject();
-	    if (!subject.toLowerCase().startsWith("re: "))
-		subject = "Re: " + subject;
-	    final byte[] bytes = message.getRawMessage();
-	    final String from = message.getFrom();
-	    if (from == null || from.trim().isEmpty())
-		return false;
-	    final String replyToBase;
-	    try {
-		replyToBase = getReplyTo(bytes);
-	    }
-	    catch(IOException e)
-	    {
-		luwrain.crash(e);
-		return false;
-	    }
-	    final String replyTo = !replyToBase.trim().isEmpty()?replyToBase:from;
-	    final StringBuilder newBody = new StringBuilder();
-	    //newBody.append(strings.replyFirstLine(MailUtils.extractNameFromAddr(from), message.getSentDate()));
-	    newBody.append("\n");
-	    newBody.append("\n");
-	    if (!message.getText().isEmpty())
-		for(String s: message.getText().split("\n", -1))
-		    newBody.append(">" + s + "\n");
-	    if (wideReply)
-	    {
-		final MailUtils utils;
-		try {
-		    utils = new MailUtils(bytes);
-		}
-		catch (IOException e)
-		{
-		    luwrain.crash(e);
-		    return false;
-		}
-		luwrain.launchApp("message", new String[]{
-			replyTo,
-			utils.getWideReplyCc(getCcExcludeAddrs(), true),
-			subject,
-			newBody.toString()
-		    });
-	    } else 
-	    {
-		luwrain.launchApp("message", new String[]{
-			replyTo,
-			subject,
-			newBody.toString()
-		    });
-	    }
-	    return true;
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return false;
-	}
-	*/
-	return false;
-    }
-
-    boolean makeForward(MailMessage message)
-    {
-	NullCheck.notNull(message, "message");
-	try {
-	    if (!base.hasOpenedMessage())
-		return false;
-	    final MailMessage m = message != null?message:base.getOpenedMessage();
-	    String subject = m.getSubject();
-	    if (!subject.toLowerCase().startsWith("fwd: "))
-		subject = "Fwd: " + subject;
-	    final byte[] bytes = m.getRawMessage();
-	    final String from = m.getFrom();
-	    final StringBuilder newBody = new StringBuilder();
-	    newBody.append("=== Пересылаемое сообщение ===\n");
-	    newBody.append("ОТ: ");
-	    newBody.append(m.getFrom());
-	    newBody.append("\n");
-	    newBody.append("Кому: ");
-	    if (m.getTo().length > 0)
-	    {
-		final String[] values = m.getTo();
-		newBody.append(values[0]);
-		for(int i = 1;i < values.length;++i)
-		    newBody.append("," + values[i]);
-	    }
-	    newBody.append("\n");
-	    if (m.getCc().length > 0)
-	    {
-		newBody.append("Копия: ");
-		final String[] values = m.getCc();
-		newBody.append(values[0]);
-		for(int i = 1;i < values.length;++i)
-		    newBody.append("," + values[i]);
-	    }
-	    newBody.append("\n");
-	    newBody.append("Тема: " + m.getSubject() + "\n");
-	    newBody.append("Дата: " + m.getSentDate() + "\n");
-	    newBody.append("\n");
-	    for(String s: m.getText().split("\n"))
-		newBody.append(s + "\n");
-	    newBody.append("=== Конец пересылаемого сообщения ===");
-	    luwrain.launchApp("message", new String[]{
-		    "",
-		    subject,
-		    newBody.toString()
-		});
-	    return true;
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return false;
-	}
     }
 
     boolean saveAttachment(String fileName)

@@ -31,6 +31,7 @@ final class Hooks
     static private final String LOG_COMPONENT = Base.LOG_COMPONENT;
 
     static private final String ORGANIZE_SUMMARY_HOOK_NAME = "luwrain.mail.summary.organize";
+        static private final String REPLY_HOOK_NAME = "luwrain.mail.reply";
 
     private final Luwrain luwrain;
 
@@ -64,4 +65,17 @@ final class Hooks
 	return array.toArray(new Object[array.size()]);
     }
 
+    boolean makeReply(MailMessage message)
+    {
+	NullCheck.notNull(message, "message");
+	final Object[] args = new Object[]{new MessageHookObject(message)};
+	try {
+	    return new ChainOfResponsibilityHook(luwrain).run(REPLY_HOOK_NAME, args);
+	}
+	catch(RuntimeException e)
+	{
+	    Log.error(LOG_COMPONENT, "unable to run the " + REPLY_HOOK_NAME + ":" + e.getClass().getName() + ":" + e.getMessage());
+	    return false;
+	}
+    }
 }
