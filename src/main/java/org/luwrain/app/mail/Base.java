@@ -57,12 +57,8 @@ final class Base extends Utils
     {
 	NullCheck.notNull(folder, "folder");
 	this.openedFolder = folder;
-	final MailMessage[] allMessages = storing.getMessages().load(folder);
-	final List<MailMessage> res = new LinkedList();
-	for(MailMessage m: allMessages)
-	    if (m.getState() != MailMessage.State.DELETED)
-		res.add(m);
-	this.summaryItems = hooks.organizeSummary(res.toArray(new MailMessage[res.size()]));
+	final MailMessage[] messages = storing.getMessages().loadNoDeleted(folder);
+	this.summaryItems = hooks.organizeSummary(messages);
     }
 
     void openMessage(MailMessage message)

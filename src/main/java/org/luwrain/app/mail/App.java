@@ -148,6 +148,8 @@ final class App implements Application, MonoApp
 		    case ACTION:
 			if (ActionEvent.isAction(event, "reply"))
 			    return actions.onSummaryReply(this);
+						if (ActionEvent.isAction(event, "delete-message"))
+						    return actions.onSummaryDelete(this, false);
 			return false;
 		    default:
 			return super.onSystemEvent(event);

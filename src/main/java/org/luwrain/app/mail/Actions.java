@@ -79,21 +79,28 @@ final class Actions extends Utils
 	    luwrain.crash(e);
 	}
 	base.openMessage(message);
-		    return true;
+	return true;
     }
 
-    boolean onSummaryDelete(Base base, TableArea summaryArea, boolean deleteForever)
+    boolean onSummaryDelete(ListArea summaryArea, boolean deleteForever)
     {
-	NullCheck.notNull(base, "base");
 	NullCheck.notNull(summaryArea, "summaryArea");
-	final Object o = summaryArea.getSelectedRow();
-	if (o == null || !(o instanceof MailMessage))
+	final Object o = summaryArea.selected();
+	if (o == null || !(o instanceof SummaryItem))
 	    return false;
-	final MailMessage message = (MailMessage)o;
-	if (!deleteInSummary(message, deleteForever))
+	final SummaryItem item = (SummaryItem)o;
+	if (item.message == null)
+	    return false;
+	try {
+	    if (deleteForever)
+		base.storing.getMessages().delete(item.message); else
+		item.message.setState(MailMessage.State.DELETED);
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
 	    return true;
-	summaryArea.refresh();
-	app.clearMessageArea();
+	}
 	return true;
     }
 
@@ -153,28 +160,4 @@ final class Actions extends Utils
 	    return new String[0];
 	return new String[]{addr};
     }
-
-        boolean deleteInSummary(MailMessage message, boolean deleteForever)
-    {
-	/*
-	NullCheck.notNull(message, "message");
-	if (currentFolder == null)
-	    return false;
-	try {
-	    if (deleteForever)
-		storing.getMessages().delete(message); else
-		message.setState(MailMessage.State.DELETED);
-	    updateSummaryModel();
-	}
-	catch(PimException e)
-	{
-	    e.printStackTrace();
-	    luwrain.message("Во время удаления сообщения произошла непредвиденная ошибка:" + e.getMessage());
-	    return false;
-	}
-	*/
-	return true;
-    }
-
-
 }
