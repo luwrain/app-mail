@@ -76,10 +76,10 @@ final class Actions extends Utils
 		message.setState(MailMessage.State.READ);
 		summaryArea.refresh();
 	    }
-	    	    	base.openMessage(message);
-			messageArea.setDocument(createDocForMessage(message), 128);
-	layouts.messageMode();
-	return true;
+	    base.openMessage(message);
+	    messageArea.setDocument(createDocForMessage(message, strings), 128);
+	    layouts.messageMode();
+	    return true;
 	}
 	catch(PimException e)
 	{

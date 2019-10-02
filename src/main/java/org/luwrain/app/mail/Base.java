@@ -146,6 +146,7 @@ final class Base extends Utils
     {
 	final ReaderArea.Params params = new ReaderArea.Params();
 	params.context = new DefaultControlContext(luwrain);
+	params.name = strings.messageAreaName();
 	return params;
     }
 

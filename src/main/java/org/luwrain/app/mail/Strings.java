@@ -29,5 +29,13 @@ public interface Strings
     String actionReplyAll();
     String appName();
     String foldersAreaName();
+    String messageAreaAttachment();
+    String messageAreaCc();
+    String messageAreaContentType();
+    String messageAreaDate();
+    String messageAreaFrom();
+    String messageAreaName();
+    String messageAreaSubject();
+    String messageAreaTo();
     String summaryAreaName();
 }

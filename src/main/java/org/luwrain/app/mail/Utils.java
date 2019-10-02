@@ -8,6 +8,7 @@ import org.luwrain.core.*;
 import org.luwrain.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.util.*;
 
 class Utils
 {
@@ -19,7 +20,7 @@ class Utils
 	final StringBuilder b = new StringBuilder();
 	b.append(items[0]);
 	for(int i = 1;i < items.length;++i)
-	    b.append("," + items[i]);
+	    b.append(", ").append(items[i]);
 	return new String(b);
     }
 
@@ -28,10 +29,7 @@ class Utils
 	NullCheck.notNull(str, "str");
 	if (str.isEmpty())
 	    return new String[0];
-	final String[] res = str.split("\n", -1);
-	for(int i = 0;i < res.length;++i)
-	    res[i] = res[i].replaceAll("\r", "");
-	return res;
+	return FileUtils.universalLineSplitting(str);
     }
 
     static String getReplyTo(byte[] bytes) throws PimException, java.io.IOException
@@ -46,25 +44,28 @@ class Utils
 	*/
     }
 
-    static Document createDocForMessage(MailMessage message) throws PimException
+    static Document createDocForMessage(MailMessage message, Strings strings) throws PimException
     {
 	NullCheck.notNull(message, "message");
 	final NodeBuilder builder = new NodeBuilder();
-	builder.addParagraph("ОТ: " + message.getFrom());
-	builder.addParagraph("Кому: " + listToString(message.getTo()));
-	builder.addParagraph("Копия: " + listToString(message.getCc()));
-	builder.addParagraph("Тема: " + message.getSubject());
-	builder.addParagraph("Время: " + message.getSentDate());
-	builder.addParagraph("Тип данных: " + message.getContentType());
-	//nodes.add(NodeFactory.newEmptyLine());
-	//attachments = message.getAttachments();
+	builder.addParagraph(strings.messageAreaFrom() + " " + message.getFrom());
+	builder.addParagraph(strings.messageAreaTo() + " " + listToString(message.getTo()));
+	builder.addParagraph(strings.messageAreaCc() + " " + listToString(message.getCc()));
+	builder.addParagraph(strings.messageAreaSubject() + " " + message.getSubject());
+	builder.addParagraph(strings.messageAreaDate() + " " + message.getSentDate());
+	builder.addParagraph(strings.messageAreaContentType() + " " + message.getContentType());
+	if (message.getAttachments().length > 0)
+	{
+	    		builder.addEmptyLine();
+	for(String a: message.getAttachments())
+	    builder.addParagraph(strings.messageAreaAttachment() + " " + a);
+	}
+			builder.addEmptyLine();
 	for(String line: splitLines(message.getText()))
-	    if (!line.isEmpty())
+	    if (!line.trim().isEmpty())
 		builder.addParagraph(line); else
 		builder.addEmptyLine();
-	final Node root = builder.newRoot(); 
-	final Document doc = new Document(root);
-	doc.setProperty("url", "http://localhost");
+	final Document doc = new Document(builder.newRoot());
 	doc.commit();
 	return doc;
     }
