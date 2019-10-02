@@ -23,6 +23,7 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.controls.reader.*;
 
 final class Base extends Utils
 {
@@ -110,12 +111,14 @@ final class Base extends Utils
 	return params;
     }
 
-    ListArea.Params createSummaryParams()
+    ListArea.Params createSummaryParams(ListArea.ClickHandler clickHandler)
     {
+	NullCheck.notNull(clickHandler, "clickHandler");
 	final ListArea.Params params = new ListArea.Params();
 	params.context = new DefaultControlContext(luwrain);
 	params.name = strings.summaryAreaName();
 	params.model = new SummaryListModel();
+	params.clickHandler = clickHandler;
 	params.appearance = new ListUtils.DoubleLevelAppearance(params.context){
 		@Override public boolean isSectionItem(Object item)
 		{
@@ -136,6 +139,13 @@ final class Base extends Utils
 		    return summaryItem.type == SummaryItem.Type.SECTION;
 		}
 	    };
+	return params;
+    }
+
+    ReaderArea.Params createMessageReaderParams()
+    {
+	final ReaderArea.Params params = new ReaderArea.Params();
+	params.context = new DefaultControlContext(luwrain);
 	return params;
     }
 

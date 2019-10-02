@@ -46,7 +46,7 @@ final class App implements Application, MonoApp
 	this.strings = (Strings)o;
 	this.luwrain = luwrain;
 	this.base = new Base(luwrain, strings);
-	this.actions = new Actions(base, this);
+	this.actions = new Actions(base, createLayouts());
 	this.actionLists = new ActionLists(base);
 	if (base.storing == null)
 	    return new InitResult(InitResult.Type.FAILURE);
@@ -122,7 +122,7 @@ final class App implements Application, MonoApp
 		}
 	    };
 
-	this.summaryArea = new ListArea(base.createSummaryParams()) {
+	this.summaryArea = new ListArea(base.createSummaryParams((area, index, obj)->actions.onSummaryClick(obj, area, this.messageArea))) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -161,9 +161,7 @@ final class App implements Application, MonoApp
 		}
 	    };
 
-	final ReaderArea.Params messageParams = new ReaderArea.Params();
-	messageParams.context = new DefaultControlContext(luwrain);
-	this.messageArea = new ReaderArea(messageParams){
+	this.messageArea = new ReaderArea(base.createMessageReaderParams()){
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -194,6 +192,17 @@ final class App implements Application, MonoApp
 	    };
     }
 
+    private Layouts createLayouts()
+    {
+	return new Layouts(){
+	    @Override public void messageMode()
+	    {
+		layout.setBasicLayout(new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, messageArea));
+		luwrain.setActiveArea(messageArea);
+	    }
+	};
+    }
+
     void saveAttachment(String fileName)
     {
 	actions.saveAttachment(fileName);
@@ -202,20 +211,6 @@ final class App implements Application, MonoApp
     void refreshMessages()
     {
 	summaryArea.refresh();
-    }
-
-    void clearMessageArea()
-    {
-	base.openMessage(null);//FIXME:closeMessage()
-	//	messageArea.show(null);
-	//messageArea.setHotPoint(0, 0);
-    }
-
-    boolean switchToRawMessage()
-    {
-	if (!base.hasOpenedMessage())
-	    return false;
-	return true;
     }
 
     @Override public void closeApp()

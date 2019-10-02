@@ -30,16 +30,16 @@ final class Actions extends Utils
     private final Luwrain luwrain;
     private final Strings strings;
     private final Base base;
-    private final App app;
+    private final Layouts layouts;
 
-    Actions(Base base, App app)
+    Actions(Base base, Layouts layouts)
     {
 	NullCheck.notNull(base, "base");
-	NullCheck.notNull(app, "app");
+	NullCheck.notNull(layouts, "layouts");
 	this.base = base;
 	this.luwrain = base.luwrain;
 	this.strings = base.strings;
-	this.app = app;
+	this.layouts = layouts;
     }
 
     boolean onOpenFolder(MailFolder folder, ListArea summaryArea)
@@ -60,26 +60,32 @@ final class Actions extends Utils
 	return true;
     }
 
-    boolean onSummaryClick(ListArea summaryArea)
+    boolean onSummaryClick(Object obj, ListArea summaryArea, ReaderArea messageArea)
     {
+	NullCheck.notNull(obj, "obj");
 	NullCheck.notNull(summaryArea, "summaryArea");
-	final Object o = summaryArea.selected();
-	if (o == null || !(o instanceof MailMessage))
+	NullCheck.notNull(messageArea, "messageArea");
+	if (!(obj instanceof SummaryItem))
 	    return false;
-	final MailMessage message = (MailMessage)o;
+	final MailMessage message = ((SummaryItem)obj).message;
+	if (message == null)
+	    return false;
 	try {
 	    if (message.getState() == MailMessage.State.NEW)
 	    {
 		message.setState(MailMessage.State.READ);
 		summaryArea.refresh();
 	    }
+	    	    	base.openMessage(message);
+			messageArea.setDocument(createDocForMessage(message), 128);
+	layouts.messageMode();
+	return true;
 	}
 	catch(PimException e)
 	{
 	    luwrain.crash(e);
+	    return true;
 	}
-	base.openMessage(message);
-	return true;
     }
 
     boolean onSummaryDelete(ListArea summaryArea, boolean deleteForever)

@@ -46,7 +46,7 @@ class Utils
 	*/
     }
 
-    static Document prepareDocForMsg(MailMessage message) throws PimException
+    static Document createDocForMessage(MailMessage message) throws PimException
     {
 	NullCheck.notNull(message, "message");
 	final NodeBuilder builder = new NodeBuilder();
