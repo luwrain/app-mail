@@ -56,9 +56,9 @@ this.base = base;
     private boolean severalAccountsAvailable()
     {
 	try {
-	    final StoredMailAccount[] accounts = base.mailStoring.getAccounts().load();
+	    final MailAccount[] accounts = base.mailStoring.getAccounts().load();
 	    int count = 0;
-	    for(StoredMailAccount a: accounts)
+	    for(MailAccount a: accounts)
 	    {
 		if (a.getType() != MailAccount.Type.SMTP)
 		    continue;

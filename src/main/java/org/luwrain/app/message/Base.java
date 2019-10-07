@@ -45,7 +45,7 @@ final class Base extends Utils
 	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(luwrain, true);
     }
 
-    boolean send(StoredMailAccount account, MailMessage msg) throws PimException
+    boolean send(MailAccount account, MailMessage msg) throws PimException
     {
 	NullCheck.notNull(account, "account");
 	NullCheck.notNull(msg, "msg");
@@ -70,7 +70,7 @@ final class Base extends Utils
 	return mailStoring != null && contactsStoring != null;
     }
 
-    private String prepareFromLine(StoredMailAccount account) throws PimException
+    private String prepareFromLine(MailAccount account) throws PimException
     {
 	NullCheck.notNull(account, "account");
 	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());

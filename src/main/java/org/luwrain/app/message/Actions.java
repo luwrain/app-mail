@@ -45,8 +45,8 @@ final class Actions
 	if (!isReadyForSending(area))
 	    return false;
 	try {
-	    final StoredMailAccount account;
-	    final StoredMailAccount defaultAccount = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
+	    final MailAccount account;
+	    final MailAccount defaultAccount = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
 	    if (useAnotherAccount)
 	    {
 		account = conv.accountToSend();
@@ -58,8 +58,10 @@ final class Actions
 		{
 		    if (!conv.confirmLaunchingAccountWizard())
 			return false;
+		    /*FIXME:
 		    if (!(new org.luwrain.pim.wizards.Mail(luwrain).start()))
 			return false;
+		    */
 		    account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
 		} else
 		    account = defaultAccount;

@@ -115,11 +115,11 @@ final class Conversations
 	return Popups.confirmDefaultYes(luwrain, "Отправление сообщения", "Учётные записи для отправления почты отсутствуют. Вы хотите добавить новую сейчас?");//FIXME:
     }
 
-    StoredMailAccount accountToSend() throws PimException
+    MailAccount accountToSend() throws PimException
     {
-	final StoredMailAccount[] accounts = base.mailStoring.getAccounts().load();
+	final MailAccount[] accounts = base.mailStoring.getAccounts().load();
 	final List items = new LinkedList();
-	for(StoredMailAccount a: accounts)
+	for(MailAccount a: accounts)
 	    if (a.getType() == MailAccount.Type.SMTP && a.getFlags().contains(MailAccount.Flags.ENABLED))
 		items.add(a);
 	if (items.isEmpty())
@@ -127,6 +127,6 @@ final class Conversations
 	final Object res = Popups.fixedList(luwrain, "Выберите учётную запись для отправки сообщения:", items.toArray(new Object[items.size()]));//FIXME:
 	if (res == null)
 	    return null;
-	return (StoredMailAccount)res;
+	return (MailAccount)res;
     }
 }
