@@ -35,7 +35,7 @@ final class Actions
 	this.luwrain = base.luwrain;
 	this.base = base;
 	this.strings = base.strings;
-	this.conv = new Conversations(luwrain, base, strings);
+	this.conv = new Conversations(base);
     }
 
     //Returns true, if the message is successfully saved in the pending queue, the sending worker will be launched

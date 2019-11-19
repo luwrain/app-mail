@@ -83,14 +83,15 @@ public final class App implements Application
 			    final String name = getItemNameOnLine(getHotPointY());
 			    if (name == null)
 				return super.onInputEvent(event);
-			    if (name.equals(MessageArea.TO_NAME))
+			    switch(name)
+			    {
+			    case MessageArea.TO_NAME:
 				return actions.onEditTo(this);
-			    if (name.equals(MessageArea.CC_NAME))
+			    case MessageArea.CC_NAME:
 				return actions.onEditCc(this);
+			}
 			    return super.onInputEvent(event);
 			}
-		    case DELETE:
-			return actions.onDeleteAttachment(this);
 		    case ESCAPE:
 			closeApp();
 			return true;

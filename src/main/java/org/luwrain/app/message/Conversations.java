@@ -30,28 +30,26 @@ import org.luwrain.popups.pim.*;
 final class Conversations
 {
     private final Luwrain luwrain;
-    private final Base base;
     private final Strings strings;
+    private final Base base;
 
-    Conversations(Luwrain luwrain, Base base, Strings strings)
+    Conversations(Base base)
     {
-	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(base, "base");
-	NullCheck.notNull(strings, "strings");
-	this.luwrain = luwrain;
 	this.base = base;
-	this.strings = strings;
+	this.luwrain = base.luwrain;
+	this.strings = base.strings;
     }
 
     File attachment()
     {
-	return Popups.existingFile(luwrain, strings.attachmentPopupName(), strings.attachmentPopupPrefix(), new String[0]);
+	return Popups.existingFile(luwrain, strings.attachmentPopupName(), strings.attachmentPopupPrefix());
     }
-    
-	boolean confirmAttachmentDeleting(File file)
-	{
-	    NullCheck.notNull(file, "file");
-	    return Popups.confirmDefaultNo(luwrain, "Удаление прикрепления", "Вы действительно хотите исключить " + file.getName() + " из списка прикреплений?");
+
+    boolean confirmAttachmentDeleting(File file)
+    {
+	NullCheck.notNull(file, "file");
+	return Popups.confirmDefaultNo(luwrain, "Удаление прикрепления", "Вы действительно хотите исключить " + file.getName() + " из списка прикреплений?");
     }
 
     String editCc(String initial)
@@ -98,17 +96,6 @@ final class Conversations
 	    return null;
 	return popup.result();
     }
-
-    /*
-    private boolean mayRemove(Object item)
-    {
-	final YesNoPopup popup = new YesNoPopup(luwrain, "Удаление адреса получателя", "Вы действительно хотите удалить получателя копии \"" + item.toString() + "\"?", false, Popups.DEFAULT_POPUP_FLAGS);
-	luwrain.popup(popup);
-	if (popup.wasCancelled())
-	    return false;
-	return popup.result();
-    }
-    */
 
     boolean confirmLaunchingAccountWizard()
     {
