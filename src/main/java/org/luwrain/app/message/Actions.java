@@ -39,7 +39,7 @@ final class Actions
     }
 
     //Returns true, if the message is successfully saved in the pending queue, the sending worker will be launched
-    boolean onSend(Area area, boolean useAnotherAccount)
+    boolean onSend(MessageArea area, boolean useAnotherAccount)
     {
 	NullCheck.notNull(area, "area");
 	if (!isReadyForSending(area))
@@ -75,7 +75,7 @@ final class Actions
 	}
     }
 
-    boolean onEditTo(Area area)
+    boolean onEditTo(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
 	final String res = conv.editTo();
@@ -84,7 +84,7 @@ final class Actions
 	return true;
     }
 
-    boolean onEditCc(Area area)
+    boolean onEditCc(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
 	final String res = conv.editCc(area.getCc());
@@ -93,7 +93,7 @@ final class Actions
 	return true;
     }
 
-    boolean onAttachFile(Area area)
+    boolean onAttachFile(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
 	final File file = conv.attachment();
@@ -103,11 +103,11 @@ final class Actions
 	return true;
     }
 
-    boolean onDeleteAttachment(Area area)
+    boolean onDeleteAttachment(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
 	final int index = area.getHotPointY();
-	if (area.getItemTypeOnLine(index) != Area.Type.STATIC)
+	if (area.getItemTypeOnLine(index) != MessageArea.Type.STATIC)
 	    return false;
 	final Object obj = area.getItemObjOnLine(index);
 	if (obj == null || !(obj instanceof Attachment))
@@ -120,7 +120,7 @@ final class Actions
 	return true;
     }
 
-        private boolean isReadyForSending(Area area)
+        private boolean isReadyForSending(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
 	if (area.getTo().trim().isEmpty())

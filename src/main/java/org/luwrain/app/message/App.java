@@ -22,12 +22,10 @@ import org.luwrain.controls.*;
 
 public final class App implements Application
 {
-    private Luwrain luwrain = null;
-    private Strings strings = null;
     private Base base = null;
     private ActionLists actionLists = null;
     private Actions actions = null;
-    private Area messageArea;
+    private MessageArea messageArea;
 
     private final MessageContent startingMessage = new MessageContent();
 
@@ -54,19 +52,18 @@ public final class App implements Application
 	final Object o = luwrain.i18n().getStrings(Strings.NAME);
 	if (o == null)
 	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
-	this.strings = (Strings)o;
-	this.luwrain = luwrain;
+	final Strings strings = (Strings)o;
 	this.base = new Base(luwrain, strings);
-	this.actionLists = new ActionLists(luwrain, base, strings);
+	this.actionLists = new ActionLists(base);
 	this.actions = new Actions(base);
 	if (!base.isReady())
 	    return new InitResult(InitResult.Type.FAILURE);
 	if (startingMessage.text.isEmpty())
 	{
 	    final Settings.PersonalInfo sett = Settings.createPersonalInfo(luwrain.getRegistry());
-final String value = sett.getSignature("");
-if (!value.isEmpty())
-    startingMessage.text = "\n" + value;
+	    final String value = sett.getSignature("");
+	    if (!value.isEmpty())
+		startingMessage.text = "\n" + value;
 	}
 	createArea();
 	return new InitResult();
@@ -74,7 +71,7 @@ if (!value.isEmpty())
 
     private void createArea()
     {
-	messageArea = new Area(luwrain,  strings, startingMessage) {
+	messageArea = new MessageArea(base.luwrain, base.strings, startingMessage) {
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -86,9 +83,9 @@ if (!value.isEmpty())
 			    final String name = getItemNameOnLine(getHotPointY());
 			    if (name == null)
 				return super.onInputEvent(event);
-			    if (name.equals(Area.TO_NAME))
+			    if (name.equals(MessageArea.TO_NAME))
 				return actions.onEditTo(this);
-			    if (name.equals(Area.CC_NAME))
+			    if (name.equals(MessageArea.CC_NAME))
 				return actions.onEditCc(this);
 			    return super.onInputEvent(event);
 			}
@@ -115,7 +112,7 @@ if (!value.isEmpty())
 			{
 			    if (actions.onSend(messageArea, false))
 			    {
-				luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
+				base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
 				closeApp();
 			    }
 			    return true;
@@ -124,7 +121,7 @@ if (!value.isEmpty())
 			{
 			    if (actions.onSend(messageArea, true))
 			    {
-				luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
+				base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
 				closeApp();
 			    }
 			    return true;
@@ -139,7 +136,7 @@ if (!value.isEmpty())
 		    case OK:
 				if (actions.onSend( messageArea, false))
 				{
-				    luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
+				    base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
 				    closeApp();
 				}
 	return true;
@@ -149,7 +146,7 @@ if (!value.isEmpty())
 		}
 		@Override public String getAreaName()
 		{
-		    return strings.appName();
+		    return base.strings.appName();
 		}
     @Override public Action[] getAreaActions()
     {
@@ -160,12 +157,12 @@ if (!value.isEmpty())
 
 @Override public void closeApp()
     {
-	luwrain.closeApp();
+	base.luwrain.closeApp();
     }
 
     @Override public String getAppName()
     {
-	return strings.appName();
+	return base.strings.appName();
     }
 
     @Override public AreaLayout getAreaLayout()

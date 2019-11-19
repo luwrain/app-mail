@@ -24,10 +24,10 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.MailMessage;
 
-class Area extends FormArea
+class MessageArea extends FormArea
 {
     static private final String HOOKS_PREFIX = "luwrain.message.edit";
-    
+
     static final String TO_NAME = "to";
     static final String CC_NAME = "cc";
     static final String SUBJECT_NAME = "subject";
@@ -38,7 +38,7 @@ class Area extends FormArea
     private final MutableLinesImpl lines;
     private int attachmentCounter = 0;
 
-    Area(Luwrain luwrain, Strings strings, MessageContent msg)
+    MessageArea(Luwrain luwrain, Strings strings, MessageContent msg)
     {
 	super(new DefaultControlContext(luwrain));
 	NullCheck.notNull(luwrain, "luwrain");

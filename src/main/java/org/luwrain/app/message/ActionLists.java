@@ -26,18 +26,17 @@ import org.luwrain.pim.mail.*;
 final class ActionLists
 {
     private final Luwrain luwrain;
+        private final Strings strings;
         private final Base base;
-    private final Strings strings;
+
     private final boolean severalAccounts;
 
-    ActionLists(Luwrain luwrain, Base base, Strings strings)
+    ActionLists( Base base)
     {
-	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(base, "base");
-NullCheck.notNull(strings, "strings");
-this.luwrain = luwrain;
-this.base = base;
-	this.strings = strings;
+	this.base = base;
+this.luwrain = base.luwrain;
+	this.strings = base.strings;
 	this.severalAccounts = severalAccountsAvailable();
     }
 
