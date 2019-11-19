@@ -26,16 +26,15 @@ import org.luwrain.pim.mail.*;
 final class ActionLists
 {
     private final Luwrain luwrain;
-        private final Strings strings;
-        private final Base base;
-
+    private final Strings strings;
+    private final Base base;
     private final boolean severalAccounts;
 
     ActionLists( Base base)
     {
 	NullCheck.notNull(base, "base");
 	this.base = base;
-this.luwrain = base.luwrain;
+	this.luwrain = base.luwrain;
 	this.strings = base.strings;
 	this.severalAccounts = severalAccountsAvailable();
     }
@@ -45,22 +44,22 @@ this.luwrain = base.luwrain;
 	NullCheck.notNull(area, "area");
 	final boolean hasDeleteAttachment;
 	final int index = area.getHotPointY();
-		if (area.getItemTypeOnLine(index) != MessageArea.Type.STATIC)
-		    hasDeleteAttachment = false; else
-		{
-	final Object obj = area.getItemObj(index);
-	hasDeleteAttachment = obj != null && obj instanceof Attachment;
-	    }
+	if (area.getItemTypeOnLine(index) != MessageArea.Type.STATIC)
+	    hasDeleteAttachment = false; else
+	{
+	    final Object obj = area.getItemObj(index);
+	    hasDeleteAttachment = obj != null && obj instanceof Attachment;
+	}
 	final List<Action> res = new LinkedList();
 	res.add(new Action("send", strings.actionSend()));
 	if (severalAccounts)
 	    res.add(new Action("send-another-account", strings.actionSendAnotherAccount()));
-	res.add(new Action("choose-to", "Выбрать получателя из списка"));
+	res.add(new Action("choose-to", strings.actionChooseTo()));
 	res.add(new Action("choose-cc", strings.actionChooseCc()));
 	res.add(new Action("attach-file", strings.actionAttachFile(), new KeyboardEvent(KeyboardEvent.Special.INSERT)));
 	if (hasDeleteAttachment)
-	    	res.add(new Action("delete-attachment", strings.actionDeleteAttachment(), new KeyboardEvent(KeyboardEvent.Special.DELETE)));
-					return res.toArray(new Action[res.size()]);
+	    res.add(new Action("delete-attachment", strings.actionDeleteAttachment(), new KeyboardEvent(KeyboardEvent.Special.DELETE)));
+	return res.toArray(new Action[res.size()]);
     }
 
     private boolean severalAccountsAvailable()

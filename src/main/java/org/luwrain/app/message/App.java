@@ -77,25 +77,25 @@ public final class App implements Application
 		    NullCheck.notNull(event, "event");
 		    if (event.isSpecial() && !event.isModified())
 			switch(event.getSpecial())
-		    {
-		    case ENTER:
 			{
-			    final String name = getItemNameOnLine(getHotPointY());
-			    if (name == null)
-				return super.onInputEvent(event);
-			    switch(name)
+			case ENTER:
 			    {
-			    case MessageArea.TO_NAME:
-				return actions.onEditTo(this);
-			    case MessageArea.CC_NAME:
-				return actions.onEditCc(this);
+				final String name = getItemNameOnLine(getHotPointY());
+				if (name == null)
+				    return super.onInputEvent(event);
+				switch(name)
+				{
+				case MessageArea.TO_NAME:
+				    return actions.onEditTo(this);
+				case MessageArea.CC_NAME:
+				    return actions.onEditCc(this);
+				}
+				return super.onInputEvent(event);
+			    }
+			case ESCAPE:
+			    closeApp();
+			    return true;
 			}
-			    return super.onInputEvent(event);
-			}
-		    case ESCAPE:
-			closeApp();
-			return true;
-		    }
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
@@ -133,16 +133,16 @@ public final class App implements Application
 			    return actions.onEditCc(messageArea);
 			if (ActionEvent.isAction(event, "attach-file"))
 			    return actions.onAttachFile(messageArea);
-						if (ActionEvent.isAction(event, "delete-attachment"))
+			if (ActionEvent.isAction(event, "delete-attachment"))
 			    return actions.onDeleteAttachment(messageArea);
 			return false;
 		    case OK:
-				if (actions.onSend( messageArea, false))
-				{
-				    base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
-				    closeApp();
-				}
-	return true;
+			if (actions.onSend( messageArea, false))
+			{
+			    base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
+			    closeApp();
+			}
+			return true;
 		    default:
 			return super.onSystemEvent(event);
 		    }
@@ -151,14 +151,14 @@ public final class App implements Application
 		{
 		    return base.strings.appName();
 		}
-    @Override public Action[] getAreaActions()
-    {
-	return actionLists.getActions(this);
-    }
+		@Override public Action[] getAreaActions()
+		{
+		    return actionLists.getActions(this);
+		}
 	    };
     }
 
-@Override public void closeApp()
+    @Override public void closeApp()
     {
 	base.luwrain.closeApp();
     }

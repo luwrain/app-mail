@@ -24,6 +24,7 @@ public interface Strings
 
     String actionAttachFile();
     String actionChooseCc();
+    String actionChooseTo();
     String actionDeleteAttachment();
     String actionSend();
     String actionSendAnotherAccount();
