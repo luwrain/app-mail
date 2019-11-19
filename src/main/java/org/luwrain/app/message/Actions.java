@@ -109,7 +109,7 @@ final class Actions
 	final int index = area.getHotPointY();
 	if (area.getItemTypeOnLine(index) != MessageArea.Type.STATIC)
 	    return false;
-	final Object obj = area.getItemObjOnLine(index);
+	final Object obj = area.getItemObj(index);
 	if (obj == null || !(obj instanceof Attachment))
 	    return false;
 	final Attachment a = (Attachment)obj;

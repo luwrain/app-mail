@@ -103,7 +103,7 @@ class MessageArea extends FormArea
 	{
 	    if (getItemTypeOnLine(i) != FormArea.Type.STATIC)
 		continue;
-	    final Object o = getItemObjOnLine(i);
+	    final Object o = getItemObj(i);
 	    if (o == null || !(o instanceof Attachment))
 		continue;
 	    res.add((Attachment)o);
@@ -131,7 +131,7 @@ class MessageArea extends FormArea
 	    }
 	final Attachment a = new Attachment(ATTACHMENT + attachmentCounter, file);
 	++attachmentCounter;
-	addStatic(a.name, strings.attachment(file), a);
+	addStatic(a.name, strings.attachment(file.getName()), a);
     }
 
     void removeAttachment(int lineIndex)

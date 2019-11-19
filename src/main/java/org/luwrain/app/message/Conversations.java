@@ -49,7 +49,7 @@ final class Conversations
     boolean confirmAttachmentDeleting(File file)
     {
 	NullCheck.notNull(file, "file");
-	return Popups.confirmDefaultNo(luwrain, "Удаление прикрепления", "Вы действительно хотите исключить " + file.getName() + " из списка прикреплений?");
+	return Popups.confirmDefaultYes(luwrain, "Удаление прикрепления", "Вы действительно хотите исключить " + file.getName() + " из списка прикреплений?");
     }
 
     String editCc(String initial)

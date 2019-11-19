@@ -40,15 +40,26 @@ this.luwrain = base.luwrain;
 	this.severalAccounts = severalAccountsAvailable();
     }
 
-    Action[] getActions()
+    Action[] getActions(MessageArea area)
     {
+	NullCheck.notNull(area, "area");
+	final boolean hasDeleteAttachment;
+	final int index = area.getHotPointY();
+		if (area.getItemTypeOnLine(index) != MessageArea.Type.STATIC)
+		    hasDeleteAttachment = false; else
+		{
+	final Object obj = area.getItemObj(index);
+	hasDeleteAttachment = obj != null && obj instanceof Attachment;
+	    }
 	final List<Action> res = new LinkedList();
-	res.add(new Action("send", "Отправить"));
+	res.add(new Action("send", strings.actionSend()));
 	if (severalAccounts)
-	    res.add(new Action("send-another-account", "Отправить через учётную запись"));
+	    res.add(new Action("send-another-account", strings.actionSendAnotherAccount()));
 	res.add(new Action("choose-to", "Выбрать получателя из списка"));
-	res.add(new Action("choose-cc", "Выбрать получателей копии из списка"));
-					res.add(new Action("attach-file", "Прикрепить файл", new KeyboardEvent(KeyboardEvent.Special.INSERT)));//FIXME:
+	res.add(new Action("choose-cc", strings.actionChooseCc()));
+	res.add(new Action("attach-file", strings.actionAttachFile(), new KeyboardEvent(KeyboardEvent.Special.INSERT)));
+	if (hasDeleteAttachment)
+	    	res.add(new Action("delete-attachment", strings.actionDeleteAttachment(), new KeyboardEvent(KeyboardEvent.Special.DELETE)));
 					return res.toArray(new Action[res.size()]);
     }
 

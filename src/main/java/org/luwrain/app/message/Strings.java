@@ -34,6 +34,12 @@ public interface Strings
     String enterMessageBelow();
     String attachmentPopupName();
     String attachmentPopupPrefix();
-    String attachment(File f);
+    String attachment(String f);
     String contactsFolderTitle(String str);
+
+    String actionSend();
+    String actionSendAnotherAccount();
+    String actionChooseCc();
+    String actionAttachFile();
+    String actionDeleteAttachment();
 }

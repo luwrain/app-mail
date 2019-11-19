@@ -133,6 +133,8 @@ public final class App implements Application
 			    return actions.onEditCc(messageArea);
 			if (ActionEvent.isAction(event, "attach-file"))
 			    return actions.onAttachFile(messageArea);
+						if (ActionEvent.isAction(event, "delete-attachment"))
+			    return actions.onDeleteAttachment(messageArea);
 			return false;
 		    case OK:
 				if (actions.onSend( messageArea, false))
@@ -151,7 +153,7 @@ public final class App implements Application
 		}
     @Override public Action[] getAreaActions()
     {
-	return actionLists.getActions();
+	return actionLists.getActions(this);
     }
 	    };
     }
