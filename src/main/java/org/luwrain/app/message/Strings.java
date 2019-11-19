@@ -22,24 +22,17 @@ public interface Strings
 {
     static final String NAME = "luwrain.message";
 
+    String actionAttachFile();
+    String actionChooseCc();
+    String actionDeleteAttachment();
+    String actionSend();
+    String actionSendAnotherAccount();
     String appName();
-    //    String noMailStoring();
-    String withoutSubject();
-    String emptyRecipient();
-    String errorSendingMessage();
-
-    String to();
-    String cc();
-    String subject();
-    String enterMessageBelow();
     String attachmentPopupName();
     String attachmentPopupPrefix();
     String attachment(String f);
-    String contactsFolderTitle(String str);
-
-    String actionSend();
-    String actionSendAnotherAccount();
-    String actionChooseCc();
-    String actionAttachFile();
-    String actionDeleteAttachment();
+    String cc();
+    String enterMessageBelow();
+    String subject();
+    String to();
 }
