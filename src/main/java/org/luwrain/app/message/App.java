@@ -108,6 +108,8 @@ public final class App implements Application
 		    case CLOSE:
 			closeApp();
 			return true;
+		    case HELP:
+			return base.luwrain.openHelp("luwrain.message");
 		    case ACTION:
 			if (ActionEvent.isAction(event, "send"))
 			{
