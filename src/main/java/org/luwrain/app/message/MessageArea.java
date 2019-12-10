@@ -153,10 +153,10 @@ class MessageArea extends FormArea
 	return msg;
     }
 
-    private MultilineEdit2.Params createEditParams()
+    private MultilineEdit.Params createEditParams()
     {
-	final MultilineEdit2.Params params = createMultilineEditParams(context, lines);
-	final MultilineEditCorrector2 corrector = (MultilineEditCorrector2)params.model;
+	final MultilineEdit.Params params = createMultilineEditParams(context, lines);
+	final MultilineEditCorrector corrector = (MultilineEditCorrector)params.model;
 	params.model = new DirectScriptMultilineEditCorrector(context, corrector, HOOKS_PREFIX);
 	return params;
     }
