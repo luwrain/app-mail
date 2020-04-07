@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2019 Michael Pozhidaev <msp@luwrain.org>
-
-   This file is part of LUWRAIN.
-
-   LUWRAIN is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   LUWRAIN is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.mail;
 
@@ -27,23 +12,12 @@ import org.luwrain.pim.mail.*;
 
 final class Actions extends Utils
 {
-    private final Luwrain luwrain;
-    private final Strings strings;
-    private final Base base;
-    private final Layouts layouts;
-
-    Actions(Base base, Layouts layouts)
-    {
-	NullCheck.notNull(base, "base");
-	NullCheck.notNull(layouts, "layouts");
-	this.base = base;
-	this.luwrain = base.luwrain;
-	this.strings = base.strings;
-	this.layouts = layouts;
-    }
+    private final Luwrain luwrain = null;
+    private final Strings strings = null;
 
     boolean onOpenFolder(MailFolder folder, ListArea summaryArea)
     {
+	/*
 	NullCheck.notNull(folder, "folder");
 	NullCheck.notNull(summaryArea, "summaryArea");
 	try {
@@ -57,12 +31,14 @@ final class Actions extends Utils
 	summaryArea.refresh();
 	summaryArea.reset(false);
 	luwrain.setActiveArea(summaryArea);
+	*/
 	return true;
     }
 
     boolean onSummaryClick(Object obj, ListArea summaryArea, ReaderArea messageArea)
     {
 	NullCheck.notNull(obj, "obj");
+	/*
 	NullCheck.notNull(summaryArea, "summaryArea");
 	NullCheck.notNull(messageArea, "messageArea");
 	if (!(obj instanceof SummaryItem))
@@ -86,10 +62,13 @@ final class Actions extends Utils
 	    luwrain.crash(e);
 	    return true;
 	}
+	*/
+	return false;
     }
 
     boolean onSummaryDelete(ListArea summaryArea, boolean deleteForever)
     {
+	/*
 	NullCheck.notNull(summaryArea, "summaryArea");
 	final Object o = summaryArea.selected();
 	if (o == null || !(o instanceof SummaryItem))
@@ -107,11 +86,13 @@ final class Actions extends Utils
 	    luwrain.crash(e);
 	    return true;
 	}
+	*/
 	return true;
     }
 
     boolean onSummaryReply(ListArea summaryArea)
     {
+	/*
 	NullCheck.notNull(base, "base");
 	NullCheck.notNull(summaryArea, "summaryArea");
 	final Object obj = summaryArea.selected();
@@ -120,12 +101,10 @@ final class Actions extends Utils
 	final SummaryItem summaryItem = (SummaryItem)obj;
 	if (summaryItem.message == null)
 	    return false;
-	return base.hooks.makeReply(summaryItem.message);
-    }
 
-    void onLaunchMailFetch()
-    {
-	luwrain.launchApp("fetch", new String[]{"--MAIL"});
+	return base.hooks.makeReply(summaryItem.message);
+	*/
+	return true;
     }
 
     boolean saveAttachment(String fileName)
@@ -160,10 +139,13 @@ final class Actions extends Utils
 
     private String[] getCcExcludeAddrs()
     {
+	/*
 	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());
 	final String addr = sett.getDefaultMailAddress("");
 	if (addr.trim().isEmpty())
 	    return new String[0];
 	return new String[]{addr};
+	*/
+	return null;
     }
 }

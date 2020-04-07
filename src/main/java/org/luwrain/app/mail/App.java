@@ -1,18 +1,3 @@
-/*
-   Copyright 2012-2019 Michael Pozhidaev <msp@luwrain.org>
-
-   This file is part of LUWRAIN.
-
-   LUWRAIN is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public
-   License as published by the Free Software Foundation; either
-   version 3 of the License, or (at your option) any later version.
-
-   LUWRAIN is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-*/
 
 package org.luwrain.app.mail;
 
@@ -23,209 +8,46 @@ import org.luwrain.controls.*;
 import org.luwrain.controls.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.template.*;
 
-final class App implements Application, MonoApp
+final class App extends AppBase<Strings> implements MonoApp
 {
-    private Luwrain luwrain = null;
-    private Actions actions = null;
-    private ActionLists actionLists = null;
-    private Base base = null;
-    private Strings strings = null;
+    static final String LOG_COMPONENT = "mail";
+    
+    private Hooks hooks = null;
+    private MailStoring storing = null;
+    private MainLayout mainLayout = null;
 
-    private TreeArea foldersArea = null;
-    private ListArea summaryArea = null;
-    private ReaderArea messageArea = null;
-    private AreaLayoutHelper layout = null;
-
-    @Override public InitResult onLaunchApp(Luwrain luwrain)
+    App()
     {
-	NullCheck.notNull(luwrain, "luwrain");
-	final Object o = luwrain.i18n().getStrings(Strings.NAME);
-	if (o == null || !(o instanceof Strings))
-	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
-	this.strings = (Strings)o;
-	this.luwrain = luwrain;
-	this.base = new Base(luwrain, strings);
-	this.actions = new Actions(base, createLayouts());
-	this.actionLists = new ActionLists(base);
-	if (base.storing == null)
-	    return new InitResult(InitResult.Type.FAILURE);
-	createAreas();
-	if (base.openDefaultFolder())
-	    summaryArea.refresh();
-		this.layout = new AreaLayoutHelper(()->{
-		luwrain.onNewAreaLayout();
-		luwrain.announceActiveArea();
-		    }, new AreaLayout(AreaLayout.LEFT_RIGHT, foldersArea, summaryArea));
-			luwrain.runWorker(org.luwrain.pim.workers.Pop3.NAME);
-	return new InitResult();
+	super(Strings.NAME, Strings.class);
     }
 
-    private void createAreas()
+    @Override protected boolean onAppInit()
     {
-	this.foldersArea = new TreeArea(base.createFoldersTreeParams((area, obj)->{
-		    if (obj == null || !(obj instanceof MailFolder))
-			return false;
-		    final MailFolder folder = (MailFolder)obj;
-		    return actions.onOpenFolder(folder, summaryArea);
-		})) {
-		@Override public boolean onInputEvent(KeyboardEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case TAB:
-			    return AreaLayoutHelper.activateNextArea(luwrain, getAreaLayout(), this);
-			}
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    switch(event.getCode())
-		    {
-		    case CLOSE:
-			closeApp();
+	this.hooks = new Hooks(getLuwrain());
+	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
+		//luwrain.runWorker(org.luwrain.pim.workers.Pop3.NAME);
 			return true;
-		    default:
-			return super.onSystemEvent(event);
-		    }
-		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    switch(query.getQueryCode())
-		    {
-		    case AreaQuery.UNIREF_AREA:
-			{
-			    final Object selected = foldersArea.selected();
-			    if (selected == null || !(selected instanceof MailFolder) || !(query instanceof UniRefAreaQuery))
-				return false;
-			    final UniRefAreaQuery uniRefQuery = (UniRefAreaQuery)query;
-			    final MailFolder folder = (MailFolder)selected;
-			    try {
-				final String uniRef = base.storing.getFolders().getUniRef(folder);
-				if (uniRef == null || uniRef.trim().isEmpty())
-				    return false;
-				uniRefQuery.answer(uniRef);
-			    }
-			    catch(PimException e)
-			    {
-				luwrain.crash(e);
-				return false;
-			    }
-			}
-		    default:
-			return super.onAreaQuery(query);
-		    }
-		}
-	    };
-
-	this.summaryArea = new ListArea(base.createSummaryParams((area, index, obj)->actions.onSummaryClick(obj, area, this.messageArea))) {
-		@Override public boolean onInputEvent(KeyboardEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case TAB:
-			    return AreaLayoutHelper.activateNextArea(luwrain, getAreaLayout(), this);
-			case BACKSPACE:
-			    AreaLayoutHelper.activatePrevArea(luwrain, getAreaLayout(), this);
-			    return true;
-			}
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    switch(event.getCode())
-		    {
-		    case CLOSE:
-			closeApp();
-			return true;
-		    case ACTION:
-			if (ActionEvent.isAction(event, "reply"))
-			    return actions.onSummaryReply(this);
-						if (ActionEvent.isAction(event, "delete-message"))
-						    return actions.onSummaryDelete(this, false);
-			return false;
-		    default:
-			return super.onSystemEvent(event);
-		    }
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    return actionLists.getSummaryAreaActions();
-		}
-	    };
-
-	this.messageArea = new ReaderArea(base.createMessageReaderParams()){
-		@Override public boolean onInputEvent(KeyboardEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case TAB:
-			    return AreaLayoutHelper.activateNextArea(luwrain, getAreaLayout(), this);
-			case BACKSPACE:
-			    return AreaLayoutHelper.activatePrevArea(luwrain, getAreaLayout(), this);
-			}
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.getType() != EnvironmentEvent.Type.REGULAR)
-			return super.onSystemEvent(event);
-		    switch(event.getCode())
-		    {
-		    case CLOSE:
-			closeApp();
-			return true;
-		    default:
-			return super.onSystemEvent(event);
-		    }
-		}
-	    };
     }
 
-    private Layouts createLayouts()
+        private Layouts layouts()
     {
 	return new Layouts(){
 	    @Override public void messageMode()
 	    {
-		layout.setBasicLayout(new AreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, summaryArea, messageArea));
-		luwrain.setActiveArea(messageArea);
 	    }
 	};
     }
 
-    void saveAttachment(String fileName)
+    MailStoring getStoring()
     {
-	actions.saveAttachment(fileName);
+	return this.storing;
     }
 
-    void refreshMessages()
+    @Override  protected AreaLayout getDefaultAreaLayout()
     {
-	summaryArea.refresh();
-    }
-
-    @Override public void closeApp()
-    {
-	luwrain.closeApp();
-    }
-
-    @Override public String getAppName()
-    {
-	return strings.appName();
-    }
-
-    @Override  public AreaLayout getAreaLayout()
-    {
-	return layout.getLayout();
+	return mainLayout.getLayout();
     }
 
     @Override public MonoApp.Result onMonoAppSecondInstance(Application app)
