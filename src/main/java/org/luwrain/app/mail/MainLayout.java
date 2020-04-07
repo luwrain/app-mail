@@ -32,10 +32,9 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
     private final ListArea summaryArea;
     private final ReaderArea messageArea;
 
-        private MailFolder openedFolder = null;
     private SummaryItem[] summaryItems = new SummaryItem[0];
-        private MailMessage openedMessage;
-
+    //private MailFolder openedFolder = null;
+    //private MailMessage openedMessage;
 
     MainLayout(App app)
     {
@@ -45,12 +44,16 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (app.onInputEvent(this, event))
+			return true;
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-			return super.onSystemEvent(event);
+		    if (app.onSystemEvent(this, event))
+			return true;
+		    return super.onSystemEvent(event);
 		}
 		@Override public boolean onAreaQuery(AreaQuery query)
 		{
@@ -85,12 +88,16 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    		    if (app.onInputEvent(this, event))
+			return true;
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-			return super.onSystemEvent(event);
+		    		    if (app.onSystemEvent(this, event))
+			return true;
+		    return super.onSystemEvent(event);
 		}
 		@Override public Action[] getAreaActions()
 		{
@@ -101,23 +108,27 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    		    if (app.onInputEvent(this, event))
+			return true;
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-			return super.onSystemEvent(event);
+		    		    if (app.onSystemEvent(this, event))
+			return true;
+				    		    return super.onSystemEvent(event);
 		}
 	    };
     }
 
     @Override public boolean onTreeClick(TreeArea area, Object obj)
     {
-		    if (obj == null || !(obj instanceof MailFolder))
-			return false;
-		    final MailFolder folder = (MailFolder)obj;
-		    return false;//actions.onOpenFolder(folder, summaryArea);
-		}
+	if (obj == null || !(obj instanceof MailFolder))
+	    return false;
+	final MailFolder folder = (MailFolder)obj;
+	return false;//actions.onOpenFolder(folder, summaryArea);
+    }
 
     TreeArea.Params createFoldersTreeParams()
     {
@@ -214,10 +225,6 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 	    }
 	}
     }
-
-
-
-
 		    }
 
 
