@@ -30,25 +30,6 @@ final class Actions extends Utils
     private final Luwrain luwrain = null;
     private final Strings strings = null;
 
-    boolean onOpenFolder(MailFolder folder, ListArea summaryArea)
-    {
-	/*
-	NullCheck.notNull(folder, "folder");
-	NullCheck.notNull(summaryArea, "summaryArea");
-	try {
-	    base.openFolder(folder);
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return true;
-	}
-	summaryArea.refresh();
-	summaryArea.reset(false);
-	luwrain.setActiveArea(summaryArea);
-	*/
-	return true;
-    }
 
     boolean onSummaryClick(Object obj, ListArea summaryArea, ReaderArea messageArea)
     {

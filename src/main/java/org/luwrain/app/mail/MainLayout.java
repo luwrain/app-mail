@@ -32,9 +32,9 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
     private final ListArea summaryArea;
     private final ReaderArea messageArea;
 
+    private MailFolder folder = null;
     private SummaryItem[] summaryItems = new SummaryItem[0];
-    //private MailFolder openedFolder = null;
-    //private MailMessage openedMessage;
+    private MailMessage message = null;
 
     MainLayout(App app)
     {
@@ -61,24 +61,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 		    switch(query.getQueryCode())
 		    {
 		    case AreaQuery.UNIREF_AREA:
-			{
-			    final Object selected = foldersArea.selected();
-			    if (selected == null || !(selected instanceof MailFolder) || !(query instanceof UniRefAreaQuery))
-				return false;
-			    final UniRefAreaQuery uniRefQuery = (UniRefAreaQuery)query;
-			    final MailFolder folder = (MailFolder)selected;
-			    try {
-				final String uniRef = app.getStoring().getFolders().getUniRef(folder);
-				if (uniRef == null || uniRef.trim().isEmpty())
-				    return false;
-				uniRefQuery.answer(uniRef);
-			    }
-			    catch(PimException e)
-			    {
-				app.getLuwrain().crash(e);
-				return false;
-			    }
-			}
+			return onFoldersUniRefQuery(query);
 		    default:
 			return super.onAreaQuery(query);
 		    }
@@ -88,14 +71,14 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    		    if (app.onInputEvent(this, event))
+		    if (app.onInputEvent(this, event))
 			return true;
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    		    if (app.onSystemEvent(this, event))
+		    if (app.onSystemEvent(this, event))
 			return true;
 		    return super.onSystemEvent(event);
 		}
@@ -108,16 +91,16 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    		    if (app.onInputEvent(this, event))
+		    if (app.onInputEvent(this, event))
 			return true;
 		    return super.onInputEvent(event);
 		}
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    		    if (app.onSystemEvent(this, event))
+		    if (app.onSystemEvent(this, event))
 			return true;
-				    		    return super.onSystemEvent(event);
+		    return super.onSystemEvent(event);
 		}
 	    };
     }
@@ -126,11 +109,45 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
     {
 	if (obj == null || !(obj instanceof MailFolder))
 	    return false;
-	final MailFolder folder = (MailFolder)obj;
-	return false;//actions.onOpenFolder(folder, summaryArea);
+	this.folder = (MailFolder)obj;
+	try {
+	    final MailMessage[] messages = app.getStoring().getMessages().loadNoDeleted(folder);
+	    this.summaryItems = app.getHooks().organizeSummary(messages);
+	}
+	catch(PimException e)
+	{
+	    app.getLuwrain().crash(e);
+	    return true;
+	}
+	summaryArea.refresh();
+	summaryArea.reset(false);
+	app.getLuwrain().setActiveArea(summaryArea);
+	return true;
     }
 
-    TreeArea.Params createFoldersTreeParams()
+    private boolean onFoldersUniRefQuery(AreaQuery query)
+    {
+	NullCheck.notNull(query, "query");
+	final Object selected = foldersArea.selected();								    
+	if (selected == null || !(selected instanceof MailFolder) || !(query instanceof UniRefAreaQuery))
+	    return false;
+	final UniRefAreaQuery uniRefQuery = (UniRefAreaQuery)query;
+	final MailFolder folder = (MailFolder)selected;
+	try {
+	    final String uniRef = app.getStoring().getFolders().getUniRef(folder);
+	    if (uniRef == null || uniRef.trim().isEmpty())
+		return false;
+	    uniRefQuery.answer(uniRef);
+	    return true;
+	}
+	catch(PimException e)
+	{
+	    app.getLuwrain().crash(e);
+	    return false;
+	}
+    }
+
+    private TreeArea.Params createFoldersTreeParams()
     {
 	final TreeArea.Params params = new TreeArea.Params();
 	params.context = new DefaultControlContext(app.getLuwrain());
@@ -140,7 +157,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 	return params;
     }
 
-    ListArea.Params createSummaryParams()
+    private ListArea.Params createSummaryParams()
     {
 	final ListArea.Params params = new ListArea.Params();
 	params.context = new DefaultControlContext(app.getLuwrain());
@@ -180,7 +197,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 
     AreaLayout getLayout()
     {
-	return new AreaLayout(foldersArea);
+	return new AreaLayout(AreaLayout.LEFT_RIGHT, foldersArea, summaryArea);
     }
 
     private final class SummaryListModel implements ListArea.Model
@@ -225,21 +242,4 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 	    }
 	}
     }
-		    }
-
-
-    /*
-    void openFolder(MailFolder folder) throws PimException
-    {
-	NullCheck.notNull(folder, "folder");
-	this.openedFolder = folder;
-	final MailMessage[] messages = storing.getMessages().loadNoDeleted(folder);
-	this.summaryItems = hooks.organizeSummary(messages);
-    }
-
-    void openMessage(MailMessage message)
-    {
-	this.openedMessage = message;
-    }
-    */
-
+}
