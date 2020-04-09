@@ -25,7 +25,7 @@ import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.template.*;
 
-final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
+final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, ListArea.ClickHandler
 {
     private final App app;
     private final TreeArea foldersArea;
@@ -147,6 +147,116 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 	}
     }
 
+
+    @Override public boolean onListClick(ListArea area, int index, Object obj)
+    {
+	NullCheck.notNull(obj, "obj");
+	if (!(obj instanceof SummaryItem))
+	    return false;
+	final MailMessage message = ((SummaryItem)obj).message;
+	if (message == null)
+	    return false;
+	try {
+	    if (message.getState() == MailMessage.State.NEW)
+	    {
+		message.setState(MailMessage.State.READ);
+		summaryArea.refresh();
+	    }
+	    messageArea.setDocument(Utils.createDocForMessage(message, app.getStrings()), 128);
+	    return true;
+	}
+	catch(PimException e)
+	{
+	    app.getLuwrain().crash(e);
+	    return true;
+	}
+
+    }
+
+    private boolean actDeleteMessage(ListArea summaryArea, boolean deleteForever)
+    {
+	/*
+	NullCheck.notNull(summaryArea, "summaryArea");
+	final Object o = summaryArea.selected();
+	if (o == null || !(o instanceof SummaryItem))
+	    return false;
+	final SummaryItem item = (SummaryItem)o;
+	if (item.message == null)
+	    return false;
+	try {
+	    if (deleteForever)
+		base.storing.getMessages().delete(item.message); else
+		item.message.setState(MailMessage.State.DELETED);
+	}
+	catch(PimException e)
+	{
+	    luwrain.crash(e);
+	    return true;
+	}
+	*/
+	return true;
+    }
+
+    private boolean actReply(ListArea summaryArea)
+    {
+	/*
+	NullCheck.notNull(base, "base");
+	NullCheck.notNull(summaryArea, "summaryArea");
+	final Object obj = summaryArea.selected();
+	if (obj == null || !(obj instanceof SummaryItem))
+	    return false;
+	final SummaryItem summaryItem = (SummaryItem)obj;
+	if (summaryItem.message == null)
+	    return false;
+
+	return base.hooks.makeReply(summaryItem.message);
+	*/
+	return true;
+    }
+
+    boolean saveAttachment(String fileName)
+    {
+	/*
+	  if (currentMessage == null)
+	    return false;
+	File destFile = new File(luwrain.launchContext().userHomeDirAsFile(), fileName);
+	destFile = Popups.file(luwrain, "Сохранение прикрепления", "Введите имя файла для сохранения прикрепления:", destFile, 0, 0);
+	if (destFile == null)
+	    return false;
+	if (destFile.isDirectory())
+	    destFile = new File(destFile, fileName);
+	final org.luwrain.util.MailEssentialJavamail util = new org.luwrain.util.MailEssentialJavamail();
+	try {
+	    if (!util.saveAttachment(currentMessage.getRawMail(), fileName, destFile))
+	    {
+		luwrain.message("Целостность почтового сообщения нарушена, сохранение прикрепления невозможно", Luwrain.MESSAGE_ERROR);
+		return false;
+	    }
+	}
+	catch (Exception e)
+	{
+	    e.printStackTrace();
+	    luwrain.message("Во время сохранения прикрепления произошла непредвиденная ошибка:" + e.getMessage());
+	    return false;
+	}
+	luwrain.message("Файл " + destFile.getAbsolutePath() + " успешно сохранён", Luwrain.MESSAGE_OK);
+	*/
+	return true;
+    }
+
+    private String[] getCcExcludeAddrs()
+    {
+	/*
+	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());
+	final String addr = sett.getDefaultMailAddress("");
+	if (addr.trim().isEmpty())
+	    return new String[0];
+	return new String[]{addr};
+	*/
+	return null;
+    }
+
+
     private TreeArea.Params createFoldersTreeParams()
     {
 	final TreeArea.Params params = new TreeArea.Params();
@@ -163,7 +273,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler
 	params.context = new DefaultControlContext(app.getLuwrain());
 	params.name = app.getStrings().summaryAreaName();
 	params.model = new SummaryListModel();
-	//	params.clickHandler = clickHandler;
+	params.clickHandler = this;
 	params.appearance = new ListUtils.DoubleLevelAppearance(params.context){
 		@Override public boolean isSectionItem(Object item)
 		{
