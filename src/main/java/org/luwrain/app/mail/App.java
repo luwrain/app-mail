@@ -40,8 +40,13 @@ final class App extends AppBase<Strings> implements MonoApp
 	this.hooks = new Hooks(getLuwrain());
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	this.mainLayout = new MainLayout(this);
-	//luwrain.runWorker(org.luwrain.pim.workers.Pop3.NAME);
 	setAppName(getStrings().appName());
+	return true;
+    }
+
+    boolean fetchIncomingBkg()
+    {
+	getLuwrain().runWorker(org.luwrain.pim.workers.Pop3.NAME);
 	return true;
     }
 

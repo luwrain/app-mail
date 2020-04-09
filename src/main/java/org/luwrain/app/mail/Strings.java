@@ -38,4 +38,5 @@ public interface Strings
     String messageAreaSubject();
     String messageAreaTo();
     String summaryAreaName();
+    String actionFetchIncomingBkg();
 }

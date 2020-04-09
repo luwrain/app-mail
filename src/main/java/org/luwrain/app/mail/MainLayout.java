@@ -40,7 +40,11 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
     {
 	NullCheck.notNull(app, "app");
 	this.app = app;
+	final ActionInfo fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new KeyboardEvent(KeyboardEvent.Special.F6), app::fetchIncomingBkg);
 	this.foldersArea = new TreeArea(createFoldersTreeParams()) {
+		final Actions actions = actions(
+						fetchIncomingBkg
+						);
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -51,7 +55,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (app.onSystemEvent(this, event))
+		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
 		}
@@ -66,8 +70,15 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 			return super.onAreaQuery(query);
 		    }
 		}
+		@Override public Action[] getAreaActions()
+		{
+		    return actions.getAreaActions();
+		}
 	    };
 	this.summaryArea = new ListArea(createSummaryParams()) {
+		final Actions actions = actions(
+						fetchIncomingBkg
+						);
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -78,16 +89,19 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (app.onSystemEvent(this, event))
+		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
 		}
 		@Override public Action[] getAreaActions()
 		{
-		    return new Action[0];
+		    return actions.getAreaActions();
 		}
 	    };
 	this.messageArea = new ReaderArea(createMessageReaderParams()){
+		final Actions actions = actions(
+						fetchIncomingBkg
+						);
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -98,9 +112,13 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (app.onSystemEvent(this, event))
+		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
+		}
+		@Override public Action[] getAreaActions()
+		{
+		    return actions.getAreaActions();
 		}
 	    };
     }
