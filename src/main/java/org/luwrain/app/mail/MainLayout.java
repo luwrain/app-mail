@@ -40,12 +40,12 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
     {
 	NullCheck.notNull(app, "app");
 	this.app = app;
-	final ActionInfo fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new KeyboardEvent(KeyboardEvent.Special.F6), app::fetchIncomingBkg);
+	final ActionInfo fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), app::fetchIncomingBkg);
 	this.foldersArea = new TreeArea(createFoldersTreeParams()) {
 		final Actions actions = actions(
 						fetchIncomingBkg
 						);
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))
@@ -79,7 +79,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		final Actions actions = actions(
 						fetchIncomingBkg
 						);
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))
@@ -102,7 +102,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		final Actions actions = actions(
 						fetchIncomingBkg
 						);
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))

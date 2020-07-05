@@ -56,9 +56,9 @@ final class ActionLists
 	    res.add(new Action("send-another-account", strings.actionSendAnotherAccount()));
 	res.add(new Action("choose-to", strings.actionChooseTo()));
 	res.add(new Action("choose-cc", strings.actionChooseCc()));
-	res.add(new Action("attach-file", strings.actionAttachFile(), new KeyboardEvent(KeyboardEvent.Special.INSERT)));
+	res.add(new Action("attach-file", strings.actionAttachFile(), new InputEvent(InputEvent.Special.INSERT)));
 	if (hasDeleteAttachment)
-	    res.add(new Action("delete-attachment", strings.actionDeleteAttachment(), new KeyboardEvent(KeyboardEvent.Special.DELETE)));
+	    res.add(new Action("delete-attachment", strings.actionDeleteAttachment(), new InputEvent(InputEvent.Special.DELETE)));
 	return res.toArray(new Action[res.size()]);
     }
 

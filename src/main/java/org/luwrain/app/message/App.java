@@ -72,7 +72,7 @@ public final class App implements Application
     private void createArea()
     {
 	messageArea = new MessageArea(base.luwrain, base.strings, startingMessage) {
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.isSpecial() && !event.isModified())
