@@ -174,4 +174,31 @@ public final class App implements Application
     {
 	return new AreaLayout(messageArea);
     }
+
+    Luwrain getLuwrain()
+    {
+	return base.luwrain;
+    }
+
+    Strings getStrings()
+    {
+	return base.strings;
+    }
+
+    boolean onInputEvent(Object o1, Object o2)
+    {
+	return false;
+    }
+
+    boolean onSystemEvent(Object o1, Object o2, Object o3)
+    {
+	return false;
+    }
+
+
+        boolean onAreaQuery(Object o1, Object o2)
+    {
+	return false;
+    }
+
 }
