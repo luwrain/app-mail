@@ -87,7 +87,7 @@ addr = sett.getDefaultMailAddress("").trim();
 
     private MailFolder getFolderForPending()
     {
-	final org.luwrain.settings.mail.Settings.MailFolders sett = org.luwrain.settings.mail.Settings.createMailFolders(luwrain.getRegistry());
+	final org.luwrain.pim.mail.Settings.Folders sett = org.luwrain.pim.mail.Settings.createFolders(luwrain.getRegistry());
 	final String uniRef = sett.getFolderPending("");
 	if (uniRef.trim().isEmpty())
 	    return null;
