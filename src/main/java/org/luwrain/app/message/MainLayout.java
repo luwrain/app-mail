@@ -11,7 +11,7 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.MailMessage;
 
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 final class MainLayout extends LayoutBase
 {

@@ -23,7 +23,7 @@ import org.luwrain.controls.*;
 import org.luwrain.controls.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, ListArea.ClickHandler
 {

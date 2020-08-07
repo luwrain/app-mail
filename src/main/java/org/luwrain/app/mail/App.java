@@ -20,7 +20,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 final class App extends AppBase<Strings> implements MonoApp
 {
@@ -32,7 +32,7 @@ final class App extends AppBase<Strings> implements MonoApp
 
     App()
     {
-	super(Strings.NAME, Strings.class);
+	super(Strings.NAME, Strings.class, "luwrain.mail");
     }
 
     @Override protected boolean onAppInit()
