@@ -1,7 +1,7 @@
 /*
    Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
 
-   This file is part of LUWRAIN.
+i   This file is part of LUWRAIN.
 
    LUWRAIN is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public
@@ -23,10 +23,6 @@ public interface Strings
     static final String NAME = "luwrain.mail";
 
 
-    String actionDeleteMessage();
-    String actionForward();
-    String actionReply();
-    String actionReplyAll();
     String appName();
     String foldersAreaName();
     String messageAreaAttachment();
