@@ -22,7 +22,7 @@ final class Actions
 	this.strings = base.strings;
 	this.conv = new Conversations(base);
     }
-
+    /*
     //Returns true, if the message is successfully saved in the pending queue, the sending worker will be launched
     boolean onSend(MessageArea area, boolean useAnotherAccount)
     {
@@ -46,7 +46,7 @@ final class Actions
 		    /*FIXME:
 		    if (!(new org.luwrain.pim.wizards.Mail(luwrain).start()))
 			return false;
-		    */
+		    /
 		    account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
 		} else
 		    account = defaultAccount;
@@ -122,4 +122,5 @@ final class Actions
 	}
 	return true;
     }
+*/
 }

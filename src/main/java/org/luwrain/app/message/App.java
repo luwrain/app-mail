@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2019 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -19,186 +19,43 @@ package org.luwrain.app.message;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
+import org.luwrain.app.base.*;
 
-public final class App implements Application
+public final class App extends AppBase<Strings>
 {
-    private Base base = null;
-    private ActionLists actionLists = null;
-    private Actions actions = null;
-    private MessageArea messageArea;
+    private MainLayout mainLayout = null;
 
     private final MessageContent startingMessage = new MessageContent();
 
     public App()
     {
+	super(Strings.NAME, Strings.class);
     }
 
-    public App(String to, String cc,
-	       String subject, String text)
+    public App(String to, String cc, String subject, String text)
     {
+	super(Strings.NAME, Strings.class);
 	NullCheck.notNull(to, "to");
 	NullCheck.notNull(cc, "cc");
 	NullCheck.notNull(subject, "subject");
 	NullCheck.notNull(text, "text");
+	/*
 	startingMessage.to = to;
 	startingMessage.cc = cc;
 	startingMessage.subject = subject;
 	startingMessage.text = text;
+	*/
     }
 
-    @Override public InitResult onLaunchApp(Luwrain luwrain)
+    @Override protected boolean onAppInit()
     {
-	NullCheck.notNull(luwrain, "luwrain");
-	final Object o = luwrain.i18n().getStrings(Strings.NAME);
-	if (o == null)
-	    return new InitResult(InitResult.Type.NO_STRINGS_OBJ, Strings.NAME);
-	final Strings strings = (Strings)o;
-	this.base = new Base(luwrain, strings);
-	this.actionLists = new ActionLists(base);
-	this.actions = new Actions(base);
-	if (!base.isReady())
-	    return new InitResult(InitResult.Type.FAILURE);
-	if (startingMessage.text.isEmpty())
-	{
-	    final Settings.PersonalInfo sett = Settings.createPersonalInfo(luwrain.getRegistry());
-	    final String value = sett.getSignature("");
-	    if (!value.isEmpty())
-		startingMessage.text = "\n" + value;
-	}
-	createArea();
-	return new InitResult();
+	this.mainLayout = new MainLayout(this);
+	return true;
     }
 
-    private void createArea()
+    @Override public AreaLayout getDefaultAreaLayout()
     {
-	messageArea = new MessageArea(base.luwrain, base.strings, startingMessage) {
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.isSpecial() && !event.isModified())
-			switch(event.getSpecial())
-			{
-			case ENTER:
-			    {
-				final String name = getItemNameOnLine(getHotPointY());
-				if (name == null)
-				    return super.onInputEvent(event);
-				switch(name)
-				{
-				case MessageArea.TO_NAME:
-				    return actions.onEditTo(this);
-				case MessageArea.CC_NAME:
-				    return actions.onEditCc(this);
-				}
-				return super.onInputEvent(event);
-			    }
-			case ESCAPE:
-			    closeApp();
-			    return true;
-			}
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(SystemEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.getType() != SystemEvent.Type.REGULAR)
-			return super.onSystemEvent(event);
-		    switch (event.getCode())
-		    {
-		    case CLOSE:
-			closeApp();
-			return true;
-		    case HELP:
-			return base.luwrain.openHelp("luwrain.message");
-		    case ACTION:
-			if (ActionEvent.isAction(event, "send"))
-			{
-			    if (actions.onSend(messageArea, false))
-			    {
-				base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
-				closeApp();
-			    }
-			    return true;
-			}
-			if (ActionEvent.isAction(event, "send-another-account"))
-			{
-			    if (actions.onSend(messageArea, true))
-			    {
-				base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
-				closeApp();
-			    }
-			    return true;
-			}
-			if (ActionEvent.isAction(event, "choose-to"))
-			    return actions.onEditTo(messageArea);
-			if (ActionEvent.isAction(event, "choose-cc"))
-			    return actions.onEditCc(messageArea);
-			if (ActionEvent.isAction(event, "attach-file"))
-			    return actions.onAttachFile(messageArea);
-			if (ActionEvent.isAction(event, "delete-attachment"))
-			    return actions.onDeleteAttachment(messageArea);
-			return false;
-		    case OK:
-			if (actions.onSend( messageArea, false))
-			{
-			    base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
-			    closeApp();
-			}
-			return true;
-		    default:
-			return super.onSystemEvent(event);
-		    }
-		}
-		@Override public String getAreaName()
-		{
-		    return base.strings.appName();
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    return actionLists.getActions(this);
-		}
-	    };
-    }
-
-    @Override public void closeApp()
-    {
-	base.luwrain.closeApp();
-    }
-
-    @Override public String getAppName()
-    {
-	return base.strings.appName();
-    }
-
-    @Override public AreaLayout getAreaLayout()
-    {
-	return new AreaLayout(messageArea);
-    }
-
-    Luwrain getLuwrain()
-    {
-	return base.luwrain;
-    }
-
-    Strings getStrings()
-    {
-	return base.strings;
-    }
-
-    boolean onInputEvent(Object o1, Object o2)
-    {
-	return false;
-    }
-
-    boolean onSystemEvent(Object o1, Object o2, Object o3)
-    {
-	return false;
-    }
-
-
-        boolean onAreaQuery(Object o1, Object o2)
-    {
-	return false;
+	return mainLayout.getLayout();
     }
 
 }

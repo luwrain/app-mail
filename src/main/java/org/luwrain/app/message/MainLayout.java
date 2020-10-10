@@ -3,7 +3,6 @@
 package org.luwrain.app.message;
 
 import java.io.*;
-//import java.nio.file.*;
 import java.util.*;
 
 import org.luwrain.core.*;
@@ -15,14 +14,6 @@ import org.luwrain.app.base.*;
 
 final class MainLayout extends LayoutBase
 {
-    static private final String HOOKS_PREFIX = "luwrain.message.edit";
-
-    static final String
-	TO_NAME = "to",
-	CC_NAME = "cc",
-	SUBJECT_NAME = "subject",
-ATTACHMENT = "attachment";
-
 private final App app;
     private final FormArea formArea;
     private final MutableLinesImpl lines;
@@ -63,97 +54,9 @@ private final App app;
 		}
 
 	    };
-		formArea.addEdit(TO_NAME, app.getStrings().to(), msg.to);
-		formArea.addEdit(CC_NAME, app.getStrings().cc(), msg.cc);
-		formArea.addEdit(SUBJECT_NAME, app.getStrings().subject(), msg.subject);
-		formArea.activateMultilineEdit(app.getStrings().enterMessageBelow(), lines, createEditParams(), true);
     }
 
-    String getTo()
-    {
-	return formArea.getEnteredText(TO_NAME);
-    }
-
-    void setTo(String value)
-    {
-	NullCheck.notNull(value, "value");
-	formArea.setEnteredText(value, "value");
-    }
-
-    void focusTo()
-    {
-	formArea.setHotPoint(0, 0);
-    }
-
-    String getCc()
-    {
-	return formArea.getEnteredText(CC_NAME);
-    }
-
-    void setCc(String value)
-    {
-	NullCheck.notNull(value, "value");
-	formArea.setEnteredText(CC_NAME, value);
-    }
-
-    String getSubject()
-    {
-	return formArea.getEnteredText(SUBJECT_NAME);
-    }
-
-    void focusSubject()
-    {
-	formArea.setHotPoint(0, 2);
-    }
-
-    String getText()
-    {
-	return lines.getWholeText();
-    }
-
-    Attachment[] getAttachments()
-    {
-	final List<Attachment> res = new LinkedList();
-		for(int i = 0;i < formArea.getItemCount();++i)
-	{
-	    if (formArea.getItemTypeOnLine(i) != FormArea.Type.STATIC)
-		continue;
-	    final Object o = formArea.getItemObj(i);
-	    if (o == null || !(o instanceof Attachment))
-		continue;
-	    res.add((Attachment)o);
-	}
-		return res.toArray(new Attachment[res.size()]);
-    }
-
-    File[] getAttachmentFiles()
-    {
-	final Attachment[] attachments = getAttachments();
-	final File[] res = new File[attachments.length];
-	for(int i = 0;i < attachments.length;++i)
-	    res[i] = attachments[i].file;
-	return res;
-    }
-
-    void addAttachment(File file)
-    {
-	NullCheck.notNull(file, "file");
-	for(Attachment a: getAttachments())
-	    if (a.file.equals(file))
-	    {
-		app.getLuwrain().message("Файл " + file.getName() + " уже прикреплён к сообщению", Luwrain.MessageType.ERROR);//FIXME:
-		return;
-	    }
-	final Attachment a = new Attachment(ATTACHMENT + attachmentCounter, file);
-	++attachmentCounter;
-	formArea.addStatic(a.name, app.getStrings().attachment(file.getName()), a);
-    }
-
-    void removeAttachment(int lineIndex)
-    {
-	formArea.removeItemOnLine(lineIndex);
-    }
-
+    /*
     MailMessage constructMailMessage() throws org.luwrain.pim.PimException
     {
 	final MailMessage msg = new MailMessage();
@@ -175,4 +78,37 @@ private final App app;
 	params.model = new DirectScriptMultilineEditCorrector(params.context, corrector, HOOKS_PREFIX);
 	return params;
     }
+    */
+
+AreaLayout getLayout()
+{
+    return new AreaLayout(formArea);
 }
+}
+
+/*
+			    if (actions.onSend(messageArea, true))
+			    {
+				base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
+				closeApp();
+			    }
+			    return true;
+			}
+			if (ActionEvent.isAction(event, "choose-to"))
+			    return actions.onEditTo(messageArea);
+			if (ActionEvent.isAction(event, "choose-cc"))
+			    return actions.onEditCc(messageArea);
+			if (ActionEvent.isAction(event, "attach-file"))
+			    return actions.onAttachFile(messageArea);
+			if (ActionEvent.isAction(event, "delete-attachment"))
+			    return actions.onDeleteAttachment(messageArea);
+			return false;
+		    case OK:
+			if (actions.onSend( messageArea, false))
+			{
+			    base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
+			    closeApp();
+			}
+			return true;
+
+*/
