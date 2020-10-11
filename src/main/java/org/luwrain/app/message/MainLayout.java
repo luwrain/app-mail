@@ -14,20 +14,16 @@ import org.luwrain.app.base.*;
 
 final class MainLayout extends LayoutBase
 {
-private final App app;
-    private final FormArea formArea;
-    private final MutableLinesImpl lines;
-    private int attachmentCounter = 0;
+    private final App app;
+    private final MessageArea messageArea;
 
     MainLayout(App app)
     {
 	NullCheck.notNull(app, "app");
 	this.app = app;
-	final MessageContent msg = null;
-		this.lines = new MutableLinesImpl(msg.textLines());
-		this.formArea = new FormArea(new DefaultControlContext(app.getLuwrain())){
+	this.messageArea = new MessageArea(createParams()){
 		final Actions actions = actions();
-				@Override public boolean onInputEvent(InputEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))
@@ -37,7 +33,7 @@ private final App app;
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-					    if (app.onSystemEvent(this, event, actions))
+		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
 		}
@@ -52,116 +48,45 @@ private final App app;
 		{
 		    return actions.getAreaActions();
 		}
-
 	    };
     }
 
-    /*
-    MailMessage constructMailMessage() throws org.luwrain.pim.PimException
+    MailMessage getMailMessage()
     {
 	final MailMessage msg = new MailMessage();
-	msg.setTo(Base.splitAddrs(formArea.getEnteredText(TO_NAME)));
-	msg.setCc(Utils.splitAddrs(formArea.getEnteredText(CC_NAME)));
-	msg.setSubject(formArea.getEnteredText(SUBJECT_NAME));
-	msg.setText(getText());
+	msg.setTo(App.splitAddrs(messageArea.getTo()));
+	msg.setCc(App.splitAddrs(messageArea.getCc()));
+	msg.setSubject(messageArea.getSubject());
+	msg.setText(messageArea.getText());
 	final List<String> attachments = new LinkedList();
-	for(File f: getAttachmentFiles())
+	for(File f: messageArea.getAttachmentFiles())
 	    attachments.add(f.getAbsolutePath());
 	msg.setAttachments(attachments.toArray(new String[attachments.size()]));
 	return msg;
     }
 
-    private MultilineEdit.Params createEditParams()
+    private boolean actSend()
     {
-	final MultilineEdit.Params params = formArea.createMultilineEditParams(new DefaultControlContext(app.getLuwrain()), lines);
-	final MultilineEditCorrector corrector = (MultilineEditCorrector)params.model;
-	params.model = new DirectScriptMultilineEditCorrector(params.context, corrector, HOOKS_PREFIX);
-	return params;
-    }
-    */
-
-AreaLayout getLayout()
-{
-    return new AreaLayout(formArea);
-}
-}
-
-/*
-			    if (actions.onSend(messageArea, true))
+	if (app.onSend(getMailMessage(), true))
 			    {
-				base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
-				closeApp();
+				app.getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
+				app.closeApp();
 			    }
-			    return true;
-			}
-			if (ActionEvent.isAction(event, "choose-to"))
-			    return actions.onEditTo(messageArea);
-			if (ActionEvent.isAction(event, "choose-cc"))
-			    return actions.onEditCc(messageArea);
-			if (ActionEvent.isAction(event, "attach-file"))
-			    return actions.onAttachFile(messageArea);
-			if (ActionEvent.isAction(event, "delete-attachment"))
-			    return actions.onDeleteAttachment(messageArea);
-			return false;
-		    case OK:
-			if (actions.onSend( messageArea, false))
-			{
-			    base.luwrain.runWorker(org.luwrain.pim.workers.Smtp.NAME);
-			    closeApp();
-			}
-			return true;
-
-    /*
-    //Returns true, if the message is successfully saved in the pending queue, the sending worker will be launched
-    boolean onSend(MessageArea area, boolean useAnotherAccount)
-    {
-	NullCheck.notNull(area, "area");
-	if (!isReadyForSending(area))
-	    return false;
-	try {
-	    final MailAccount account;
-	    final MailAccount defaultAccount = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
-	    if (useAnotherAccount)
-	    {
-		account = conv.accountToSend();
-		if (account == null)
-		    return false;
-	    }else
-	    {
-		if (defaultAccount == null)
-		{
-		    if (!conv.confirmLaunchingAccountWizard())
-			return false;
-		    /*FIXME:
-		    if (!(new org.luwrain.pim.wizards.Mail(luwrain).start()))
-			return false;
-		    /
-		    account = base.mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
-		} else
-		    account = defaultAccount;
-	    }
-	    return base.send(account, area.constructMailMessage());
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return false;
-	}
+				    return true;
     }
 
-    boolean onEditTo(MessageArea area)
+    private boolean actEditTo()
     {
-	NullCheck.notNull(area, "area");
-	final String res = conv.editTo();
+	final String res = app.getConv().editTo();
 	if (res != null)
-	    area.setTo(res);
+	    messageArea.setTo(res);
 	return true;
     }
 
-    boolean onEditCc(MessageArea area)
+    private boolean actEditCc(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
-	final String res = conv.editCc(area.getCc());
+	final String res = app.getConv().editCc(area.getCc());
 	if (res != null)
 	    area.setCc(res);
 	return true;
@@ -170,7 +95,7 @@ AreaLayout getLayout()
     boolean onAttachFile(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
-	final File file = conv.attachment();
+	final File file = app.getConv().attachment();
 	if (file == null)
 	    return true;
 	area.addAttachment(file);
@@ -187,10 +112,10 @@ AreaLayout getLayout()
 	if (obj == null || !(obj instanceof Attachment))
 	    return false;
 	final Attachment a = (Attachment)obj;
-	if (!conv.confirmAttachmentDeleting(a.file))
+	if (!app.getConv().confirmAttachmentDeleting(a.file))
 	    return true;
 	area.removeAttachment(index);
-	luwrain.message("Прикрепление " + a.file.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
+	app.getLuwrain().message("Прикрепление " + a.file.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
 	return true;
     }
 
@@ -199,16 +124,28 @@ AreaLayout getLayout()
 	NullCheck.notNull(area, "area");
 	if (area.getTo().trim().isEmpty())
 	{
-	    luwrain.message("Не указан получатель сообщения", Luwrain.MessageType.ERROR);//FIXME:
+	    app.getLuwrain().message("Не указан получатель сообщения", Luwrain.MessageType.ERROR);//FIXME:
 	    area.focusTo();
 	    return false;
 	}
 	if (area.getSubject().trim().isEmpty())
 	{
-	    luwrain.message("Не указана тема сообщения", Luwrain.MessageType.ERROR);
+	    app.getLuwrain().message("Не указана тема сообщения", Luwrain.MessageType.ERROR);
 	    area.focusSubject();
 	    return false;
 	}
 	return true;
     }
-*/
+
+    private MessageArea.Params createParams()
+    {
+	final MessageArea.Params params = new MessageArea.Params();
+	params.context = new DefaultControlContext(app.getLuwrain());
+	return params;
+    }
+
+AreaLayout getLayout()
+{
+    return new AreaLayout(messageArea);
+}
+}

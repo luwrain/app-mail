@@ -28,8 +28,9 @@ import org.luwrain.pim.contacts.*;
 
 public final class App extends AppBase<Strings>
 {
-        private MailStoring mailStoring = null;
+    private MailStoring mailStoring = null;
     private ContactsStoring contactsStoring = null;
+    private Conversations conv = null;
     private MainLayout mainLayout = null;
 
     private final MessageContent startingMessage = new MessageContent();
@@ -47,7 +48,7 @@ public final class App extends AppBase<Strings>
 	NullCheck.notNull(subject, "subject");
 	NullCheck.notNull(text, "text");
 	/*
-	startingMessage.to = to;
+	  startingMessage.to = to;
 	startingMessage.cc = cc;
 	startingMessage.subject = subject;
 	startingMessage.text = text;
@@ -56,11 +57,11 @@ public final class App extends AppBase<Strings>
 
     @Override protected boolean onAppInit()
     {
-
 	this.mailStoring = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(getLuwrain(), true);
 	if (mailStoring == null || contactsStoring == null)
 	    return false;
+	this.conv = new Conversations(this);
 	this.mainLayout = new MainLayout(this);
 	return true;
     }
@@ -70,7 +71,37 @@ public final class App extends AppBase<Strings>
 	return mainLayout.getLayout();
     }
 
-        boolean send(MailAccount account, MailMessage msg) throws PimException
+    Conversations getConv()
+    {
+	return this.conv;
+    }
+
+        boolean onSend(MailMessage message, boolean useAnotherAccount)
+    {
+	NullCheck.notNull(message, "message");
+	try {
+	    	    if (useAnotherAccount)
+	    {
+		final MailAccount account = conv.accountToSend();
+		if (account == null)
+		    return false;
+		return send(account, message);
+	    }
+	    final MailAccount account;
+	    final MailAccount defaultAccount = mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
+		if (defaultAccount == null)
+		    account = conv.accountToSend(); else
+		    account = defaultAccount;
+			    return send(account, message);
+	}
+	catch(PimException e)
+	{
+	    getLuwrain().crash(e);
+	    return false;
+	}
+    }
+
+    private boolean send(MailAccount account, MailMessage msg) throws PimException
     {
 	NullCheck.notNull(account, "account");
 	NullCheck.notNull(msg, "msg");
@@ -100,9 +131,6 @@ public final class App extends AppBase<Strings>
 	return this.mailStoring;
     }
 
-
-    
-
     private String prepareFromLine(MailAccount account) throws PimException
     {
 	NullCheck.notNull(account, "account");
@@ -111,10 +139,10 @@ public final class App extends AppBase<Strings>
 	final String addr;
 	if (!account.getSubstName().trim().isEmpty())
 	    personal = account.getSubstName().trim(); else
-personal = sett.getFullName("").trim();
-		if (!account.getSubstAddress().trim().isEmpty())
+	    personal = sett.getFullName("").trim();
+	if (!account.getSubstAddress().trim().isEmpty())
 	    addr = account.getSubstAddress().trim(); else
-addr = sett.getDefaultMailAddress("").trim();
+	    addr = sett.getDefaultMailAddress("").trim();
 	return mailStoring.combinePersonalAndAddr(personal, addr);
     }
 
@@ -154,6 +182,4 @@ addr = sett.getDefaultMailAddress("").trim();
 		res.add(s.trim());
 	return res.toArray(new String[res.size()]);
     }
-
-
 }
