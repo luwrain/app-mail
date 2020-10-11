@@ -16,13 +16,20 @@
 
 package org.luwrain.app.message;
 
+import java.util.*;
+
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
+import org.luwrain.pim.*;
+import org.luwrain.pim.mail.*;
+import org.luwrain.pim.contacts.*;
 
 public final class App extends AppBase<Strings>
 {
+        private MailStoring mailStoring = null;
+    private ContactsStoring contactsStoring = null;
     private MainLayout mainLayout = null;
 
     private final MessageContent startingMessage = new MessageContent();
@@ -49,6 +56,11 @@ public final class App extends AppBase<Strings>
 
     @Override protected boolean onAppInit()
     {
+
+	this.mailStoring = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
+	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(getLuwrain(), true);
+	if (mailStoring == null || contactsStoring == null)
+	    return false;
 	this.mainLayout = new MainLayout(this);
 	return true;
     }
@@ -57,5 +69,91 @@ public final class App extends AppBase<Strings>
     {
 	return mainLayout.getLayout();
     }
+
+        boolean send(MailAccount account, MailMessage msg) throws PimException
+    {
+	NullCheck.notNull(account, "account");
+	NullCheck.notNull(msg, "msg");
+	msg.setFrom(prepareFromLine(account));
+	if (msg.getFrom().trim().isEmpty())
+	    throw new RuntimeException("No sender address");//FIXME:
+	msg.setSentDate(new Date());
+	msg.setContentType("text/plain; charset=utf-8");//FIXME:
+	msg.setExtInfo(mailStoring.getAccounts().getUniRef(account));
+	final Map<String, String> headers = new HashMap();
+	headers.put("User-Agent", getUserAgentStr());
+	msg.setRawMessage(mailStoring.getMessages().toByteArray(msg, headers));
+	final MailFolder folder = getFolderForPending();
+	if (folder == null)
+	    throw new RuntimeException("Unable to prepare a folder for pending messages");
+	mailStoring.getMessages().save(folder, msg);
+	return true;
+    }
+
+    ContactsStoring getContactsStoring()
+    {
+	return this.contactsStoring;
+    }
+
+    MailStoring getMailStoring()
+    {
+	return this.mailStoring;
+    }
+
+
+    
+
+    private String prepareFromLine(MailAccount account) throws PimException
+    {
+	NullCheck.notNull(account, "account");
+	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(getLuwrain().getRegistry());
+	final String personal;
+	final String addr;
+	if (!account.getSubstName().trim().isEmpty())
+	    personal = account.getSubstName().trim(); else
+personal = sett.getFullName("").trim();
+		if (!account.getSubstAddress().trim().isEmpty())
+	    addr = account.getSubstAddress().trim(); else
+addr = sett.getDefaultMailAddress("").trim();
+	return mailStoring.combinePersonalAndAddr(personal, addr);
+    }
+
+    private MailFolder getFolderForPending()
+    {
+	final org.luwrain.pim.mail.Settings sett = org.luwrain.pim.mail.Settings.create(getLuwrain().getRegistry());
+	final String uniRef = sett.getFolderPending("");
+	if (uniRef.trim().isEmpty())
+	    return null;
+	try {
+	    return mailStoring.getFolders().loadByUniRef(uniRef);
+	}
+	catch (PimException e)
+	{
+	    getLuwrain().crash(e);
+	    return null;
+	}
+    }
+
+    private String getUserAgentStr()
+    {
+	final String ver = getLuwrain().getProperty("luwrain.version");
+	if (!ver.isEmpty())
+	    return "LUWRAIN v" + ver;
+	return "LUWRAIN";
+    }
+
+    static String[] splitAddrs(String line)
+    {
+	NullCheck.notNull(line, "line");
+	if (line.trim().isEmpty())
+	    return new String[0];
+	final List<String> res = new LinkedList();
+	final String[] lines = line.split(",", -1);
+	for(String s: lines)
+	    if (!s.trim().isEmpty())
+		res.add(s.trim());
+	return res.toArray(new String[res.size()]);
+    }
+
 
 }

@@ -29,16 +29,16 @@ import org.luwrain.popups.pim.*;
 
 final class Conversations
 {
+    private final App app;
     private final Luwrain luwrain;
     private final Strings strings;
-    private final Base base;
 
-    Conversations(Base base)
+    Conversations(App app)
     {
-	NullCheck.notNull(base, "base");
-	this.base = base;
-	this.luwrain = base.luwrain;
-	this.strings = base.strings;
+	NullCheck.notNull(app, "app");
+	this.app = app;
+	this.luwrain = app.getLuwrain();
+	this.strings = app.getStrings();
     }
 
     File attachment()
@@ -55,10 +55,10 @@ final class Conversations
     String editCc(String initial)
     {
 	NullCheck.notNull(initial, "initial");
-	final String[] items = Base.splitAddrs(initial);
+	final String[] items = App.splitAddrs(initial);
 	final CcEditPopup popup;
 	try {
-	    popup = new CcEditPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), base.contactsStoring, items);
+	    popup = new CcEditPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), app.getContactsStoring(), items);
 	}
 	catch(PimException e)
 	{
@@ -81,10 +81,9 @@ final class Conversations
 
     String editTo()
     {
-	NullCheck.notNull(base, "base");
 	final ChooseMailPopup popup;
 	try {
-	    popup = new ChooseMailPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), base.contactsStoring, base.contactsStoring.getFolders().getRoot());
+	    popup = new ChooseMailPopup(luwrain, org.luwrain.popups.pim.Strings.create(luwrain), app.getContactsStoring(), app.getContactsStoring().getFolders().getRoot());
 	}
 	catch(PimException e)
 	{
@@ -104,7 +103,7 @@ final class Conversations
 
     MailAccount accountToSend() throws PimException
     {
-	final MailAccount[] accounts = base.mailStoring.getAccounts().load();
+	final MailAccount[] accounts = app.getMailStoring().getAccounts().load();
 	final List items = new LinkedList();
 	for(MailAccount a: accounts)
 	    if (a.getType() == MailAccount.Type.SMTP && a.getFlags().contains(MailAccount.Flags.ENABLED))
