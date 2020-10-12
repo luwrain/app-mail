@@ -1,4 +1,18 @@
+/*
+   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
 
+   This file is part of LUWRAIN.
+
+   LUWRAIN is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   LUWRAIN is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+*/
 
 package org.luwrain.app.message;
 
@@ -9,8 +23,9 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.pim.mail.MailMessage;
-
+import org.luwrain.io.json.*;
 import org.luwrain.app.base.*;
+import org.luwrain .util.*;
 
 final class MainLayout extends LayoutBase
 {
@@ -68,11 +83,11 @@ final class MainLayout extends LayoutBase
     private boolean actSend()
     {
 	if (app.onSend(getMailMessage(), true))
-			    {
-				app.getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
-				app.closeApp();
-			    }
-				    return true;
+	{
+	    app.getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
+	    app.closeApp();
+	}
+	return true;
     }
 
     private boolean actEditTo()
@@ -119,7 +134,7 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-        private boolean isReadyForSending(MessageArea area)
+    private boolean isReadyForSending(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
 	if (area.getTo().trim().isEmpty())
@@ -139,13 +154,19 @@ final class MainLayout extends LayoutBase
 
     private MessageArea.Params createParams()
     {
+	final Settings.PersonalInfo sett = Settings.createPersonalInfo(app.getLuwrain().getRegistry());
+	final List<String> text = new LinkedList();
+	text.addAll(Arrays.asList(app.messageContent.getTextAsArray()));
+	text.add("");
+	text.addAll(Arrays.asList(TextUtils.splitLinesAnySeparator(sett.getSignature(""))));
 	final MessageArea.Params params = new MessageArea.Params();
 	params.context = new DefaultControlContext(app.getLuwrain());
+	params.text = text.toArray(new String[text.size()]);
 	return params;
     }
 
-AreaLayout getLayout()
-{
-    return new AreaLayout(messageArea);
-}
+    AreaLayout getLayout()
+    {
+	return new AreaLayout(messageArea);
+    }
 }

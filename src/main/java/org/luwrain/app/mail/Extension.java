@@ -18,6 +18,7 @@ package org.luwrain.app.mail;
 
 import org.luwrain.base.*;
 import org.luwrain.core.*;
+import org.luwrain.io.json.*;
 
 public final class Extension extends org.luwrain.core.extensions.EmptyExtension
 {
@@ -54,17 +55,10 @@ public final class Extension extends org.luwrain.core.extensions.EmptyExtension
 		    NullCheck.notNullItems(args, "args");
 		    if (args.length == 0)
 			return new Application[]{new org.luwrain.app.message.App()};
-		    switch(args.length)
-		    {
-		    case 1:
-			return new Application[]{new org.luwrain.app.message.App(args[0], "", "", "")};
-		    case 2:
-			return new Application[]{new org.luwrain.app.message.App(args[0], "", args[1], "")};
-		    case 3:
-			return new Application[]{new org.luwrain.app.message.App(args[0], "", args[1], args[2])};
-		    case 4:
-			return new Application[]{new org.luwrain.app.message.App(args[0], args[1], args[2], args[3])};
-		    }
+		    if (args.length == 1)
+			return new Application[]{new org.luwrain.app.message.App(MessageContent.fromJson(args[0]))};
+		    if (args.length == 4)
+			return new Application[]{new org.luwrain.app.message.App(new MessageContent(args[0], args[1], args[2], args[3]))};
 		    return new Application[]{new org.luwrain.app.message.App()};
 		}
 	    }

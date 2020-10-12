@@ -25,34 +25,26 @@ import org.luwrain.app.base.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.pim.contacts.*;
+import org.luwrain.io.json.*;
 
 public final class App extends AppBase<Strings>
 {
+    final MessageContent messageContent;
     private MailStoring mailStoring = null;
     private ContactsStoring contactsStoring = null;
     private Conversations conv = null;
     private MainLayout mainLayout = null;
 
-    private final MessageContent startingMessage = new MessageContent();
-
     public App()
     {
 	super(Strings.NAME, Strings.class);
+	this.messageContent = new MessageContent();
     }
 
-    public App(String to, String cc, String subject, String text)
+    public App(MessageContent messageContent)
     {
 	super(Strings.NAME, Strings.class);
-	NullCheck.notNull(to, "to");
-	NullCheck.notNull(cc, "cc");
-	NullCheck.notNull(subject, "subject");
-	NullCheck.notNull(text, "text");
-	/*
-	  startingMessage.to = to;
-	startingMessage.cc = cc;
-	startingMessage.subject = subject;
-	startingMessage.text = text;
-	*/
+	this.messageContent = messageContent != null?messageContent:new MessageContent();
     }
 
     @Override protected boolean onAppInit()
@@ -63,6 +55,7 @@ public final class App extends AppBase<Strings>
 	    return false;
 	this.conv = new Conversations(this);
 	this.mainLayout = new MainLayout(this);
+	setAppName(getStrings().appName());
 	return true;
     }
 
@@ -71,16 +64,38 @@ public final class App extends AppBase<Strings>
 	return mainLayout.getLayout();
     }
 
+            boolean onInputEvent(Area area, InputEvent event, Runnable closing)
+    {
+	NullCheck.notNull(area, "area");
+	if (event.isSpecial())
+	    switch(event.getSpecial())
+	    {
+	    case ESCAPE:
+		if (closing != null)
+		    closing.run(); else
+		    closeApp();
+		return true;
+	    }
+	return super.onInputEvent(area, event);
+    }
+
+    @Override public boolean onInputEvent(Area area, InputEvent event)
+    {
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(event, "event");
+	return onInputEvent(area, event, null);
+    }
+
     Conversations getConv()
     {
 	return this.conv;
     }
 
-        boolean onSend(MailMessage message, boolean useAnotherAccount)
+    boolean onSend(MailMessage message, boolean useAnotherAccount)
     {
 	NullCheck.notNull(message, "message");
 	try {
-	    	    if (useAnotherAccount)
+	    if (useAnotherAccount)
 	    {
 		final MailAccount account = conv.accountToSend();
 		if (account == null)
@@ -89,10 +104,10 @@ public final class App extends AppBase<Strings>
 	    }
 	    final MailAccount account;
 	    final MailAccount defaultAccount = mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
-		if (defaultAccount == null)
-		    account = conv.accountToSend(); else
-		    account = defaultAccount;
-			    return send(account, message);
+	    if (defaultAccount == null)
+		account = conv.accountToSend(); else
+		account = defaultAccount;
+	    return send(account, message);
 	}
 	catch(PimException e)
 	{
