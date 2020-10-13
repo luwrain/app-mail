@@ -39,15 +39,50 @@ final class App extends AppBase<Strings> implements MonoApp
     {
 	this.hooks = new Hooks(getLuwrain());
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
+	if (storing == null)
+	    return false;
 	this.mainLayout = new MainLayout(this);
 	setAppName(getStrings().appName());
 	return true;
+    }
+
+                boolean onInputEvent(Area area, InputEvent event, Runnable closing)
+    {
+	NullCheck.notNull(area, "area");
+	if (event.isSpecial())
+	    switch(event.getSpecial())
+	    {
+	    case ESCAPE:
+		if (closing != null)
+		    closing.run(); else
+		    closeApp();
+		return true;
+	    }
+	return super.onInputEvent(area, event);
+    }
+
+    @Override public boolean onInputEvent(Area area, InputEvent event)
+    {
+	NullCheck.notNull(area, "area");
+	NullCheck.notNull(event, "event");
+	return onInputEvent(area, event, null);
+    }
+
+    MailStoring getMailStoring()
+    {
+	return this.storing;
     }
 
     boolean fetchIncomingBkg()
     {
 	getLuwrain().runWorker(org.luwrain.pim.workers.Pop3.NAME);
 	return true;
+    }
+
+    void layout(AreaLayout layout)
+    {
+	NullCheck.notNull(layout, "layout");
+	getLayout().setBasicLayout(layout);
     }
 
     private Layouts layouts()
@@ -78,5 +113,10 @@ final class App extends AppBase<Strings> implements MonoApp
     {
 	NullCheck.notNull(app, "app");
 	return MonoApp.Result.BRING_FOREGROUND;
+    }
+
+    interface Layouts
+    {
+	void messageMode();
     }
 }

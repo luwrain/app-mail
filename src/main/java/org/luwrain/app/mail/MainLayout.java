@@ -43,6 +43,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 	final ActionInfo fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), app::fetchIncomingBkg);
 	this.foldersArea = new TreeArea(createFoldersTreeParams()) {
 		final Actions actions = actions(
+						action("new-folder", "Новая группа", new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
 						fetchIncomingBkg
 						);
 		@Override public boolean onInputEvent(InputEvent event)
@@ -55,6 +56,12 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (event.getType() == SystemEvent.Type.REGULAR)
+			switch(event.getCode())
+			{
+			case PROPERTIES:
+			    return onFolderProps();
+			}
 		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
@@ -121,6 +128,41 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		    return actions.getAreaActions();
 		}
 	    };
+    }
+
+    private boolean actNewFolder()
+    {
+	final Object obj = foldersArea.selected();
+	if (obj == null || !(obj instanceof MailFolder))
+	    return true;
+	final MailFolder folder = (MailFolder)obj;
+	final MailFolder newFolder = new MailFolder();
+	newFolder.setTitle("Новая группа");//FIXME:
+	try {
+	    app.getMailStoring().getFolders().save(folder, newFolder);
+	}
+	catch(PimException e)
+	{
+	    app.getLuwrain().crash(e);
+	    return true;
+	}
+	foldersArea.refresh();
+	return true;
+    }
+
+    private boolean onFolderProps()
+    {
+	final Object obj = foldersArea.selected();
+	if (!(obj instanceof MailFolder))
+	    return false;
+	final FolderPropertiesLayout propsLayout = new FolderPropertiesLayout(app, (MailFolder)obj, ()->{
+		app.layout(getLayout());
+		foldersArea.refresh();
+		app.getLuwrain().announceActiveArea();
+			   });
+									      app.layout(propsLayout.getLayout());
+									      app.getLuwrain().announceActiveArea();
+	return true;
     }
 
     @Override public boolean onTreeClick(TreeArea area, Object obj)
