@@ -91,7 +91,7 @@ public final class App extends AppBase<Strings>
 	return this.conv;
     }
 
-    boolean onSend(MailMessage message, boolean useAnotherAccount)
+    boolean send(MailMessage message, boolean useAnotherAccount)
     {
 	NullCheck.notNull(message, "message");
 	try {
@@ -129,7 +129,7 @@ public final class App extends AppBase<Strings>
 	final Map<String, String> headers = new HashMap();
 	headers.put("User-Agent", getUserAgentStr());
 	msg.setRawMessage(mailStoring.getMessages().toByteArray(msg, headers));
-	final MailFolder folder = getFolderForPending();
+	final MailFolder folder = mailStoring.getFolders().findFirstByProperty("defaultOutgoing", "true");
 	if (folder == null)
 	    throw new RuntimeException("Unable to prepare a folder for pending messages");
 	mailStoring.getMessages().save(folder, msg);
@@ -159,22 +159,6 @@ public final class App extends AppBase<Strings>
 	    addr = account.getSubstAddress().trim(); else
 	    addr = sett.getDefaultMailAddress("").trim();
 	return mailStoring.combinePersonalAndAddr(personal, addr);
-    }
-
-    private MailFolder getFolderForPending()
-    {
-	final org.luwrain.pim.mail.Settings sett = org.luwrain.pim.mail.Settings.create(getLuwrain().getRegistry());
-	final String uniRef = sett.getFolderPending("");
-	if (uniRef.trim().isEmpty())
-	    return null;
-	try {
-	    return mailStoring.getFolders().loadByUniRef(uniRef);
-	}
-	catch (PimException e)
-	{
-	    getLuwrain().crash(e);
-	    return null;
-	}
     }
 
     private String getUserAgentStr()

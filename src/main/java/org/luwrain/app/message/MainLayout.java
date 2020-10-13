@@ -37,7 +37,9 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(app, "app");
 	this.app = app;
 	this.messageArea = new MessageArea(createParams()){
-		final Actions actions = actions();
+		final Actions actions = actions(
+						action("sent", app.getStrings().actionSend(), MainLayout.this::actSend)
+						);
 		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -48,6 +50,12 @@ final class MainLayout extends LayoutBase
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    if (event.getType() == SystemEvent.Type.REGULAR)
+			switch(event.getCode())
+			{
+			case OK:
+			    return actSend();
+			}
 		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
@@ -66,23 +74,9 @@ final class MainLayout extends LayoutBase
 	    };
     }
 
-    MailMessage getMailMessage()
-    {
-	final MailMessage msg = new MailMessage();
-	msg.setTo(App.splitAddrs(messageArea.getTo()));
-	msg.setCc(App.splitAddrs(messageArea.getCc()));
-	msg.setSubject(messageArea.getSubject());
-	msg.setText(messageArea.getText());
-	final List<String> attachments = new LinkedList();
-	for(File f: messageArea.getAttachmentFiles())
-	    attachments.add(f.getAbsolutePath());
-	msg.setAttachments(attachments.toArray(new String[attachments.size()]));
-	return msg;
-    }
-
     private boolean actSend()
     {
-	if (app.onSend(getMailMessage(), true))
+	if (app.send(getMailMessage(), true))
 	{
 	    app.getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
 	    app.closeApp();
@@ -107,7 +101,7 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    boolean onAttachFile(MessageArea area)
+    private boolean actAttachFile(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
 	final File file = app.getConv().attachment();
@@ -117,7 +111,7 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    boolean onDeleteAttachment(MessageArea area)
+    private boolean actDeleteAttachment(MessageArea area)
     {
 	NullCheck.notNull(area, "area");
 	final int index = area.getHotPointY();
@@ -163,6 +157,20 @@ final class MainLayout extends LayoutBase
 	params.context = new DefaultControlContext(app.getLuwrain());
 	params.text = text.toArray(new String[text.size()]);
 	return params;
+    }
+
+        private MailMessage getMailMessage()
+    {
+	final MailMessage msg = new MailMessage();
+	msg.setTo(App.splitAddrs(messageArea.getTo()));
+	msg.setCc(App.splitAddrs(messageArea.getCc()));
+	msg.setSubject(messageArea.getSubject());
+	msg.setText(messageArea.getText());
+	final List<String> attachments = new LinkedList();
+	for(File f: messageArea.getAttachmentFiles())
+	    attachments.add(f.getAbsolutePath());
+	msg.setAttachments(attachments.toArray(new String[attachments.size()]));
+	return msg;
     }
 
     AreaLayout getLayout()
