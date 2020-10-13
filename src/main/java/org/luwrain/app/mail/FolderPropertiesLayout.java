@@ -16,6 +16,8 @@
 
 package org.luwrain.app.mail;
 
+import java.util.*;
+
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.core.queries.*;
@@ -41,7 +43,7 @@ final class FolderPropertiesLayout extends LayoutBase
 	this.app = app;
 	this.folder = folder;
 	this.closing = closing;
-	this.formArea = new FormArea(new DefaultControlContext(app.getLuwrain())) {
+	this.formArea = new FormArea(new DefaultControlContext(app.getLuwrain()), "Свойства группы \"" + folder.getTitle() + "\"") {
 		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -70,7 +72,11 @@ final class FolderPropertiesLayout extends LayoutBase
 		    return super.onAreaQuery(query);
 		}
 	    };
-	formArea.addEdit("title", "Название:", folder.getTitle());//
+	formArea.addEdit("title", "Имя группы:", folder.getTitle());//
+	formArea.addCheckbox("defaultIncoming", "Использовать для входящих писем по умолчанию:", propSet(folder.getProperties(), "defaultIncoming"));
+		formArea.addCheckbox("defaultIncomingLists", "Использовать для писем из списков рассылки:", propSet(folder.getProperties(), "defaultIncomingLists"));
+				formArea.addCheckbox("defaultOutgoing", "Использовать для исходящих писем:", propSet(folder.getProperties(), "defaultOutgoing"));
+								formArea.addCheckbox("defaultSent", "Использовать для отправленных писем:", propSet(folder.getProperties(), "defaultSent"));
     }
 
     private boolean onSaveAndClose()
@@ -82,6 +88,10 @@ final class FolderPropertiesLayout extends LayoutBase
 	    return true;
 	}
 	this.folder.setTitle(title);
+	this.folder.getProperties().setProperty("defaultIncoming", new Boolean(formArea.getCheckboxState("defaultIncoming")).toString());
+		this.folder.getProperties().setProperty("defaultIncomingLists", new Boolean(formArea.getCheckboxState("defaultIncomingLists")).toString());
+				this.folder.getProperties().setProperty("defaultOutgoing", new Boolean(formArea.getCheckboxState("defaultOutgoing")).toString());
+								this.folder.getProperties().setProperty("defaultSent", new Boolean(formArea.getCheckboxState("defaultSent")).toString());
 	try {
 	    this.folder.save();
 	}
@@ -97,5 +107,15 @@ final class FolderPropertiesLayout extends LayoutBase
     AreaLayout getLayout()
     {
 	return new AreaLayout(formArea);
+    }
+
+    static private boolean propSet(Properties props, String propName)
+    {
+	NullCheck.notNull(props, "props");
+	NullCheck.notEmpty(propName, "propName");
+	final String value = props.getProperty(propName);
+	if (value == null)
+	    return false;
+	return value.equals("true");
     }
 }
