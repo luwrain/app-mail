@@ -69,13 +69,9 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		@Override public boolean onAreaQuery(AreaQuery query)
 		{
 		    NullCheck.notNull(query, "query");
-		    switch(query.getQueryCode())
-		    {
-		    case AreaQuery.UNIREF_AREA:
-			return onFoldersUniRefQuery(query);
-		    default:
+		    if (app.onAreaQuery(this, query))
+			return true;
 			return super.onAreaQuery(query);
-		    }
 		}
 		@Override public Action[] getAreaActions()
 		{
@@ -184,29 +180,6 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 	app.getLuwrain().setActiveArea(summaryArea);
 	return true;
     }
-
-    private boolean onFoldersUniRefQuery(AreaQuery query)
-    {
-	NullCheck.notNull(query, "query");
-	final Object selected = foldersArea.selected();								    
-	if (selected == null || !(selected instanceof MailFolder) || !(query instanceof UniRefAreaQuery))
-	    return false;
-	final UniRefAreaQuery uniRefQuery = (UniRefAreaQuery)query;
-	final MailFolder folder = (MailFolder)selected;
-	try {
-	    final String uniRef = app.getStoring().getFolders().getUniRef(folder);
-	    if (uniRef == null || uniRef.trim().isEmpty())
-		return false;
-	    uniRefQuery.answer(uniRef);
-	    return true;
-	}
-	catch(PimException e)
-	{
-	    app.getLuwrain().crash(e);
-	    return false;
-	}
-    }
-
 
     @Override public boolean onListClick(ListArea area, int index, Object obj)
     {
