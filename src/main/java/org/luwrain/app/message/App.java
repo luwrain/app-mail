@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -61,12 +61,13 @@ public final class App extends AppBase<Strings>
 
     @Override public AreaLayout getDefaultAreaLayout()
     {
-	return mainLayout.getLayout();
+	return mainLayout.getAreaLayout();
     }
 
-    Conversations getConv()
+    @Override public boolean onEscape(InputEvent event)
     {
-	return this.conv;
+	closeApp();
+	return true;
     }
 
     boolean send(MailMessage message, boolean useAnotherAccount)
@@ -112,6 +113,11 @@ public final class App extends AppBase<Strings>
 	    throw new RuntimeException("Unable to prepare a folder for pending messages");
 	mailStoring.getMessages().save(folder, msg);
 	return true;
+    }
+
+        Conversations getConv()
+    {
+	return this.conv;
     }
 
     ContactsStoring getContactsStoring()

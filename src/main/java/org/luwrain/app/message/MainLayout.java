@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -34,19 +34,17 @@ final class MainLayout extends LayoutBase
 
     MainLayout(App app)
     {
-	NullCheck.notNull(app, "app");
+	super(app);
 	this.app = app;
-	this.messageArea = new MessageArea(createParams()){
-		final Actions actions = actions(
-						action("sent", app.getStrings().actionSend(), MainLayout.this::actSend)
-						);
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event))
-			return true;
-		    return super.onInputEvent(event);
-		}
+	final Settings.PersonalInfo sett = Settings.createPersonalInfo(app.getLuwrain().getRegistry());
+	final List<String> text = new ArrayList();
+	text.addAll(Arrays.asList(app.messageContent.getTextAsArray()));
+	text.add("");
+	text.addAll(Arrays.asList(TextUtils.splitLinesAnySeparator(sett.getSignature(""))));
+	final MessageArea.Params params = new MessageArea.Params();
+	params.context = getControlContext();
+	params.text = text.toArray(new String[text.size()]);
+	this.messageArea = new MessageArea(params){
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -56,22 +54,12 @@ final class MainLayout extends LayoutBase
 			case OK:
 			    return actSend();
 			}
-		    if (app.onSystemEvent(this, event, actions))
-			return true;
 		    return super.onSystemEvent(event);
 		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    if (app.onAreaQuery(this, query))
-			return true;
-		    return super.onAreaQuery(query);
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    return actions.getAreaActions();
-		}
 	    };
+	setAreaLayout(messageArea, actions(
+					   action("sent", app.getStrings().actionSend(), MainLayout.this::actSend)
+					   ));
     }
 
     private boolean actSend()
@@ -146,18 +134,6 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    private MessageArea.Params createParams()
-    {
-	final Settings.PersonalInfo sett = Settings.createPersonalInfo(app.getLuwrain().getRegistry());
-	final List<String> text = new LinkedList();
-	text.addAll(Arrays.asList(app.messageContent.getTextAsArray()));
-	text.add("");
-	text.addAll(Arrays.asList(TextUtils.splitLinesAnySeparator(sett.getSignature(""))));
-	final MessageArea.Params params = new MessageArea.Params();
-	params.context = new DefaultControlContext(app.getLuwrain());
-	params.text = text.toArray(new String[text.size()]);
-	return params;
-    }
 
         private MailMessage getMailMessage()
     {
@@ -171,10 +147,5 @@ final class MainLayout extends LayoutBase
 	    attachments.add(f.getAbsolutePath());
 	msg.setAttachments(attachments.toArray(new String[attachments.size()]));
 	return msg;
-    }
-
-    AreaLayout getLayout()
-    {
-	return new AreaLayout(messageArea);
     }
 }
