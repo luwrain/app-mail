@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -33,17 +33,7 @@ public final class Extension extends org.luwrain.core.extensions.EmptyExtension
     @Override public ExtensionObject[] getExtObjects(Luwrain luwrain)
     {
 	return new ExtensionObject[]{
-
-	    new Shortcut() {
-		@Override public String getExtObjName()
-		{
-		    return "mail";
-		}
-		@Override public Application[] prepareApp(String[] args)
-		{
-		    return new Application[]{new org.luwrain.app.mail.App()};
-		}
-	    },
+	    new SimpleShortcut("mail", App.class),
 
 	    new Shortcut() {
 		@Override public String getExtObjName()
@@ -62,7 +52,6 @@ public final class Extension extends org.luwrain.core.extensions.EmptyExtension
 		    return new Application[]{new org.luwrain.app.message.App()};
 		}
 	    }
-
 	};
     }
 }

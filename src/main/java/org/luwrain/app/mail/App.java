@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2020 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -84,7 +84,7 @@ final class App extends AppBase<Strings> implements MonoApp
 
     @Override  protected AreaLayout getDefaultAreaLayout()
     {
-	return mainLayout.getLayout();
+	return mainLayout.getAreaLayout();
     }
 
     @Override public MonoApp.Result onMonoAppSecondInstance(Application app)
