@@ -42,76 +42,74 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 	this.app = app;
 	final ActionInfo fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), app::fetchIncomingBkg);
 
-    {
-	final TreeArea.Params params = new TreeArea.Params();
-	params.context = getControlContext();
-	params.model = new CachedTreeModel(new FoldersModel());
-	params.name = app.getStrings().foldersAreaName();
-	params.clickHandler = this;
-	this.foldersArea = new TreeArea(params) {
-@Override public boolean onSystemEvent(SystemEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (event.getType() == SystemEvent.Type.REGULAR)
-			switch(event.getCode())
-			{
-			case PROPERTIES:
-			    return onFolderProps();
-			}
-		    return super.onSystemEvent(event);
-		}
-	    };
-    }
-		final Actions foldersActions = actions(
-						action("new-folder", "Новая группа", new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
-						fetchIncomingBkg
-						);
+	{
+	    final TreeArea.Params params = new TreeArea.Params();
+	    params.context = getControlContext();
+	    params.model = new CachedTreeModel(new FoldersModel());
+	    params.name = app.getStrings().foldersAreaName();
+	    params.clickHandler = this;
+	    this.foldersArea = new TreeArea(params) {
+		    @Override public boolean onSystemEvent(SystemEvent event)
+		    {
+			NullCheck.notNull(event, "event");
+			if (event.getType() == SystemEvent.Type.REGULAR)
+			    switch(event.getCode())
+			    {
+			    case PROPERTIES:
+				return onFolderProps();
+			    }
+			return super.onSystemEvent(event);
+		    }
+		};
+	}
+	final Actions foldersActions = actions(
+					       action("new-folder", "Новая группа", new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
+					       fetchIncomingBkg
+					       );
 
+	{
+	    final ListArea.Params params = new ListArea.Params();
+	    params.context = getControlContext();
+	    params.name = app.getStrings().summaryAreaName();
+	    params.model = new ListUtils.ArrayModel(()->{ return summaryItems; });
+	    params.clickHandler = this;
+	    params.appearance = new ListUtils.DoubleLevelAppearance(getControlContext()){
+		    @Override public boolean isSectionItem(Object item)
+		    {
+			NullCheck.notNull(item, "item");
+			if (!(item instanceof SummaryItem))
+			    return false;
+			final SummaryItem summaryItem = (SummaryItem)item;
+			return summaryItem.type == SummaryItem.Type.SECTION;
+		    }
+		};
+	    params.transition = new ListUtils.DoubleLevelTransition(params.model){
+		    @Override public boolean isSectionItem(Object item)
+		    {
+			NullCheck.notNull(item, "item");
+			if (!(item instanceof SummaryItem))
+			    return false;
+			final SummaryItem summaryItem = (SummaryItem)item;
+			return summaryItem.type == SummaryItem.Type.SECTION;
+		    }
+		};
+	    this.summaryArea = new ListArea(params);
+	}
+	final Actions summaryActions = actions(
+					       fetchIncomingBkg
+					       );
 
+	{
+	    final ReaderArea.Params params = new ReaderArea.Params();
+	    params.context = getControlContext();
+	    params.name = app.getStrings().messageAreaName();
+	    this.messageArea = new ReaderArea(params);
+	}
+	final Actions messageActions = actions(
+					       fetchIncomingBkg
+					       );
 
-    {
-	final ListArea.Params params = new ListArea.Params();
-	params.context = getControlContext();
-	params.name = app.getStrings().summaryAreaName();
-	params.model = new ListUtils.ArrayModel(()->{ return summaryItems; });
-	params.clickHandler = this;
-	params.appearance = new ListUtils.DoubleLevelAppearance(getControlContext()){
-		@Override public boolean isSectionItem(Object item)
-		{
-		    NullCheck.notNull(item, "item");
-		    if (!(item instanceof SummaryItem))
-			return false;
-		    final SummaryItem summaryItem = (SummaryItem)item;
-		    return summaryItem.type == SummaryItem.Type.SECTION;
-		}
-	    };
-	params.transition = new ListUtils.DoubleLevelTransition(params.model){
-		@Override public boolean isSectionItem(Object item)
-		{
-		    NullCheck.notNull(item, "item");
-		    if (!(item instanceof SummaryItem))
-			return false;
-		    final SummaryItem summaryItem = (SummaryItem)item;
-		    return summaryItem.type == SummaryItem.Type.SECTION;
-		}
-	    };
-		this.summaryArea = new ListArea(params);
-    }
-			final Actions summaryActions = actions(
-						fetchIncomingBkg
-						);
-			
-			{
-	final ReaderArea.Params params = new ReaderArea.Params();
-	params.context = getControlContext();
-	params.name = app.getStrings().messageAreaName();
-	this.messageArea = new ReaderArea(params);
-			}
-			final Actions messageActions = actions(
-						fetchIncomingBkg
-						);
-
-			setAreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, foldersActions, summaryArea, summaryActions, messageArea, messageActions);
+	setAreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, foldersActions, summaryArea, summaryActions, messageArea, messageActions);
     }
 
     private boolean actNewFolder()
@@ -143,9 +141,9 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 		app.layout(getAreaLayout());
 		foldersArea.refresh();
 		app.getLuwrain().announceActiveArea();
-			   });
-									      app.layout(propsLayout.getLayout());
-									      app.getLuwrain().announceActiveArea();
+	    });
+	app.layout(propsLayout.getLayout());
+	app.getLuwrain().announceActiveArea();
 	return true;
     }
 
@@ -275,8 +273,6 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 	*/
 	return null;
     }
-
-
 
     private class FoldersModel implements org.luwrain.controls.CachedTreeModelSource
     {

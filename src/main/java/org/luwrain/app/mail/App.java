@@ -22,7 +22,7 @@ import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.app.base.*;
 
-final class App extends AppBase<Strings> implements MonoApp
+public final class App extends AppBase<Strings> implements MonoApp
 {
     static final String LOG_COMPONENT = "mail";
 
@@ -30,7 +30,7 @@ final class App extends AppBase<Strings> implements MonoApp
     private MailStoring storing = null;
     private MainLayout mainLayout = null;
 
-    App()
+    public App()
     {
 	super(Strings.NAME, Strings.class, "luwrain.mail");
     }
@@ -80,6 +80,13 @@ final class App extends AppBase<Strings> implements MonoApp
     Hooks getHooks()
     {
 	return this.hooks;
+    }
+
+    @Override public boolean onEscape(InputEvent event)
+    {
+	NullCheck.notNull(event, "event");
+	closeApp();
+	return true;
     }
 
     @Override  protected AreaLayout getDefaultAreaLayout()
