@@ -97,25 +97,19 @@ final class MainLayout extends LayoutBase
 	final File file = app.getConv().attachment();
 	if (file == null)
 	    return true;
-	messageArea.addAttachment(file);
+	messageArea.addAttachment(file.getAbsoluteFile());
 	return true;
     }
 
     private boolean actDeleteAttachment()
     {
 	final int index = messageArea.getHotPointY();
-	if (messageArea.getItemTypeOnLine(index) != MessageArea.Type.STATIC)
+	final MessageArea.Attachment a = messageArea.getAttachmentByLineIndex(index);
+	if (a == null)
 	    return false;
-	Log.debug("proba", "proper type");
-	final Object obj = messageArea.getItemObj(index);
-	if (obj == null || !(obj instanceof MessageArea.Attachment))
-	    return false;
-
-	Log.debug("proba", "proper obj");
-	final MessageArea.Attachment a = (MessageArea.Attachment)obj;
 	if (!app.getConv().confirmAttachmentDeleting(a.getFile()))
 	    return true;
-	messageArea.removeAttachment(index);
+	messageArea.removeAttachmentByLineIndex(index);
 	app.getLuwrain().message("Прикрепление " + a.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
 	return true;
     }
@@ -125,31 +119,30 @@ final class MainLayout extends LayoutBase
 	NullCheck.notNull(area, "area");
 	if (area.getTo().trim().isEmpty())
 	{
-	    app.getLuwrain().message("Не указан получатель сообщения", Luwrain.MessageType.ERROR);//FIXME:
+	    app.message("Не указан получатель сообщения", Luwrain.MessageType.ERROR);//FIXME:
 	    area.focusTo();
 	    return false;
 	}
 	if (area.getSubject().trim().isEmpty())
 	{
-	    app.getLuwrain().message("Не указана тема сообщения", Luwrain.MessageType.ERROR);
+	    app.message("Не указана тема сообщения", Luwrain.MessageType.ERROR);
 	    area.focusSubject();
 	    return false;
 	}
 	return true;
     }
 
-
-        private MailMessage getMailMessage()
+    private MailMessage getMailMessage()
     {
 	final MailMessage msg = new MailMessage();
 	msg.setTo(App.splitAddrs(messageArea.getTo()));
 	msg.setCc(App.splitAddrs(messageArea.getCc()));
 	msg.setSubject(messageArea.getSubject());
 	msg.setText(messageArea.getText());
-	final List<String> attachments = new LinkedList();
-	for(File f: messageArea.getAttachmentFiles())
-	    attachments.add(f.getAbsolutePath());
-	msg.setAttachments(attachments.toArray(new String[attachments.size()]));
+	final List<String> a = new ArrayList();
+		   for(File f: messageArea.getAttachmentFiles())
+		       a.add(f.getAbsolutePath());
+		   msg.setAttachments(a.toArray(new String[a.size()]));
 	return msg;
     }
 }
