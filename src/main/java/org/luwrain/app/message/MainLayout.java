@@ -61,7 +61,7 @@ final class MainLayout extends LayoutBase
 	setAreaLayout(messageArea, actions(
 					   action("sent", app.getStrings().actionSend(), MainLayout.this::actSend),
 					   action("attach", app.getStrings().actionAttachFile(), new InputEvent(InputEvent.Special.INSERT), this::actAttachFile),
-					   					   action("delete-attachment", app.getStrings().actionDeleteAttachment(), this::actDeleteAttachment)
+					   action("delete-attachment", app.getStrings().actionDeleteAttachment(), this::actDeleteAttachment)
 					   ));
     }
 
@@ -110,7 +110,7 @@ final class MainLayout extends LayoutBase
 	if (!app.getConv().confirmAttachmentDeleting(a.getFile()))
 	    return true;
 	messageArea.removeAttachmentByLineIndex(index);
-	app.getLuwrain().message("Прикрепление " + a.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
+	app.message("Прикрепление " + a.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
 	return true;
     }
 
@@ -140,9 +140,9 @@ final class MainLayout extends LayoutBase
 	msg.setSubject(messageArea.getSubject());
 	msg.setText(messageArea.getText());
 	final List<String> a = new ArrayList();
-		   for(File f: messageArea.getAttachmentFiles())
-		       a.add(f.getAbsolutePath());
-		   msg.setAttachments(a.toArray(new String[a.size()]));
+	for(File f: messageArea.getAttachmentFiles())
+	    a.add(f.getAbsolutePath());
+	msg.setAttachments(a.toArray(new String[a.size()]));
 	return msg;
     }
 }
