@@ -43,6 +43,7 @@ final class MainLayout extends LayoutBase
 	text.addAll(Arrays.asList(TextUtils.splitLinesAnySeparator(sett.getSignature(""))));
 	final MessageArea.Params params = new MessageArea.Params();
 	params.context = getControlContext();
+	params.name = app.getStrings().appName();
 	params.text = text.toArray(new String[text.size()]);
 	this.messageArea = new MessageArea(params){
 		@Override public boolean onSystemEvent(SystemEvent event)
@@ -58,7 +59,9 @@ final class MainLayout extends LayoutBase
 		}
 	    };
 	setAreaLayout(messageArea, actions(
-					   action("sent", app.getStrings().actionSend(), MainLayout.this::actSend)
+					   action("sent", app.getStrings().actionSend(), MainLayout.this::actSend),
+					   action("attach", app.getStrings().actionAttachFile(), new InputEvent(InputEvent.Special.INSERT), this::actAttachFile),
+					   					   action("delete-attachment", app.getStrings().actionDeleteAttachment(), this::actDeleteAttachment)
 					   ));
     }
 
@@ -89,30 +92,31 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    private boolean actAttachFile(MessageArea area)
+    private boolean actAttachFile()
     {
-	NullCheck.notNull(area, "area");
 	final File file = app.getConv().attachment();
 	if (file == null)
 	    return true;
-	area.addAttachment(file);
+	messageArea.addAttachment(file);
 	return true;
     }
 
-    private boolean actDeleteAttachment(MessageArea area)
+    private boolean actDeleteAttachment()
     {
-	NullCheck.notNull(area, "area");
-	final int index = area.getHotPointY();
-	if (area.getItemTypeOnLine(index) != MessageArea.Type.STATIC)
+	final int index = messageArea.getHotPointY();
+	if (messageArea.getItemTypeOnLine(index) != MessageArea.Type.STATIC)
 	    return false;
-	final Object obj = area.getItemObj(index);
-	if (obj == null || !(obj instanceof Attachment))
+	Log.debug("proba", "proper type");
+	final Object obj = messageArea.getItemObj(index);
+	if (obj == null || !(obj instanceof MessageArea.Attachment))
 	    return false;
-	final Attachment a = (Attachment)obj;
-	if (!app.getConv().confirmAttachmentDeleting(a.file))
+
+	Log.debug("proba", "proper obj");
+	final MessageArea.Attachment a = (MessageArea.Attachment)obj;
+	if (!app.getConv().confirmAttachmentDeleting(a.getFile()))
 	    return true;
-	area.removeAttachment(index);
-	app.getLuwrain().message("Прикрепление " + a.file.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
+	messageArea.removeAttachment(index);
+	app.getLuwrain().message("Прикрепление " + a.getName() + " исключено из сообщения", Luwrain.MessageType.OK);
 	return true;
     }
 

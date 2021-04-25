@@ -31,5 +31,5 @@ public interface Strings
     String appName();
     String attachmentPopupName();
     String attachmentPopupPrefix();
-    String attachment(String f);
+    //    String attachment(String f);
 }

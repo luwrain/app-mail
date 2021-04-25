@@ -43,7 +43,7 @@ final class Conversations
 
     File attachment()
     {
-	return Popups.existingFile(luwrain, strings.attachmentPopupName(), strings.attachmentPopupPrefix());
+	return Popups.existingFile(luwrain, strings.attachmentPopupPrefix());
     }
 
     boolean confirmAttachmentDeleting(File file)
