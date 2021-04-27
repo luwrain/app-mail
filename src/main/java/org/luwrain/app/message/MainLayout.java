@@ -38,13 +38,16 @@ final class MainLayout extends LayoutBase
 	this.app = app;
 	final Settings.PersonalInfo sett = Settings.createPersonalInfo(app.getLuwrain().getRegistry());
 	final List<String> text = new ArrayList();
-	text.addAll(Arrays.asList(app.messageContent.getTextAsArray()));
+	if (app.message.getText() != null)
+	    text.addAll(app.message.getText());
 	text.add("");
 	text.addAll(Arrays.asList(TextUtils.splitLinesAnySeparator(sett.getSignature(""))));
 	final MessageArea.Params params = new MessageArea.Params();
 	params.context = getControlContext();
 	params.name = app.getStrings().appName();
 	params.text = text.toArray(new String[text.size()]);
+	if (app.message.getAttachments() != null)
+	    params.attachments = app.message.getAttachments().toArray(new String[app.message.getAttachments().size()]);
 	this.messageArea = new MessageArea(params){
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
@@ -53,26 +56,16 @@ final class MainLayout extends LayoutBase
 			switch(event.getCode())
 			{
 			case OK:
-			    return actSend();
+			    return app.send(getMailMessage(), false);
 			}
 		    return super.onSystemEvent(event);
 		}
 	    };
 	setAreaLayout(messageArea, actions(
-					   action("sent", app.getStrings().actionSend(), MainLayout.this::actSend),
+					   action("sent", app.getStrings().actionSend(), ()->app.send(getMailMessage(), false)),
 					   action("attach", app.getStrings().actionAttachFile(), new InputEvent(InputEvent.Special.INSERT), this::actAttachFile),
 					   action("delete-attachment", app.getStrings().actionDeleteAttachment(), this::actDeleteAttachment)
 					   ));
-    }
-
-    private boolean actSend()
-    {
-	if (app.send(getMailMessage(), true))
-	{
-	    app.getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
-	    app.closeApp();
-	}
-	return true;
     }
 
     private boolean actEditTo()
@@ -114,19 +107,18 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    private boolean isReadyForSending(MessageArea area)
+    private boolean isReadyForSending()
     {
-	NullCheck.notNull(area, "area");
-	if (area.getTo().trim().isEmpty())
+	if (messageArea.getTo().trim().isEmpty())
 	{
 	    app.message("Не указан получатель сообщения", Luwrain.MessageType.ERROR);//FIXME:
-	    area.focusTo();
+	    messageArea.focusTo();
 	    return false;
 	}
-	if (area.getSubject().trim().isEmpty())
+	if (messageArea.getSubject().trim().isEmpty())
 	{
 	    app.message("Не указана тема сообщения", Luwrain.MessageType.ERROR);
-	    area.focusSubject();
+	    messageArea.focusSubject();
 	    return false;
 	}
 	return true;

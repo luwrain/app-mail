@@ -29,7 +29,7 @@ import org.luwrain.io.json.*;
 
 public final class App extends AppBase<Strings>
 {
-    final MessageContent messageContent;
+    final Message message;
     private MailStoring mailStoring = null;
     private ContactsStoring contactsStoring = null;
     private Conversations conv = null;
@@ -37,14 +37,13 @@ public final class App extends AppBase<Strings>
 
     public App()
     {
-	super(Strings.NAME, Strings.class);
-	this.messageContent = new MessageContent();
+	this(null);
     }
 
-    public App(MessageContent messageContent)
+    public App(Message message)
     {
 	super(Strings.NAME, Strings.class);
-	this.messageContent = messageContent != null?messageContent:new MessageContent();
+	this.message = message != null?message:new Message();
     }
 
     @Override protected boolean onAppInit()
@@ -79,14 +78,16 @@ public final class App extends AppBase<Strings>
 		final MailAccount account = conv.accountToSend();
 		if (account == null)
 		    return false;
-		return send(account, message);
+		send(account, message);
+		return true;
 	    }
 	    final MailAccount account;
 	    final MailAccount defaultAccount = mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
 	    if (defaultAccount == null)
 		account = conv.accountToSend(); else
 		account = defaultAccount;
-	    return send(account, message);
+	    send(account, message);
+	    return true;
 	}
 	catch(PimException e)
 	{
@@ -95,24 +96,45 @@ public final class App extends AppBase<Strings>
 	}
     }
 
-    private boolean send(MailAccount account, MailMessage msg) throws PimException
+    private void send(MailAccount account, MailMessage message) throws PimException
     {
 	NullCheck.notNull(account, "account");
-	NullCheck.notNull(msg, "msg");
-	msg.setFrom(prepareFromLine(account));
-	if (msg.getFrom().trim().isEmpty())
+	NullCheck.notNull(message, "message");
+	message.setFrom(getFromLine(account));
+	if (message.getFrom().trim().isEmpty())
 	    throw new RuntimeException("No sender address");//FIXME:
-	msg.setSentDate(new Date());
-	msg.setContentType("text/plain; charset=utf-8");//FIXME:
-	msg.setExtInfo(mailStoring.getAccounts().getUniRef(account));
-	final Map<String, String> headers = new HashMap();
-	headers.put("User-Agent", getUserAgentStr());
-	msg.setRawMessage(mailStoring.getMessages().toByteArray(msg, headers));
+		message.setExtInfo(mailStoring.getAccounts().getUniRef(account));
+	fillMessageData(message);
+	/*
 	final MailFolder folder = mailStoring.getFolders().findFirstByProperty("defaultOutgoing", "true");
 	if (folder == null)
 	    throw new RuntimeException("Unable to prepare a folder for pending messages");
-	mailStoring.getMessages().save(folder, msg);
-	return true;
+	mailStoring.getMessages().save(folder, message);
+	*/
+		    //	    app.getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
+	final TaskId taskId = newTaskId();
+	
+	runTask(taskId, ()->{
+		try {
+		    mailStoring.getAccounts().sendDirectly(account, message);
+		}
+		catch(PimException e)
+		{
+		    crash(e);
+		    return;
+		}
+		finishedTask(taskId, ()->closeApp());
+	    });
+    }
+
+    private void fillMessageData(MailMessage message) throws PimException
+    {
+	NullCheck.notNull(message, "message");
+	message.setSentDate(new Date());
+	message.setContentType("text/plain; charset=utf-8");//FIXME:
+	final Map<String, String> headers = new HashMap();
+	headers.put("User-Agent", getUserAgent());
+	message.setRawMessage(mailStoring.getMessages().toByteArray(message, headers));
     }
 
         Conversations getConv()
@@ -130,7 +152,7 @@ public final class App extends AppBase<Strings>
 	return this.mailStoring;
     }
 
-    private String prepareFromLine(MailAccount account) throws PimException
+    private String getFromLine(MailAccount account) throws PimException
     {
 	NullCheck.notNull(account, "account");
 	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(getLuwrain().getRegistry());
@@ -145,7 +167,7 @@ public final class App extends AppBase<Strings>
 	return mailStoring.combinePersonalAndAddr(personal, addr);
     }
 
-    private String getUserAgentStr()
+    private String getUserAgent()
     {
 	final String ver = getLuwrain().getProperty("luwrain.version");
 	if (!ver.isEmpty())

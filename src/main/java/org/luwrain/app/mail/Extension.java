@@ -16,9 +16,11 @@
 
 package org.luwrain.app.mail;
 
+import java.util.*;
+
 import org.luwrain.base.*;
 import org.luwrain.core.*;
-import org.luwrain.io.json.*;
+import org.luwrain.io.json.Message;
 
 public final class Extension extends org.luwrain.core.extensions.EmptyExtension
 {
@@ -45,11 +47,17 @@ public final class Extension extends org.luwrain.core.extensions.EmptyExtension
 		    NullCheck.notNullItems(args, "args");
 		    if (args.length == 0)
 			return new Application[]{new org.luwrain.app.message.App()};
-		    if (args.length == 1)
-			return new Application[]{new org.luwrain.app.message.App(MessageContent.fromJson(args[0]))};
-		    if (args.length == 4)
-			return new Application[]{new org.luwrain.app.message.App(new MessageContent(args[0], args[1], args[2], args[3]))};
-		    return new Application[]{new org.luwrain.app.message.App()};
+		    final List<Application> res = new ArrayList();
+		    for(String a: args)
+		    {
+			final Message m = Message.fromString(a);
+			if (m != null)
+			    res.add(new org.luwrain.app.message.App(m));
+		    }
+		    if (res.isEmpty())
+			return new Application[]{new org.luwrain.app.message.App()};
+		    return res.toArray(new Application[res.size()]);
+
 		}
 	    }
 	};
