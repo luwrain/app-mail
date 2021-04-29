@@ -46,20 +46,15 @@ public final class App extends AppBase<Strings>
 	this.message = message != null?message:new Message();
     }
 
-    @Override protected boolean onAppInit()
+    @Override protected AreaLayout onAppInit()
     {
 	this.mailStoring = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(getLuwrain(), true);
 	if (mailStoring == null || contactsStoring == null)
-	    return false;
+	    return null;
 	this.conv = new Conversations(this);
 	this.mainLayout = new MainLayout(this);
 	setAppName(getStrings().appName());
-	return true;
-    }
-
-    @Override public AreaLayout getDefaultAreaLayout()
-    {
 	return mainLayout.getAreaLayout();
     }
 

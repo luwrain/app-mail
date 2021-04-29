@@ -35,15 +35,15 @@ public final class App extends AppBase<Strings> implements MonoApp
 	super(Strings.NAME, Strings.class, "luwrain.mail");
     }
 
-    @Override protected boolean onAppInit()
+    @Override protected AreaLayout onAppInit()
     {
 	this.hooks = new Hooks(getLuwrain());
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	if (storing == null)
-	    return false;
+	    return null;
 	this.mainLayout = new MainLayout(this);
 	setAppName(getStrings().appName());
-	return true;
+	return mainLayout.getAreaLayout();
     }
 
     MailStoring getMailStoring()
@@ -87,11 +87,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	NullCheck.notNull(event, "event");
 	closeApp();
 	return true;
-    }
-
-    @Override  protected AreaLayout getDefaultAreaLayout()
-    {
-	return mainLayout.getAreaLayout();
     }
 
     @Override public MonoApp.Result onMonoAppSecondInstance(Application app)
