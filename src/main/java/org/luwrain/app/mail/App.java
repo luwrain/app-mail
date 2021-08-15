@@ -82,9 +82,8 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return this.hooks;
     }
 
-    @Override public boolean onEscape(InputEvent event)
+    @Override public boolean onEscape()
     {
-	NullCheck.notNull(event, "event");
 	closeApp();
 	return true;
     }
