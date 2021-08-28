@@ -37,7 +37,7 @@ final class MainLayout extends LayoutBase
 	super(app);
 	this.app = app;
 	final Settings.PersonalInfo sett = Settings.createPersonalInfo(app.getLuwrain().getRegistry());
-	final List<String> text = new ArrayList();
+	final List<String> text = new ArrayList<>();
 	if (app.message.getText() != null)
 	    text.addAll(app.message.getText());
 	text.add("");
@@ -131,7 +131,7 @@ final class MainLayout extends LayoutBase
 	msg.setCc(App.splitAddrs(messageArea.getCc()));
 	msg.setSubject(messageArea.getSubject());
 	msg.setText(messageArea.getText());
-	final List<String> a = new ArrayList();
+	final List<String> a = new ArrayList<>();
 	for(File f: messageArea.getAttachmentFiles())
 	    a.add(f.getAbsolutePath());
 	msg.setAttachments(a.toArray(new String[a.size()]));

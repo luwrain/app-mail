@@ -62,7 +62,7 @@ final class Hooks
 	final List array = ScriptUtils.getArray(res);
 	if (array == null)
 	    return new SummaryItem[0];
-	final List<SummaryItem> items = new LinkedList();
+	final List<SummaryItem> items = new ArrayList<>();
 	for(Object o: array)
 	    items.add(new SummaryItem(o));
 	return items.toArray(new SummaryItem[items.size()]);

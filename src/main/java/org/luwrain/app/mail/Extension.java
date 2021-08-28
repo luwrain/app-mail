@@ -46,7 +46,7 @@ public final class Extension extends EmptyExtension
 		    NullCheck.notNullItems(args, "args");
 		    if (args.length == 0)
 			return new Application[]{new org.luwrain.app.message.App()};
-		    final List<Application> res = new ArrayList();
+		    final List<Application> res = new ArrayList<>();
 		    for(String a: args)
 		    {
 			final Message m = Message.fromString(a);

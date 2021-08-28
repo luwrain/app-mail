@@ -127,7 +127,7 @@ public final class App extends AppBase<Strings>
 	NullCheck.notNull(message, "message");
 	message.setSentDate(new Date());
 	message.setContentType("text/plain; charset=utf-8");//FIXME:
-	final Map<String, String> headers = new HashMap();
+	final Map<String, String> headers = new HashMap<>();
 	headers.put("User-Agent", getUserAgent());
 	message.setRawMessage(mailStoring.getMessages().toByteArray(message, headers));
     }
@@ -175,7 +175,7 @@ public final class App extends AppBase<Strings>
 	NullCheck.notNull(line, "line");
 	if (line.trim().isEmpty())
 	    return new String[0];
-	final List<String> res = new LinkedList();
+	final List<String> res = new ArrayList<>();
 	final String[] lines = line.split(",", -1);
 	for(String s: lines)
 	    if (!s.trim().isEmpty())
