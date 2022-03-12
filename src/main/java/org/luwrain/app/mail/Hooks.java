@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -43,6 +43,7 @@ final class Hooks
 
     SummaryItem[] organizeSummary(MailMessage[] messages)
     {
+	/*
 	NullCheck.notNullItems(messages, "messages");
 	final MessageHookObject[] hookObjs = new MessageHookObject[messages.length];
 	for(int i = 0;i < messages.length;i++)
@@ -66,10 +67,13 @@ final class Hooks
 	for(Object o: array)
 	    items.add(new SummaryItem(o));
 	return items.toArray(new SummaryItem[items.size()]);
+	*/
+	return null;
     }
 
     boolean makeReply(MailMessage message)
     {
+	/*
 	NullCheck.notNull(message, "message");
 	final Object[] args = new Object[]{new MessageHookObject(message)};
 	try {
@@ -80,5 +84,7 @@ final class Hooks
 	    Log.error(LOG_COMPONENT, "unable to run the " + REPLY_HOOK_NAME + ":" + e.getClass().getName() + ":" + e.getMessage());
 	    return false;
 	}
+	*/
+	return false;
     }
 }

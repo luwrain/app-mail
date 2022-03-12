@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -44,15 +44,17 @@ final class SummaryItem
 	    return;
 	}
 	final Object messageObj = ScriptUtils.getMember(obj, "message");
-	if (messageObj != null && messageObj instanceof MessageHookObject)
+	if (messageObj != null)
 	{
-	    final MessageHookObject messageHookObj = (MessageHookObject)messageObj;
-	    this.type = Type.MESSAGE;
-	    this.message = messageHookObj.getNativeMessageObj();
+	    //	    final MessageHookObject messageHookObj = (MessageHookObject)messageObj;
+	    this.type = null;
+	    this.message = null;
+	    /*
 	    final Object titleObj = ScriptUtils.getMember(obj, "title");
 	    if (titleObj != null)
-		this.title = titleObj.toString(); else
-		this.title = obj.toString();
+	    */
+	    this.title = null;
+	    //		this.title = obj.toString();
 	    return;
 	}
 	this.type = Type.SECTION;
