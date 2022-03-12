@@ -46,10 +46,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return mainLayout.getAreaLayout();
     }
 
-    MailStoring getMailStoring()
-    {
-	return this.storing;
-    }
+
 
     boolean fetchIncomingBkg()
     {
@@ -93,6 +90,8 @@ public final class App extends AppBase<Strings> implements MonoApp
 	NullCheck.notNull(app, "app");
 	return MonoApp.Result.BRING_FOREGROUND;
     }
+
+        MailStoring getMailStoring() { return this.storing; }
 
     interface Layouts
     {
