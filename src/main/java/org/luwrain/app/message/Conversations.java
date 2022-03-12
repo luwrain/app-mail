@@ -104,7 +104,7 @@ final class Conversations
     MailAccount accountToSend() throws PimException
     {
 	final MailAccount[] accounts = app.getMailStoring().getAccounts().load();
-	final List items = new LinkedList();
+	final List<MailAccount> items = new ArrayList<>();
 	for(MailAccount a: accounts)
 	    if (a.getType() == MailAccount.Type.SMTP && a.getFlags().contains(MailAccount.Flags.ENABLED))
 		items.add(a);

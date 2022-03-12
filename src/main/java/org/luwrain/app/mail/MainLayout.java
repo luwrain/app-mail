@@ -16,24 +16,30 @@
 
 package org.luwrain.app.mail;
 
+import java.util.*;
+
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
+import org.luwrain.controls.ListArea.*;
+import org.luwrain.controls.ListUtils.*;
 import org.luwrain.controls.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.app.base.*;
 
-final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, ListArea.ClickHandler
+import static org.luwrain.core.DefaultEventResponse.*;
+
+final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, ClickHandler<SummaryItem>
 {
     private final App app;
     final TreeArea foldersArea;
-    final ListArea summaryArea;
+    final ListArea<SummaryItem> summaryArea;
     final ReaderArea messageArea;
 
+    private final List<SummaryItem> summaryItems = new ArrayList<>();
     private MailFolder folder = null;
-    private SummaryItem[] summaryItems = new SummaryItem[0];
     private MailMessage message = null;
 
     MainLayout(App app)
@@ -41,47 +47,37 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 	super(app);
 	this.app = app;
 
-
-	
 	this.foldersArea = new TreeArea(treeParams((params)->{
-	    params.model = new CachedTreeModel(new FoldersModel());
-	    params.name = app.getStrings().foldersAreaName();
-	    params.clickHandler = this;
+		    params.model = new CachedTreeModel(new FoldersModel());
+		    params.name = app.getStrings().foldersAreaName();
+		    params.clickHandler = this;
 		})) {
-			    @Override public boolean onSystemEvent(SystemEvent event)
-		    {
-			NullCheck.notNull(event, "event");
-			if (event.getType() == SystemEvent.Type.REGULAR)
-			    switch(event.getCode())
-			    {
-			    case PROPERTIES:
-				return onFolderProps();
-			    }
-			return super.onSystemEvent(event);
-		    }
-		};
+		@Override public boolean onSystemEvent(SystemEvent event)
+		{
+		    if (event.getType() == SystemEvent.Type.REGULAR)
+			switch(event.getCode())
+			{
+			case PROPERTIES:
+			    return onFolderProps();
+			}
+		    return super.onSystemEvent(event);
+		}
+	    };
 
-	    this.summaryArea = new ListArea(listParams((params)->{
+	this.summaryArea = new ListArea<>(listParams((params)->{
 	    params.name = app.getStrings().summaryAreaName();
-	    params.model = new ListUtils.ArrayModel(()->{ return summaryItems; });
+	    params.model = new ListModel<>(summaryItems);
 	    params.clickHandler = this;
-	    params.appearance = new ListUtils.DoubleLevelAppearance(getControlContext()){
-		    @Override public boolean isSectionItem(Object item)
+	    params.appearance = new DoubleLevelAppearance<SummaryItem>(getControlContext()){
+		    @Override public boolean isSectionItem(SummaryItem item)
 		    {
-			if (!(item instanceof SummaryItem))
-			    return false;
-			final SummaryItem summaryItem = (SummaryItem)item;
-			return summaryItem.type == SummaryItem.Type.SECTION;
+			return item.type == SummaryItem.Type.SECTION;
 		    }
 		};
-	    params.transition = new ListUtils.DoubleLevelTransition(params.model){
-		    @Override public boolean isSectionItem(Object item)
+	    params.transition = new DoubleLevelTransition<SummaryItem>(params.model){
+		    @Override public boolean isSectionItem(SummaryItem item)
 		    {
-			NullCheck.notNull(item, "item");
-			if (!(item instanceof SummaryItem))
-			    return false;
-			final SummaryItem summaryItem = (SummaryItem)item;
-			return summaryItem.type == SummaryItem.Type.SECTION;
+			return item.type == SummaryItem.Type.SECTION;
 		    }
 		};
 		    }));
@@ -89,16 +85,15 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 	    	final ActionInfo
 		fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), app::fetchIncomingBkg);
 
-
 		setAreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, actions(
-									       					       action("new-folder", "Новая группа", new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
-														       fetchIncomingBkg),
+									       action("new-folder", "Новая группа", new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
+									       fetchIncomingBkg),
 
-			      		      summaryArea, actions(
-					   					       fetchIncomingBkg
-					   ));
-	messageArea = null;
-	}
+			      summaryArea, actions(
+						   fetchIncomingBkg
+						   ));
+		messageArea = null;
+    }
 
     private boolean actNewFolder()
     {
@@ -142,7 +137,8 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 	this.folder = (MailFolder)obj;
 	try {
 	    final MailMessage[] messages = app.getStoring().getMessages().loadNoDeleted(folder);
-	    this.summaryItems = app.getHooks().organizeSummary(messages);
+	    this.summaryItems.clear();
+	    this.summaryItems.addAll(Arrays.asList(app.getHooks().organizeSummary(messages)));
 	}
 	catch(PimException e)
 	{
@@ -155,12 +151,9 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, List
 	return true;
     }
 
-    @Override public boolean onListClick(ListArea area, int index, Object obj)
+    @Override public boolean onListClick(ListArea area, int index, SummaryItem item)
     {
-	NullCheck.notNull(obj, "obj");
-	if (!(obj instanceof SummaryItem))
-	    return false;
-	final MailMessage message = ((SummaryItem)obj).message;
+	final MailMessage message = item.message;
 	if (message == null)
 	    return false;
 	try {
