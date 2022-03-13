@@ -24,7 +24,10 @@ import org.luwrain.app.base.*;
 
 public final class App extends AppBase<Strings> implements MonoApp
 {
-    static final String LOG_COMPONENT = "mail";
+    static final String
+	LOG_COMPONENT = "mail",
+	HOOK_ORGANIZE_SUMMARY = "mail.summary.organize",
+	HOOK_REPLY = "mail.reply";
 
     private Hooks hooks = null;
     private MailStoring storing = null;
