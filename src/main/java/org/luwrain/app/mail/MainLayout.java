@@ -30,7 +30,7 @@ import org.luwrain.pim.mail.*;
 import org.luwrain.pim.mail.script.*;
 import org.luwrain.app.base.*;
 
-import static org.luwrain.script2.ScriptUtils.*;
+import static org.luwrain.script.ScriptUtils.*;
 import static org.luwrain.core.DefaultEventResponse.*;
 
 final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, ClickHandler<SummaryItem>
