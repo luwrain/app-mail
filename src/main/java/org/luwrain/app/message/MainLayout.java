@@ -26,16 +26,19 @@ import org.luwrain.pim.mail.MailMessage;
 import org.luwrain.io.json.*;
 import org.luwrain.app.base.*;
 import org.luwrain .util.*;
+import org.luwrain.nlp.*;
 
 final class MainLayout extends LayoutBase
 {
-    private final App app;
-    private final MessageArea messageArea;
+    final App app;
+    final MessageArea messageArea;
+    final FormSpellChecking spellChecking;
 
     MainLayout(App app)
     {
 	super(app);
 	this.app = app;
+	this.spellChecking =new FormSpellChecking(getLuwrain());
 	final Settings.PersonalInfo sett = Settings.createPersonalInfo(app.getLuwrain().getRegistry());
 	final List<String> text = new ArrayList<>();
 	if (app.message.getText() != null)
@@ -51,16 +54,18 @@ final class MainLayout extends LayoutBase
 	this.messageArea = new MessageArea(params){
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
-		    NullCheck.notNull(event, "event");
 		    if (event.getType() == SystemEvent.Type.REGULAR)
 			switch(event.getCode())
 			{
 			case OK:
 			    return app.send(getMailMessage(), false);
+			    			case IDLE:
+			    return onIdle();
 			}
 		    return super.onSystemEvent(event);
 		}
 	    };
+	messageArea.getMultilineEditChangeListeners().add(spellChecking);
 	setAreaLayout(messageArea, actions(
 					   action("sent", app.getStrings().actionSend(), ()->app.send(getMailMessage(), false)),
 					   action("attach", app.getStrings().actionAttachFile(), new InputEvent(InputEvent.Special.INSERT), this::actAttachFile),
@@ -107,6 +112,33 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
+        private boolean onIdle()
+    {
+	if (!messageArea.isHotPointInMultilineEdit())
+	    return false;
+	final MarkedLines lines = messageArea.getMultilineEditContent();
+	final int
+	x = messageArea.getMultilineEditHotPoint().getHotPointX(),
+	y = messageArea.getMultilineEditHotPoint().getHotPointY();
+	if (y >= lines.getLineCount())
+	    return true;
+	final LineMarks marks = lines.getLineMarks(y);
+	if (marks == null)
+	    return  true;
+	final LineMarks.Mark[] atPoint = marks.findAtPos(x);
+	if (atPoint == null || atPoint.length == 0)
+	    return true;
+	for(LineMarks.Mark m: atPoint)
+	{
+	    if (m.getMarkObject() == null || !(m.getMarkObject() instanceof SpellProblem))
+		continue;
+	    final SpellProblem p = (SpellProblem)m.getMarkObject();
+	    app.message(p.getComment(), Luwrain.MessageType.ANNOUNCEMENT);
+	    return true;
+	}
+	return true;
+    }
+
     private boolean isReadyForSending()
     {
 	if (messageArea.getTo().trim().isEmpty())
@@ -130,7 +162,7 @@ final class MainLayout extends LayoutBase
 	msg.setTo(App.splitAddrs(messageArea.getTo()));
 	msg.setCc(App.splitAddrs(messageArea.getCc()));
 	msg.setSubject(messageArea.getSubject());
-	msg.setText(messageArea.getText());
+	msg.setText(messageArea.getText("\n"));
 	final List<String> a = new ArrayList<>();
 	for(File f: messageArea.getAttachmentFiles())
 	    a.add(f.getAbsolutePath());

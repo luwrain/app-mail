@@ -32,7 +32,7 @@ public final class App extends AppBase<Strings>
     final Message message;
     private MailStoring mailStoring = null;
     private ContactsStoring contactsStoring = null;
-    private Conversations conv = null;
+    private Conv conv = null;
     private MainLayout mainLayout = null;
 
     public App()
@@ -52,7 +52,7 @@ public final class App extends AppBase<Strings>
 	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(getLuwrain(), true);
 	if (mailStoring == null || contactsStoring == null)
 	    return null;
-	this.conv = new Conversations(this);
+	this.conv = new Conv(this);
 	this.mainLayout = new MainLayout(this);
 	setAppName(getStrings().appName());
 	return mainLayout.getAreaLayout();
@@ -132,20 +132,9 @@ public final class App extends AppBase<Strings>
 	message.setRawMessage(mailStoring.getMessages().toByteArray(message, headers));
     }
 
-        Conversations getConv()
-    {
-	return this.conv;
-    }
-
-    ContactsStoring getContactsStoring()
-    {
-	return this.contactsStoring;
-    }
-
-    MailStoring getMailStoring()
-    {
-	return this.mailStoring;
-    }
+    Conv getConv() { return this.conv; }
+    ContactsStoring getContactsStoring() { return this.contactsStoring; }
+    MailStoring getMailStoring() { return this.mailStoring; }
 
     private String getFromLine(MailAccount account) throws PimException
     {
