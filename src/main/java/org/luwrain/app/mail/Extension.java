@@ -20,6 +20,7 @@ import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.io.json.Message;
+import org.luwrain.i18n.*;
 
 public final class Extension extends EmptyExtension
 {
@@ -35,7 +36,6 @@ public final class Extension extends EmptyExtension
     {
 	return new ExtensionObject[]{
 	    new SimpleShortcut("mail", App.class),
-
 	    new Shortcut() {
 		@Override public String getExtObjName()
 		{
@@ -43,7 +43,6 @@ public final class Extension extends EmptyExtension
 		}
 		@Override public Application[] prepareApp(String[] args)
 		{
-		    NullCheck.notNullItems(args, "args");
 		    if (args.length == 0)
 			return new Application[]{new org.luwrain.app.message.App()};
 		    final List<Application> res = new ArrayList<>();
@@ -56,9 +55,23 @@ public final class Extension extends EmptyExtension
 		    if (res.isEmpty())
 			return new Application[]{new org.luwrain.app.message.App()};
 		    return res.toArray(new Application[res.size()]);
-
 		}
 	    }
 	};
     }
+
+        @Override public void i18nExtension(Luwrain luwrain, org.luwrain.i18n.I18nExtension i18nExt)
+    {
+	i18nExt.addCommandTitle(Lang.EN, "mail", "Mail");
+	i18nExt.addCommandTitle(Lang.RU, "ьmail", "Почта");
+	try {
+	    i18nExt.addStrings(Lang.EN, Strings.NAME, new ResourceStringsObj(luwrain, getClass().getClassLoader(), getClass(), "strings-mail.properties").create(Lang.EN, Strings.class));
+	    i18nExt.addStrings(Lang.RU, Strings.NAME, new ResourceStringsObj(luwrain, getClass().getClassLoader(), getClass(), "strings-mail.properties").create(Lang.RU, Strings.class));
+	}
+	catch(java.io.IOException e)
+	{
+	    throw new RuntimeException(e);
+	}
+    }
+
 }

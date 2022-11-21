@@ -49,8 +49,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return mainLayout.getAreaLayout();
     }
 
-
-
     boolean fetchIncomingBkg()
     {
 	getLuwrain().runWorker(org.luwrain.pim.workers.Pop3.NAME);
@@ -59,7 +57,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     void layout(AreaLayout layout)
     {
-	NullCheck.notNull(layout, "layout");
 	getLayout().setBasicLayout(layout);
     }
 
@@ -72,15 +69,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	};
     }
 
-    MailStoring getStoring()
-    {
-	return this.storing;
-    }
-
-    Hooks getHooks()
-    {
-	return this.hooks;
-    }
 
     @Override public boolean onEscape()
     {
@@ -95,6 +83,8 @@ public final class App extends AppBase<Strings> implements MonoApp
     }
 
         MailStoring getMailStoring() { return this.storing; }
+        MailStoring getStoring() { return this.storing; }
+    Hooks getHooks() { return this.hooks; }
 
     interface Layouts
     {

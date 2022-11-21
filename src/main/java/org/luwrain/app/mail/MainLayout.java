@@ -38,8 +38,8 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, Clic
     static private final String
 	LOG_COMPONENT = App.LOG_COMPONENT;
 
-    private final App app;
-    final TreeArea foldersArea;
+    final App app;
+final TreeListArea<MailFolder> foldersArea;
     final ListArea<SummaryItem> summaryArea;
     final ReaderArea messageArea;
 
@@ -52,11 +52,13 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, Clic
 	super(app);
 	this.app = app;
 
-	this.foldersArea = new TreeArea(treeParams((params)->{
-		    params.model = new CachedTreeModel(new FoldersModel());
-		    params.name = app.getStrings().foldersAreaName();
-		    params.clickHandler = this;
-		})) {
+		final TreeListArea.Params treeParams = new TreeListArea.Params();
+        treeParams.context = getControlContext();
+	treeParams.name = app.getStrings().foldersAreaName();
+	//	params.model = new CatalogModel(app);
+	//	params.leafClickHandler = this;
+
+	this.foldersArea = new TreeListArea(treeParams) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    if (event.getType() == SystemEvent.Type.REGULAR)
