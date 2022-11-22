@@ -33,4 +33,5 @@ final class Conv
     }
 
     String newFolderName() { return textNotEmpty(luwrain, strings.newFolderNamePopupName(), strings.newFolderNamePopupPrefix(), ""); }
+    boolean removeFolder() { return confirmDefaultNo(luwrain, strings.removeFolderPopupName(), strings.removeFolderPopupText()); }
 }

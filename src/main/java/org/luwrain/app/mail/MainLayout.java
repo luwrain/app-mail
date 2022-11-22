@@ -88,6 +88,7 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, Clic
 	final ActionInfo
 	fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), app::fetchIncomingBkg);
 	setAreaLayout(AreaLayout.LEFT_RIGHT, foldersArea, actions(
+								  action("remove-folder", app.getStrings().actionRemoveFolder(), new InputEvent(InputEvent.Special.DELETE), this::actRemoveFolder),
 								  action("new-folder", app.getStrings().actionNewFolder(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
 								  fetchIncomingBkg),
 		      summaryArea, actions(
@@ -108,6 +109,22 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, Clic
 	final MailFolder newFolder = new MailFolder();
 	newFolder.setTitle(name);
 	app.getMailStoring().getFolders().save(opened, newFolder, Math.max(selectedIndex, 0));
+	foldersArea.requery();
+	foldersArea.refresh();
+	return true;
+    }
+
+    private boolean actRemoveFolder()
+    {
+	final MailFolder opened = foldersArea.opened();
+	if (opened == null)
+	    return false;
+	final int selectedIndex = foldersArea.selectedIndex();
+	if (selectedIndex < 0)
+	    return false;
+	if (!app.getConv().removeFolder())
+	    return true;
+	app.getStoring().getFolders().remove(opened, selectedIndex);
 	foldersArea.requery();
 	foldersArea.refresh();
 	return true;

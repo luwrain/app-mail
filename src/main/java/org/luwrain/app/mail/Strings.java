@@ -30,6 +30,10 @@ public interface Strings
     String newFolderNamePopupName();
     String newFolderNamePopupPrefix();
 
+    String actionRemoveFolder();
+    String removeFolderPopupName();
+    String removeFolderPopupText();
+
     
     String messageAreaAttachment();
     String messageAreaCc();
