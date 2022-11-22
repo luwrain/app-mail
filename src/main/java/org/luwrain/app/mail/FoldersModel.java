@@ -28,6 +28,6 @@ final class FoldersModel implements TreeListArea.Model<MailFolder>
 
     @Override public boolean isLeaf(MailFolder item)
     {
-	return false;
+	return !app.getStoring().getFolders().hasSubfolders(item);
     }
 }

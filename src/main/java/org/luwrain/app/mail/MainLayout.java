@@ -35,7 +35,7 @@ import static org.luwrain.core.DefaultEventResponse.*;
 
 import static org.luwrain.app.mail.App.*;
 
-final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, ClickHandler<SummaryItem>
+final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandler<MailFolder>, ClickHandler<SummaryItem>
 {
     final App app;
     final TreeListArea<MailFolder> foldersArea;
@@ -50,11 +50,11 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, Clic
     {
 	super(app);
 	this.app = app;
-	final TreeListArea.Params treeParams = new TreeListArea.Params();
+	final TreeListArea.Params<MailFolder> treeParams = new TreeListArea.Params<>();
         treeParams.context = getControlContext();
 	treeParams.name = app.getStrings().foldersAreaName();
 	treeParams.model = new FoldersModel(app);
-	//	params.leafClickHandler = this;
+	treeParams.leafClickHandler = this;
 	this.foldersArea = new TreeListArea(treeParams) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
@@ -95,6 +95,38 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, Clic
 					   fetchIncomingBkg
 					   ));
 	messageArea = null;
+    }
+
+    @Override public boolean onLeafClick(TreeListArea<MailFolder> area, MailFolder folder)
+    {
+	this.folder = folder;
+	this.summaryItems.clear();
+	this.summaryItems.addAll(organizeSummary(app.getStoring().getMessages().loadNoDeleted(folder)));
+	summaryArea.refresh();
+	summaryArea.reset(false);
+	setActiveArea(summaryArea);
+	return true;
+    }
+
+    @Override public boolean onListClick(ListArea area, int index, SummaryItem item)
+    {
+	final MailMessage message = item.message;
+	if (message == null)
+	    return false;
+	try {
+	    if (message.getState() == MailMessage.State.NEW)
+	    {
+		message.setState(MailMessage.State.READ);
+		summaryArea.refresh();
+	    }
+	    messageArea.setDocument(Utils.createDocForMessage(message, app.getStrings()), 128);
+	    return true;
+	}
+	catch(PimException e)
+	{
+	    app.getLuwrain().crash(e);
+	    return true;
+	}
     }
 
     private boolean actNewFolder()
@@ -143,48 +175,6 @@ final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, Clic
 	app.layout(propsLayout.getLayout());
 	app.getLuwrain().announceActiveArea();
 	return true;
-    }
-
-    @Override public boolean onTreeClick(TreeArea area, Object obj)
-    {
-	if (obj == null || !(obj instanceof MailFolder))
-	    return false;
-	this.folder = (MailFolder)obj;
-	try {
-	    final MailMessage[] messages = app.getStoring().getMessages().loadNoDeleted(folder);
-	    this.summaryItems.clear();
-	    this.summaryItems.addAll(organizeSummary(messages));
-	}
-	catch(PimException e)
-	{
-	    app.getLuwrain().crash(e);
-	    return true;
-	}
-	summaryArea.refresh();
-	summaryArea.reset(false);
-	app.getLuwrain().setActiveArea(summaryArea);
-	return true;
-    }
-
-    @Override public boolean onListClick(ListArea area, int index, SummaryItem item)
-    {
-	final MailMessage message = item.message;
-	if (message == null)
-	    return false;
-	try {
-	    if (message.getState() == MailMessage.State.NEW)
-	    {
-		message.setState(MailMessage.State.READ);
-		summaryArea.refresh();
-	    }
-	    messageArea.setDocument(Utils.createDocForMessage(message, app.getStrings()), 128);
-	    return true;
-	}
-	catch(PimException e)
-	{
-	    app.getLuwrain().crash(e);
-	    return true;
-	}
     }
 
     private boolean actDeleteMessage(ListArea summaryArea, boolean deleteForever)
