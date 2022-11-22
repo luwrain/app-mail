@@ -31,6 +31,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     private Hooks hooks = null;
     private MailStoring storing = null;
+    private Conv conv = null;
     private MainLayout mainLayout = null;
 
     public App()
@@ -44,6 +45,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	if (storing == null)
 	    return null;
+	this.conv = new Conv(this);
 	this.mainLayout = new MainLayout(this);
 	setAppName(getStrings().appName());
 	return mainLayout.getAreaLayout();
@@ -82,9 +84,10 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return MonoApp.Result.BRING_FOREGROUND;
     }
 
-        MailStoring getMailStoring() { return this.storing; }
-        MailStoring getStoring() { return this.storing; }
+    MailStoring getMailStoring() { return this.storing; }
+    MailStoring getStoring() { return this.storing; }
     Hooks getHooks() { return this.hooks; }
+    Conv getConv() { return conv; }
 
     interface Layouts
     {

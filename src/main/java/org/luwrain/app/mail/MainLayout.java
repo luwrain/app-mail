@@ -33,13 +33,12 @@ import org.luwrain.app.base.*;
 import static org.luwrain.script.ScriptUtils.*;
 import static org.luwrain.core.DefaultEventResponse.*;
 
+import static org.luwrain.app.mail.App.*;
+
 final class MainLayout extends LayoutBase implements TreeArea.ClickHandler, ClickHandler<SummaryItem>
 {
-    static private final String
-	LOG_COMPONENT = App.LOG_COMPONENT;
-
     final App app;
-final TreeListArea<MailFolder> foldersArea;
+    final TreeListArea<MailFolder> foldersArea;
     final ListArea<SummaryItem> summaryArea;
     final ReaderArea messageArea;
 
@@ -51,13 +50,11 @@ final TreeListArea<MailFolder> foldersArea;
     {
 	super(app);
 	this.app = app;
-
-		final TreeListArea.Params treeParams = new TreeListArea.Params();
+	final TreeListArea.Params treeParams = new TreeListArea.Params();
         treeParams.context = getControlContext();
 	treeParams.name = app.getStrings().foldersAreaName();
-	//	params.model = new CatalogModel(app);
+	treeParams.model = new FoldersModel(app);
 	//	params.leafClickHandler = this;
-
 	this.foldersArea = new TreeListArea(treeParams) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
@@ -70,7 +67,7 @@ final TreeListArea<MailFolder> foldersArea;
 		    return super.onSystemEvent(event);
 		}
 	    };
-
+	this.foldersArea.requery();
 	this.summaryArea = new ListArea<>(listParams((params)->{
 		    params.name = app.getStrings().summaryAreaName();
 		    params.model = new ListModel<>(summaryItems);
@@ -88,14 +85,11 @@ final TreeListArea<MailFolder> foldersArea;
 			    }
 			};
 		}));
-
 	final ActionInfo
 	fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), app::fetchIncomingBkg);
-
-	setAreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, actions(
-								       action("new-folder", "Новая группа", new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
-								       fetchIncomingBkg),
-
+	setAreaLayout(AreaLayout.LEFT_RIGHT, foldersArea, actions(
+								  action("new-folder", app.getStrings().actionNewFolder(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
+								  fetchIncomingBkg),
 		      summaryArea, actions(
 					   fetchIncomingBkg
 					   ));
@@ -104,20 +98,17 @@ final TreeListArea<MailFolder> foldersArea;
 
     private boolean actNewFolder()
     {
-	final Object obj = foldersArea.selected();
-	if (obj == null || !(obj instanceof MailFolder))
+	final MailFolder opened = foldersArea.opened();
+	if (opened == null)
+	    return false;
+	final String name = app.getConv().newFolderName();
+	if (name == null)
 	    return true;
-	final MailFolder folder = (MailFolder)obj;
+	final int selectedIndex = foldersArea.selectedIndex();
 	final MailFolder newFolder = new MailFolder();
-	newFolder.setTitle("Новая группа");//FIXME:
-	try {
-	    app.getMailStoring().getFolders().save(folder, newFolder);
-	}
-	catch(PimException e)
-	{
-	    app.getLuwrain().crash(e);
-	    return true;
-	}
+	newFolder.setTitle(name);
+	app.getMailStoring().getFolders().save(opened, newFolder, Math.max(selectedIndex, 0));
+	foldersArea.requery();
 	foldersArea.refresh();
 	return true;
     }
@@ -287,33 +278,5 @@ final TreeListArea<MailFolder> foldersArea;
 	for(Object o: array)
 	    items.add(new SummaryItem(o));
 	return items;
-    }
-
-    private class FoldersModel implements org.luwrain.controls.CachedTreeModelSource
-    {
-	@Override public Object getRoot()
-	{
-	    try {
-		return app.getStoring().getFolders().getRoot();
-	    }
-	    catch (PimException e)
-	    {
-		app.getLuwrain().crash(e);
-		return null;
-	    }
-	}
-	@Override public Object[] getChildObjs(Object obj)
-	{
-	    NullCheck.notNull(obj, "obj");
-	    final MailFolder folder = (MailFolder)obj;
-	    try {
-		return app.getStoring().getFolders().load(folder);
-	    }
-	    catch(PimException e)
-	    {
-		app.getLuwrain().crash(e);
-		return new Object[0];
-	    }
-	}
     }
 }

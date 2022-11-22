@@ -17,13 +17,13 @@ final class FoldersModel implements TreeListArea.Model<MailFolder>
 
     @Override public boolean getItems(MailFolder obj, TreeListArea.Collector<MailFolder> collector)
     {
+	collector.collect(Arrays.asList(app.getStoring().getFolders().load(obj)));
 	return true;
-		//			collector.collect(l);
     }
 
     @Override public MailFolder getRoot()
     {
-	return null;
+	return app.getStoring().getFolders().getRoot();
     }
 
     @Override public boolean isLeaf(MailFolder item)

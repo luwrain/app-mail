@@ -22,9 +22,15 @@ public interface Strings
 {
     static final String NAME = "luwrain.mail";
 
-
     String appName();
+
     String foldersAreaName();
+    
+    String actionNewFolder();
+    String newFolderNamePopupName();
+    String newFolderNamePopupPrefix();
+
+    
     String messageAreaAttachment();
     String messageAreaCc();
     String messageAreaContentType();
