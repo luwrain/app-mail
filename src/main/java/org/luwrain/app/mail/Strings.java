@@ -45,4 +45,10 @@ public interface Strings
     String messageAreaTo();
     String summaryAreaName();
     String actionFetchIncomingBkg();
+
+    String wizardIntro();
+    String wizardMailAddr();
+    String wizardMailAddrIsEmpty();
+    String wizardMailAddrIsInvalid();
+    String wizardContinue();
 }

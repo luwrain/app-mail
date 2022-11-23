@@ -33,6 +33,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     private MailStoring storing = null;
     private Conv conv = null;
     private MainLayout mainLayout = null;
+    private StartingLayout startingLayout = null;
 
     public App()
     {
@@ -42,13 +43,16 @@ public final class App extends AppBase<Strings> implements MonoApp
     @Override protected AreaLayout onAppInit()
     {
 	this.hooks = new Hooks(getLuwrain());
+	/*
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	if (storing == null)
 	    return null;
+	*/
 	this.conv = new Conv(this);
-	this.mainLayout = new MainLayout(this);
+	//	this.mainLayout = new MainLayout(this);
+	this.startingLayout = new StartingLayout(this);
 	setAppName(getStrings().appName());
-	return mainLayout.getAreaLayout();
+	return startingLayout.getAreaLayout();
     }
 
     boolean fetchIncomingBkg()
