@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
    Copyright 2015-2016 Roman Volovodov <gr.rPman@gmail.com>
 
    This file is part of LUWRAIN.
@@ -18,23 +18,25 @@
 package org.luwrain.app.mail;
 
 import java.util.*;
-import java.io.*;
 
 import org.luwrain.core.*;
-import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
+import org.luwrain.pim.mail.*;
 import org.luwrain.app.base.*;
 
 import org.luwrain.controls.WizardArea.Frame;
 import org.luwrain.controls.WizardArea.WizardValues;
 
+import static org.luwrain.core.DefaultEventResponse.*;
+
 final class StartingLayout extends LayoutBase
 {
     final App app;
     final WizardArea wizardArea;
-    final Frame introFrame;
+    final Frame introFrame, passwordFrame;
 
     private String mail = "", passwd = "";
+    private MailAccount smtp = null, pop3 = null;
 
     StartingLayout(App app)
     {
@@ -44,12 +46,16 @@ final class StartingLayout extends LayoutBase
 	this.introFrame = wizardArea.newFrame()
 	.addText(app.getStrings().wizardIntro())
 	.addInput(app.getStrings().wizardMailAddr(), "")
-	.addClickable(app.getStrings().wizardContinue(), this::onContinue);
+	.addClickable(app.getStrings().wizardContinue(), this::onMailAddress);
+	this.passwordFrame = wizardArea.newFrame()
+	.addText(app.getStrings().wizardPasswordIntro())
+	.addInput(app.getStrings().wizardPassword(), "")
+	.addClickable(app.getStrings().wizardContinue(), this::onPassword);
 	wizardArea.show(introFrame);
-		setAreaLayout(wizardArea, null);
+	setAreaLayout(wizardArea, null);
     }
 
-    private boolean onContinue(WizardValues values)
+    private boolean onMailAddress(WizardValues values)
     {
 	final String mail = values.getText(0).trim();
 	if (mail.isEmpty())
@@ -62,6 +68,20 @@ final class StartingLayout extends LayoutBase
 	    app.message(app.getStrings().wizardMailAddrIsInvalid(), Luwrain.MessageType.ERROR);
 	    return true;
 	}
+	final 	Map<String, MailAccount> accounts = app.getHooks().server(mail);
+	if (accounts == null)
+	    return false;
+	this.smtp = accounts.get("smtp");
+	this.pop3 = accounts.get("pop3");
+	if (smtp == null/* || pop3 == null*/)
+	    return false;
+	wizardArea.show(passwordFrame);
+	app.setEventResponse(text(Sounds.OK, app.getStrings().wizardPasswordAnnouncement()));
+	return true;
+    }
+
+    private boolean onPassword(WizardValues values)
+    {
 	return false;
     }
 }

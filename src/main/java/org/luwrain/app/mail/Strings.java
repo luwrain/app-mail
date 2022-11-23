@@ -47,8 +47,11 @@ public interface Strings
     String actionFetchIncomingBkg();
 
     String wizardIntro();
+    String wizardContinue();
     String wizardMailAddr();
     String wizardMailAddrIsEmpty();
     String wizardMailAddrIsInvalid();
-    String wizardContinue();
+    String wizardPasswordAnnouncement();
+    String wizardPasswordIntro();
+    String wizardPassword();
 }

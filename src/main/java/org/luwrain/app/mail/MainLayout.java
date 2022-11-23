@@ -262,28 +262,6 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 
     private List<SummaryItem> organizeSummary(MailMessage[] messages)
     {
-	final MessageObj [] hookObjs = new MessageObj[messages.length];
-	for(int i = 0;i < messages.length;i++)
-	    hookObjs[i] = new MessageObj(messages[i]);
-	final Object[] args = new Object[]{getArray(hookObjs)};
-	final Object res;
-	final List<SummaryItem> items = new ArrayList<>();
-	try {
-	    res = getHooks().provider(getLuwrain(), App.HOOK_ORGANIZE_SUMMARY, args);
-	}
-	catch(RuntimeException e)
-	{
-	    Log.error(LOG_COMPONENT, "unable to run the " + App.HOOK_ORGANIZE_SUMMARY + ": " + e.getClass().getName() + ": " + e.getMessage());
-	    app.crash(e);
-	    return items;
-	}
-	if (res == null)
-	    return items;
-	final Object[] array = asArray(res);
-	if (array == null)
-	    return items;
-	for(Object o: array)
-	    items.add(new SummaryItem(o));
-	return items;
+	return null;
     }
 }
