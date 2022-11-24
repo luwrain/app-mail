@@ -63,7 +63,7 @@ public final class Extension extends EmptyExtension
         @Override public void i18nExtension(Luwrain luwrain, org.luwrain.i18n.I18nExtension i18nExt)
     {
 	i18nExt.addCommandTitle(Lang.EN, "mail", "Mail");
-	i18nExt.addCommandTitle(Lang.RU, "ьmail", "Почта");
+	i18nExt.addCommandTitle(Lang.RU, "mail", "Почта");
 	try {
 	    i18nExt.addStrings(Lang.EN, Strings.NAME, new ResourceStringsObj(luwrain, getClass().getClassLoader(), getClass(), "strings-mail.properties").create(Lang.EN, Strings.class));
 	    i18nExt.addStrings(Lang.RU, Strings.NAME, new ResourceStringsObj(luwrain, getClass().getClassLoader(), getClass(), "strings-mail.properties").create(Lang.RU, Strings.class));
@@ -73,5 +73,4 @@ public final class Extension extends EmptyExtension
 	    throw new RuntimeException(e);
 	}
     }
-
 }
