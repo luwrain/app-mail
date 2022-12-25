@@ -44,11 +44,16 @@ final class Hooks
 	final Map<String, MailAccount> accounts = new HashMap<>();
 	final Object
 	smtp = getMember(res, "smtp"),
-		pop3 = getMember(res, "pop3");
+	pop3 = getMember(res, "pop3");
 	if (!isNull(smtp))
 	    accounts.put("smtp", getAccount(smtp));
-		if (!isNull(pop3))
+	if (!isNull(pop3))
 	    accounts.put("pop3", getAccount(pop3));
+	for(Map.Entry<String, MailAccount> e: accounts.entrySet())
+	{
+	    e.getValue().setLogin(mailAddr);
+	    e.getValue().setTitle(e.getKey().toUpperCase() + " (" + mailAddr + ")");
+	}
 	return accounts;
     }
 
@@ -111,6 +116,8 @@ final class Hooks
 	    flags.add(MailAccount.Flags.SSL);
 	if (tls)
 	    flags.add(MailAccount.Flags.TLS);
+	flags.add(MailAccount.Flags.ENABLED);
+	flags.add(MailAccount.Flags.DEFAULT);
 	account.setFlags(flags);
 	return account;
     }
