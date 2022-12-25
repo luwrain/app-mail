@@ -54,4 +54,5 @@ public interface Strings
     String wizardPasswordAnnouncement();
     String wizardPasswordIntro();
     String wizardPassword();
+    String wizardPasswordIsEmpty();
 }

@@ -41,16 +41,16 @@ public final class App extends AppBase<Strings> implements MonoApp
     @Override protected AreaLayout onAppInit()
     {
 	this.hooks = new Hooks(getLuwrain());
-	/*
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	if (storing == null)
 	    return null;
-	*/
 	this.conv = new Conv(this);
-	//	this.mainLayout = new MainLayout(this);
+		this.mainLayout = new MainLayout(this);
 	this.startingLayout = new StartingLayout(this);
 	setAppName(getStrings().appName());
+	if (storing.getAccounts().load().length == 0)
 	return startingLayout.getAreaLayout();
+	return mainLayout.getAreaLayout();
     }
 
     boolean fetchIncomingBkg()
@@ -64,9 +64,14 @@ public final class App extends AppBase<Strings> implements MonoApp
 	getLayout().setBasicLayout(layout);
     }
 
-    private Layouts layouts()
+    Layouts layouts()
     {
 	return new Layouts(){
+	    @Override public void main()
+	    {
+		setAreaLayout(mainLayout);
+		getLuwrain().announceActiveArea();
+	    }
 	    @Override public void messageMode()
 	    {
 	    }
@@ -93,6 +98,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     interface Layouts
     {
+	void main();
 	void messageMode();
     }
 }

@@ -43,9 +43,12 @@ final class Hooks
 	    return null;
 	final Map<String, MailAccount> accounts = new HashMap<>();
 	final Object
-	smtp = getMember(res, "smtp");
+	smtp = getMember(res, "smtp"),
+		pop3 = getMember(res, "pop3");
 	if (!isNull(smtp))
 	    accounts.put("smtp", getAccount(smtp));
+		if (!isNull(pop3))
+	    accounts.put("pop3", getAccount(pop3));
 	return accounts;
     }
 

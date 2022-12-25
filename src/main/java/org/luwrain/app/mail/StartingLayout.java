@@ -73,7 +73,7 @@ final class StartingLayout extends LayoutBase
 	    return false;
 	this.smtp = accounts.get("smtp");
 	this.pop3 = accounts.get("pop3");
-	if (smtp == null/* || pop3 == null*/)
+	if (smtp == null || pop3 == null)
 	    return false;
 	wizardArea.show(passwordFrame);
 	app.setEventResponse(text(Sounds.OK, app.getStrings().wizardPasswordAnnouncement()));
@@ -82,6 +82,19 @@ final class StartingLayout extends LayoutBase
 
     private boolean onPassword(WizardValues values)
     {
-	return false;
+	final String password = values.getText(0).trim();
+	if (password.isEmpty())
+	{
+	    app.message(app.getStrings().wizardPasswordIsEmpty(), Luwrain.MessageType.ERROR);
+	    return true;
+	}
+	this.smtp.setPasswd(password);
+	pop3.setPasswd(password);
+	NullCheck.notNull(app.getStoring(), "storing");
+	NullCheck.notNull(app.getStoring().getAccounts(), "accounts");
+	app.getStoring().getAccounts().save(smtp);
+	app.getStoring().getAccounts().save(pop3);
+	app.layouts().main();
+	return true;
     }
 }
