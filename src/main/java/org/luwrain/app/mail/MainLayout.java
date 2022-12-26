@@ -101,7 +101,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     {
 	this.folder = folder;
 	this.summaryItems.clear();
-	this.summaryItems.addAll(organizeSummary(app.getStoring().getMessages().loadNoDeleted(folder)));
+	this.summaryItems.addAll(app.getHooks().organizeSummary(app.getStoring().getMessages().loadNoDeleted(folder)));
 	summaryArea.refresh();
 	summaryArea.reset(false);
 	setActiveArea(summaryArea);
@@ -257,11 +257,6 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	    return new String[0];
 	return new String[]{addr};
 	*/
-	return null;
-    }
-
-    private List<SummaryItem> organizeSummary(MailMessage[] messages)
-    {
 	return null;
     }
 }

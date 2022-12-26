@@ -20,10 +20,10 @@ import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.pim.mail.script.*;
 
 import static org.luwrain.script.ScriptUtils.*;
 import static org.luwrain.script.Hooks.*;
-
 import static org.luwrain.app.mail.App.*;
 
 final class Hooks
@@ -57,33 +57,27 @@ final class Hooks
 	return accounts;
     }
 
-    void organizeSummary()
+    List<SummaryItem> organizeSummary(MailMessage[] messages)
     {
-	/*
 	final MessageObj [] hookObjs = new MessageObj[messages.length];
 	for(int i = 0;i < messages.length;i++)
 	    hookObjs[i] = new MessageObj(messages[i]);
 	final Object[] args = new Object[]{getArray(hookObjs)};
-	final Object res;
+	final Object[] res;
 	final List<SummaryItem> items = new ArrayList<>();
 	try {
-	    res = getHooks().provider(getLuwrain(), App.HOOK_ORGANIZE_SUMMARY, args);
+	    res = asArray(provider(luwrain, ORGANIZE_SUMMARY, new Object[]{getArray(hookObjs)}));
 	}
 	catch(RuntimeException e)
 	{
-	    Log.error(LOG_COMPONENT, "unable to run the " + App.HOOK_ORGANIZE_SUMMARY + ": " + e.getClass().getName() + ": " + e.getMessage());
-	    app.crash(e);
+	    luwrain.crash(e);
 	    return items;
 	}
 	if (res == null)
 	    return items;
-	final Object[] array = asArray(res);
-	if (array == null)
-	    return items;
-	for(Object o: array)
+	for(Object o: res)
 	    items.add(new SummaryItem(o));
 	return items;
-	*/
     }
 
     boolean makeReply(MailMessage message)

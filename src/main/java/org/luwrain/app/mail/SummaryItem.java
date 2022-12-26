@@ -24,10 +24,7 @@ import org.luwrain.pim.mail.script.*;
 
 final class SummaryItem
 {
-    enum Type {
-	SECTION,
-	MESSAGE,
-    };
+    enum Type {SECTION, MESSAGE};
 
     final Type type;
     final String title;
