@@ -34,6 +34,7 @@ import static org.luwrain.script.ScriptUtils.*;
 import static org.luwrain.core.DefaultEventResponse.*;
 
 import static org.luwrain.app.mail.App.*;
+import static org.luwrain.app.mail.Utils.*;
 
 final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandler<MailFolder>, ClickHandler<SummaryItem>
 {
@@ -73,28 +74,27 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 		    params.model = new ListModel<>(summaryItems);
 		    params.clickHandler = this;
 		    params.appearance = new DoubleLevelAppearance<SummaryItem>(getControlContext()){
-			    @Override public boolean isSectionItem(SummaryItem item)
-			    {
-				return item.type == SummaryItem.Type.SECTION;
-			    }
+			    @Override public boolean isSectionItem(SummaryItem item) { return item.type == SummaryItem.Type.SECTION; }
 			};
 		    params.transition = new DoubleLevelTransition<SummaryItem>(params.model){
-			    @Override public boolean isSectionItem(SummaryItem item)
-			    {
-				return item.type == SummaryItem.Type.SECTION;
-			    }
+			    @Override public boolean isSectionItem(SummaryItem item) { return item.type == SummaryItem.Type.SECTION; }
 			};
 		}));
+	final ReaderArea.Params messageParams = new ReaderArea.Params();
+	messageParams.context = getControlContext();
+	messageParams.name = app.getStrings().messageAreaName();
+	this.messageArea = new ReaderArea(messageParams);
 	final ActionInfo
 	fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), ()->{	getLuwrain().runWorker(org.luwrain.pim.workers.Pop3.NAME); return true;});
-	setAreaLayout(AreaLayout.LEFT_RIGHT, foldersArea, actions(
-								  action("remove-folder", app.getStrings().actionRemoveFolder(), new InputEvent(InputEvent.Special.DELETE), this::actRemoveFolder),
-								  action("new-folder", app.getStrings().actionNewFolder(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
-								  fetchIncomingBkg),
+	setAreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, actions(
+								       action("remove-folder", app.getStrings().actionRemoveFolder(), new InputEvent(InputEvent.Special.DELETE), this::actRemoveFolder),
+								       action("new-folder", app.getStrings().actionNewFolder(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
+								       fetchIncomingBkg),
 		      summaryArea, actions(
 					   fetchIncomingBkg
+					   ),
+		      messageArea, actions(
 					   ));
-	messageArea = null;
     }
 
     @Override public boolean onLeafClick(TreeListArea<MailFolder> area, MailFolder folder)
@@ -113,20 +113,14 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	final MailMessage message = item.message;
 	if (message == null)
 	    return false;
-	try {
-	    if (message.getState() == MailMessage.State.NEW)
-	    {
-		message.setState(MailMessage.State.READ);
-		summaryArea.refresh();
-	    }
-	    messageArea.setDocument(Utils.createDocForMessage(message, app.getStrings()), 128);
-	    return true;
-	}
-	catch(PimException e)
+	if (message.getState() == MailMessage.State.NEW)
 	{
-	    app.getLuwrain().crash(e);
-	    return true;
+	    message.setState(MailMessage.State.READ);
+	    summaryArea.refresh();
 	}
+	messageArea.setDocument(createDocForMessage(message, app.getStrings()), 128);
+	setActiveArea(messageArea);
+	return true;
     }
 
     private boolean actNewFolder()
@@ -201,21 +195,12 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
 
-    private boolean actReply(ListArea summaryArea)
+    private boolean actSummaryReply()
     {
-	/*
-	  NullCheck.notNull(base, "base");
-	NullCheck.notNull(summaryArea, "summaryArea");
-	final Object obj = summaryArea.selected();
-	if (obj == null || !(obj instanceof SummaryItem))
+	final SummaryItem item = summaryArea.selected();
+	if (item == null || item.message == null)
 	    return false;
-	final SummaryItem summaryItem = (SummaryItem)obj;
-	if (summaryItem.message == null)
-	    return false;
-
-	return base.hooks.makeReply(summaryItem.message);
-	*/
-	return true;
+	return app.getHooks().makeReply(item.message);
     }
 
     boolean saveAttachment(String fileName)
