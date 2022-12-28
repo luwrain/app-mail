@@ -86,7 +86,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 			};
 		}));
 	final ActionInfo
-	fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), app::fetchIncomingBkg);
+	fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), ()->{	getLuwrain().runWorker(org.luwrain.pim.workers.Pop3.NAME); return true;});
 	setAreaLayout(AreaLayout.LEFT_RIGHT, foldersArea, actions(
 								  action("remove-folder", app.getStrings().actionRemoveFolder(), new InputEvent(InputEvent.Special.DELETE), this::actRemoveFolder),
 								  action("new-folder", app.getStrings().actionNewFolder(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),

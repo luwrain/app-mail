@@ -17,6 +17,7 @@
 package org.luwrain.app.mail;
 
 import java.util.*;
+import org.graalvm.polyglot.*;
 
 import org.luwrain.core.*;
 import org.luwrain.pim.mail.*;
@@ -35,6 +36,63 @@ final class Hooks
 
     private final Luwrain luwrain;
     Hooks(Luwrain luwrain) { this.luwrain = luwrain; }
+
+    List<SummaryItem> organizeSummary(MailMessage[] messages)
+    {
+	Log.debug("proba", "" + messages.length + " messages");
+	final MessageObj [] hookObjs = new MessageObj[messages.length];
+	for(int i = 0;i < messages.length;i++)
+	    hookObjs[i] = new MessageObj(messages[i]);
+	final Object[] args = new Object[]{getArray(hookObjs)};
+	final Object[] res;
+	final List<SummaryItem> items = new ArrayList<>();
+	try {
+	    res = asArray(provider(luwrain, ORGANIZE_SUMMARY, new Object[]{getArray(hookObjs)}));
+	}
+	catch(RuntimeException e)
+	{
+	    luwrain.crash(e);
+	    return items;
+	}
+	if (res == null)
+	{
+	    Log.warning(LOG_COMPONENT, "The " + ORGANIZE_SUMMARY + " hook returned null");
+	    return items;
+	}
+	for(Object o: res)
+	{
+	    if (!(o instanceof Value))
+		continue;
+	    final Value value = (Value)o;
+	    if (value.isString())
+	    {
+		items.add(new SummaryItem(value.asString()));
+		continue;
+	    }
+	    final MessageObj messageObj = value.asHostObject();
+	    if (messageObj == null)
+		continue;
+	    items.add(new SummaryItem(messageObj.getMessage()));
+	}
+	return items;
+    }
+
+    boolean makeReply(MailMessage message)
+    {
+	/*
+	NullCheck.notNull(message, "message");
+	final Object[] args = new Object[]{new MessageHookObject(message)};
+	try {
+	    return new ChainOfResponsibilityHook(luwrain).run(REPLY_HOOK_NAME, args);
+	}
+	catch(RuntimeException e)
+	{
+	    Log.error(LOG_COMPONENT, "unable to run the " + REPLY_HOOK_NAME + ":" + e.getClass().getName() + ":" + e.getMessage());
+	    return false;
+	}
+	*/
+	return false;
+    }
 
     Map<String, MailAccount> server(String mailAddr)
     {
@@ -55,46 +113,6 @@ final class Hooks
 	    e.getValue().setTitle(e.getKey().toUpperCase() + " (" + mailAddr + ")");
 	}
 	return accounts;
-    }
-
-    List<SummaryItem> organizeSummary(MailMessage[] messages)
-    {
-	final MessageObj [] hookObjs = new MessageObj[messages.length];
-	for(int i = 0;i < messages.length;i++)
-	    hookObjs[i] = new MessageObj(messages[i]);
-	final Object[] args = new Object[]{getArray(hookObjs)};
-	final Object[] res;
-	final List<SummaryItem> items = new ArrayList<>();
-	try {
-	    res = asArray(provider(luwrain, ORGANIZE_SUMMARY, new Object[]{getArray(hookObjs)}));
-	}
-	catch(RuntimeException e)
-	{
-	    luwrain.crash(e);
-	    return items;
-	}
-	if (res == null)
-	    return items;
-	for(Object o: res)
-	    items.add(new SummaryItem(o));
-	return items;
-    }
-
-    boolean makeReply(MailMessage message)
-    {
-	/*
-	NullCheck.notNull(message, "message");
-	final Object[] args = new Object[]{new MessageHookObject(message)};
-	try {
-	    return new ChainOfResponsibilityHook(luwrain).run(REPLY_HOOK_NAME, args);
-	}
-	catch(RuntimeException e)
-	{
-	    Log.error(LOG_COMPONENT, "unable to run the " + REPLY_HOOK_NAME + ":" + e.getClass().getName() + ":" + e.getMessage());
-	    return false;
-	}
-	*/
-	return false;
     }
 
     static MailAccount getAccount(Object obj)

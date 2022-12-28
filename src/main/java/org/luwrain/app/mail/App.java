@@ -53,12 +53,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return mainLayout.getAreaLayout();
     }
 
-    boolean fetchIncomingBkg()
-    {
-	getLuwrain().runWorker(org.luwrain.pim.workers.Pop3.NAME);
-	return true;
-    }
-
     void layout(AreaLayout layout)
     {
 	getLayout().setBasicLayout(layout);

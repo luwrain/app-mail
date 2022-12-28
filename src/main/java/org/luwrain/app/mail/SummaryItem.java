@@ -30,36 +30,20 @@ final class SummaryItem
     final String title;
     final MailMessage message;
 
-    SummaryItem(Object obj)
+    SummaryItem(String sectName)
     {
-	NullCheck.notNull(obj, "obj");
-	if (obj instanceof String)
-	{
-	    this.type = Type.SECTION;
-	    this.title = obj.toString();
-	    this.message = null;
-	    return;
-	}
-	final Object messageObj = ScriptUtils.getMember(obj, "message");
-	if (messageObj != null)
-	{
-	    //	    final MessageHookObject messageHookObj = (MessageHookObject)messageObj;
-	    this.type = null;
-	    this.message = null;
-	    /*
-	    final Object titleObj = ScriptUtils.getMember(obj, "title");
-	    if (titleObj != null)
-	    */
-	    this.title = null;
-	    //		this.title = obj.toString();
-	    return;
-	}
+	NullCheck.notNull(sectName, "sectName");
 	this.type = Type.SECTION;
+	this.title = sectName;
 	this.message = null;
-	final Object titleObj = ScriptUtils.getMember(obj, "title");
-	if (titleObj != null)
-	    this.title = titleObj.toString(); else
-	    this.title = obj.toString();
+    }
+
+    SummaryItem(MailMessage message)
+    {
+	NullCheck.notNull(message, "message");
+	this.type = Type.MESSAGE;
+	this.title = message.getFrom();
+	this.message = message;
     }
 
     @Override public String toString()
