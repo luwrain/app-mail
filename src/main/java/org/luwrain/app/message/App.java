@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2021 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -17,6 +17,7 @@
 package org.luwrain.app.message;
 
 import java.util.*;
+import java.io.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
@@ -26,6 +27,8 @@ import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.pim.contacts.*;
 import org.luwrain.io.json.*;
+
+import static org.luwrain.pim.mail.BinaryMessage.*;
 
 public final class App extends AppBase<Strings>
 {
@@ -66,8 +69,6 @@ public final class App extends AppBase<Strings>
 
     boolean send(MailMessage message, boolean useAnotherAccount)
     {
-	NullCheck.notNull(message, "message");
-	try {
 	    if (useAnotherAccount)
 	    {
 		final MailAccount account = conv.accountToSend();
@@ -75,7 +76,7 @@ public final class App extends AppBase<Strings>
 		    return false;
 		send(account, message);
 		return true;
-	    }
+	    } //useAnotherAccount
 	    final MailAccount account;
 	    final MailAccount defaultAccount = mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
 	    if (defaultAccount == null)
@@ -83,62 +84,45 @@ public final class App extends AppBase<Strings>
 		account = defaultAccount;
 	    send(account, message);
 	    return true;
-	}
-	catch(PimException e)
-	{
-	    getLuwrain().crash(e);
-	    return false;
-	}
     }
 
-    private void send(MailAccount account, MailMessage message) throws PimException
+    private void send(MailAccount account, MailMessage message)
     {
-	NullCheck.notNull(account, "account");
-	NullCheck.notNull(message, "message");
 	message.setFrom(getFromLine(account));
 	if (message.getFrom().trim().isEmpty())
-	    throw new RuntimeException("No sender address");//FIXME:
-	//FIXME:		message.setExtInfo(mailStoring.getAccounts().getUniRef(account));
+	    throw new PimException("No sender address");//FIXME:
+	final MessageSendingData sendingData = new MessageSendingData();
+	sendingData.setAccountId(mailStoring.getAccounts().getId(account));
+	message.setExtInfo(sendingData.toString());
 	fillMessageData(message);
-	/*
-	final MailFolder folder = mailStoring.getFolders().findFirstByProperty("defaultOutgoing", "true");
+	final MailFolder folder = mailStoring.getFolders().findFirstByProperty(MailFolders.PROP_DEFAULT_OUTGOING, "true");
 	if (folder == null)
-	    throw new RuntimeException("Unable to prepare a folder for pending messages");
+	    throw new PimException("Unable to prepare a folder for pending messages");
 	mailStoring.getMessages().save(folder, message);
-	*/
-		    //	    app.getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
-	final TaskId taskId = newTaskId();
-	
-	runTask(taskId, ()->{
-		try {
-		    mailStoring.getAccounts().sendDirectly(account, message);
-		}
-		catch(PimException e)
-		{
-		    crash(e);
-		    return;
-		}
-		finishedTask(taskId, ()->closeApp());
-	    });
+		    	    getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
     }
 
-    private void fillMessageData(MailMessage message) throws PimException
+    private void fillMessageData(MailMessage message)
     {
-	NullCheck.notNull(message, "message");
 	message.setSentDate(new Date());
 	message.setContentType("text/plain; charset=utf-8");//FIXME:
 	final Map<String, String> headers = new HashMap<>();
 	headers.put("User-Agent", getUserAgent());
-	message.setRawMessage(mailStoring.getMessages().toByteArray(message, headers));
+	try {
+	message.setRawMessage(toByteArray(message, headers));
+	}
+	catch(IOException e)
+	{
+	    throw new PimException(e);
+	}
     }
 
     Conv getConv() { return this.conv; }
     ContactsStoring getContactsStoring() { return this.contactsStoring; }
     MailStoring getMailStoring() { return this.mailStoring; }
 
-    private String getFromLine(MailAccount account) throws PimException
+    private String getFromLine(MailAccount account)
     {
-	NullCheck.notNull(account, "account");
 	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(getLuwrain().getRegistry());
 	final String personal;
 	final String addr;
