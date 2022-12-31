@@ -37,10 +37,7 @@ public final class Extension extends EmptyExtension
 	return new ExtensionObject[]{
 	    new SimpleShortcut("mail", App.class),
 	    new Shortcut() {
-		@Override public String getExtObjName()
-		{
-		    return "message";
-		}
+		@Override public String getExtObjName() { return "message"; }
 		@Override public Application[] prepareApp(String[] args)
 		{
 		    if (args.length == 0)

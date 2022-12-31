@@ -42,7 +42,7 @@ public final class App extends AppBase<Strings>
 
     public App(Message message)
     {
-	super(Strings.NAME, Strings.class);
+	super(Strings.NAME, Strings.class, "luwrain.message");
 	this.message = message != null?message:new Message();
     }
 
@@ -98,7 +98,7 @@ public final class App extends AppBase<Strings>
 	message.setFrom(getFromLine(account));
 	if (message.getFrom().trim().isEmpty())
 	    throw new RuntimeException("No sender address");//FIXME:
-		message.setExtInfo(mailStoring.getAccounts().getUniRef(account));
+	//FIXME:		message.setExtInfo(mailStoring.getAccounts().getUniRef(account));
 	fillMessageData(message);
 	/*
 	final MailFolder folder = mailStoring.getFolders().findFirstByProperty("defaultOutgoing", "true");

@@ -77,21 +77,15 @@ final class Hooks
 	return items;
     }
 
-    boolean makeReply(MailMessage message)
+    void makeReply(MailMessage message)
     {
-	/*
-	NullCheck.notNull(message, "message");
-	final Object[] args = new Object[]{new MessageHookObject(message)};
 	try {
-	    return new ChainOfResponsibilityHook(luwrain).run(REPLY_HOOK_NAME, args);
+chainOfResponsibility(luwrain, REPLY, new Object[]{new MessageObj(message)});
 	}
 	catch(RuntimeException e)
 	{
-	    Log.error(LOG_COMPONENT, "unable to run the " + REPLY_HOOK_NAME + ":" + e.getClass().getName() + ":" + e.getMessage());
-	    return false;
+	    luwrain.crash(e);
 	}
-	*/
-	return false;
     }
 
     Map<String, MailAccount> server(String mailAddr)

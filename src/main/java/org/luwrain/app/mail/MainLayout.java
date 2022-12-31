@@ -38,6 +38,9 @@ import static org.luwrain.app.mail.Utils.*;
 
 final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandler<MailFolder>, ClickHandler<SummaryItem>
 {
+    static private final InputEvent
+	HOT_KEY_REPLY = new InputEvent('r', EnumSet.of(InputEvent.Modifiers.ALT));
+
     final App app;
     final TreeListArea<MailFolder> foldersArea;
     final ListArea<SummaryItem> summaryArea;
@@ -91,6 +94,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 								       action("new-folder", app.getStrings().actionNewFolder(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
 								       fetchIncomingBkg),
 		      summaryArea, actions(
+					   action("reply", app.getStrings().actionReply(), HOT_KEY_REPLY, this::actSummaryReply),
 					   fetchIncomingBkg
 					   ),
 		      messageArea, actions(
@@ -200,7 +204,8 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	final SummaryItem item = summaryArea.selected();
 	if (item == null || item.message == null)
 	    return false;
-	return app.getHooks().makeReply(item.message);
+app.getHooks().makeReply(item.message);
+return true;
     }
 
     boolean saveAttachment(String fileName)

@@ -25,16 +25,18 @@ public interface Strings
     String appName();
 
     String foldersAreaName();
-    
     String actionNewFolder();
     String newFolderNamePopupName();
     String newFolderNamePopupPrefix();
-
     String actionRemoveFolder();
     String removeFolderPopupName();
     String removeFolderPopupText();
+        String actionFetchIncomingBkg();
 
-    
+        String summaryAreaName();
+    String actionReply();
+    String actionReplyAll();
+
     String messageAreaAttachment();
     String messageAreaCc();
     String messageAreaContentType();
@@ -43,8 +45,8 @@ public interface Strings
     String messageAreaName();
     String messageAreaSubject();
     String messageAreaTo();
-    String summaryAreaName();
-    String actionFetchIncomingBkg();
+
+
 
     String wizardIntro();
     String wizardContinue();

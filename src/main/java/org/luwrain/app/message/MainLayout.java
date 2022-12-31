@@ -49,6 +49,8 @@ final class MainLayout extends LayoutBase
 	params.context = getControlContext();
 	params.name = app.getStrings().appName();
 	params.text = text.toArray(new String[text.size()]);
+	params.to = app.message.getTo() != null?app.message.getTo().trim():"";
+	params.subject = app.message.getSubject() != null?app.message.getSubject().trim():"";
 	if (app.message.getAttachments() != null)
 	    params.attachments = app.message.getAttachments().toArray(new String[app.message.getAttachments().size()]);
 	this.messageArea = new MessageArea(params){
