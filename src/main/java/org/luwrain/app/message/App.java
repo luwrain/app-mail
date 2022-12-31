@@ -69,21 +69,21 @@ public final class App extends AppBase<Strings>
 
     boolean send(MailMessage message, boolean useAnotherAccount)
     {
-	    if (useAnotherAccount)
-	    {
-		final MailAccount account = conv.accountToSend();
-		if (account == null)
-		    return false;
-		send(account, message);
-		return true;
-	    } //useAnotherAccount
-	    final MailAccount account;
-	    final MailAccount defaultAccount = mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
-	    if (defaultAccount == null)
-		account = conv.accountToSend(); else
-		account = defaultAccount;
+	if (useAnotherAccount)
+	{
+	    final MailAccount account = conv.accountToSend();
+	    if (account == null)
+		return false;
 	    send(account, message);
 	    return true;
+	} //useAnotherAccount
+	final MailAccount account;
+	final MailAccount defaultAccount = mailStoring.getAccounts().getDefault(MailAccount.Type.SMTP);
+	if (defaultAccount == null)
+	    account = conv.accountToSend(); else
+	    account = defaultAccount;
+	send(account, message);
+	return true;
     }
 
     private void send(MailAccount account, MailMessage message)
@@ -99,7 +99,7 @@ public final class App extends AppBase<Strings>
 	if (folder == null)
 	    throw new PimException("Unable to prepare a folder for pending messages");
 	mailStoring.getMessages().save(folder, message);
-		    	    getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
+	getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
     }
 
     private void fillMessageData(MailMessage message)
@@ -109,7 +109,7 @@ public final class App extends AppBase<Strings>
 	final Map<String, String> headers = new HashMap<>();
 	headers.put("User-Agent", getUserAgent());
 	try {
-	message.setRawMessage(toByteArray(message, headers));
+	    message.setRawMessage(toByteArray(message, headers));
 	}
 	catch(IOException e)
 	{
