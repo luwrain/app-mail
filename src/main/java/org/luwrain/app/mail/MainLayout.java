@@ -67,7 +67,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 			switch(event.getCode())
 			{
 			case PROPERTIES:
-			    return onFolderProps();
+			return onFolderProps();
 			}
 		    return super.onSystemEvent(event);
 		}
@@ -124,7 +124,6 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
 
-
     private boolean actNewFolder()
     {
 	final MailFolder opened = foldersArea.opened();
@@ -173,7 +172,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
 
-        @Override public boolean onListClick(ListArea area, int index, SummaryItem item)
+    @Override public boolean onListClick(ListArea area, int index, SummaryItem item)
     {
 	final MailMessage message = item.message;
 	if (message == null)
@@ -189,7 +188,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
 
-
+    
     private boolean actMarkMessage()
     {
 	final SummaryItem item = summaryArea.selected();
@@ -201,25 +200,24 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
 
-        private boolean actUnmarkMessage()
+    private boolean actUnmarkMessage()
     {
 	final SummaryItem item = summaryArea.selected();
 	if (item == null || item.message == null)
 	    return false;
 	item.message.setState(MailMessage.State.READ);
-		app.getStoring().getMessages().update(item.message);
+	app.getStoring().getMessages().update(item.message);
 	app.setEventResponse(text(Sounds.SELECTED, app.getStrings().messageUnmarked()));
 	return true;
     }
-
 
     private boolean actSummaryReply()
     {
 	final SummaryItem item = summaryArea.selected();
 	if (item == null || item.message == null)
 	    return false;
-app.getHooks().makeReply(item.message);
-return true;
+	app.getHooks().makeReply(item.message);
+	return true;
     }
 
     private boolean actDeleteMessage()
