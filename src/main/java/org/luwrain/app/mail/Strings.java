@@ -38,6 +38,11 @@ public interface Strings
     String actionReplyAll();
     String actionDeleteMessage();
     String actionDeleteMessageForever();
+    String actionMarkMessage();
+    String messageMarked();
+    String actionUnmarkMessage();
+    String messageUnmarked();
+    
 
     String messageAreaAttachment();
     String messageAreaCc();

@@ -35,6 +35,7 @@ import static org.luwrain.core.DefaultEventResponse.*;
 
 import static org.luwrain.app.mail.App.*;
 import static org.luwrain.app.mail.Utils.*;
+import static org.luwrain.core.DefaultEventResponse.*;
 
 final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandler<MailFolder>, ClickHandler<SummaryItem>
 {
@@ -77,6 +78,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 		    params.model = new ListModel<>(summaryItems);
 		    params.clickHandler = this;
 		    params.appearance = new DoubleLevelAppearance<SummaryItem>(getControlContext()){
+			    @Override public void announceNonSection(SummaryItem summaryItem) { announceSummaryMessage(summaryItem); }
 			    @Override public boolean isSectionItem(SummaryItem item) { return item.type == SummaryItem.Type.SECTION; }
 			};
 		    params.transition = new DoubleLevelTransition<SummaryItem>(params.model){
@@ -95,6 +97,14 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 								       fetchIncomingBkg),
 		      summaryArea, actions(
 					   action("reply", app.getStrings().actionReply(), HOT_KEY_REPLY, this::actSummaryReply),
+					   action("mark", app.getStrings().actionMarkMessage(), new InputEvent(InputEvent.Special.INSERT), this::actMarkMessage, ()->{
+						   final SummaryItem item = summaryArea.selected();
+						   return item != null && item.message != null && item.message.getState() != MailMessage.State.MARKED;
+					       }),
+					   action("unmark", app.getStrings().actionUnmarkMessage(), new InputEvent(InputEvent.Special.INSERT), this::actUnmarkMessage, ()->{
+						   final SummaryItem item = summaryArea.selected();
+						   return item != null && item.message != null && item.message.getState() == MailMessage.State.MARKED;
+					       }),
 					   action("delete", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), this::actDeleteMessage),
 					   action("delete-forever", app.getStrings().actionDeleteMessageForever(), new InputEvent(InputEvent.Special.DELETE, EnumSet.of(InputEvent.Modifiers.SHIFT)), this::actDeleteMessage),
 					   fetchIncomingBkg
@@ -114,20 +124,6 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
 
-    @Override public boolean onListClick(ListArea area, int index, SummaryItem item)
-    {
-	final MailMessage message = item.message;
-	if (message == null)
-	    return false;
-	if (message.getState() == MailMessage.State.NEW)
-	{
-	    message.setState(MailMessage.State.READ);
-	    summaryArea.refresh();
-	}
-	messageArea.setDocument(createDocForMessage(message, app.getStrings()), 128);
-	setActiveArea(messageArea);
-	return true;
-    }
 
     private boolean actNewFolder()
     {
@@ -177,6 +173,46 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
 
+        @Override public boolean onListClick(ListArea area, int index, SummaryItem item)
+    {
+	final MailMessage message = item.message;
+	if (message == null)
+	    return false;
+	if (message.getState() == MailMessage.State.NEW)
+	{
+	    message.setState(MailMessage.State.READ);
+	    app.getStoring().getMessages().update(message);
+	    summaryArea.refresh();
+	}
+	messageArea.setDocument(createDocForMessage(message, app.getStrings()), 128);
+	setActiveArea(messageArea);
+	return true;
+    }
+
+
+    private boolean actMarkMessage()
+    {
+	final SummaryItem item = summaryArea.selected();
+	if (item == null || item.message == null)
+	    return false;
+	item.message.setState(MailMessage.State.MARKED);
+	app.getStoring().getMessages().update(item.message);
+	app.setEventResponse(text(Sounds.SELECTED, app.getStrings().messageMarked()));
+	return true;
+    }
+
+        private boolean actUnmarkMessage()
+    {
+	final SummaryItem item = summaryArea.selected();
+	if (item == null || item.message == null)
+	    return false;
+	item.message.setState(MailMessage.State.READ);
+		app.getStoring().getMessages().update(item.message);
+	app.setEventResponse(text(Sounds.SELECTED, app.getStrings().messageUnmarked()));
+	return true;
+    }
+
+
     private boolean actSummaryReply()
     {
 	final SummaryItem item = summaryArea.selected();
@@ -194,6 +230,32 @@ return true;
 	item.message.setState(MailMessage.State.DELETED);
 	app.getStoring().getMessages().update(item.message);
 	return true;
+    }
+
+    private void announceSummaryMessage(SummaryItem summaryItem)
+    {
+	final MailMessage m = summaryItem.message;
+	if (m == null)
+	    return;
+	if (m.getState() == null)
+	{
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    return;
+	}
+	switch(m.getState())
+	{
+	case NEW:
+	    app.setEventResponse(listItem(Sounds.ATTENTION, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    break;
+	case READ:
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    break;
+	case MARKED:
+	    app.setEventResponse(listItem(Sounds.SELECTED, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    break;
+	default:
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	}
     }
 
     private boolean actDeleteMessageForever()
