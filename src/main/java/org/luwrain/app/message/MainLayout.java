@@ -27,6 +27,7 @@ import org.luwrain.io.json.*;
 import org.luwrain.app.base.*;
 import org.luwrain .util.*;
 import org.luwrain.nlp.*;
+import org.luwrain.io.json.*;
 
 final class MainLayout extends LayoutBase
 {
@@ -165,6 +166,11 @@ final class MainLayout extends LayoutBase
 	msg.setCc(App.splitAddrs(messageArea.getCc()));
 	msg.setSubject(messageArea.getSubject());
 	msg.setText(messageArea.getText("\n"));
+	final MessageContentType contentType = new MessageContentType();
+	contentType.setType(MessageContentType.PLAIN);
+	contentType.setCharset("UTF-8");
+	contentType.setEncoding(MessageContentType.BASE64);
+	msg.setContentType(contentType.toString());
 	final List<String> a = new ArrayList<>();
 	for(File f: messageArea.getAttachmentFiles())
 	    a.add(f.getAbsolutePath());

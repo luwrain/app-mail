@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -103,12 +103,12 @@ notNull(message, "message");
 	    throw new PimException("Unable to prepare a folder for pending messages");
 	mailStoring.getMessages().save(folder, message);
 	getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
+	closeApp();
     }
 
     private void fillMessageData(MailMessage message)
     {
 	message.setSentDate(new Date());
-	message.setContentType("text/plain; charset=utf-8");//FIXME:
 	final Map<String, String> headers = new HashMap<>();
 	headers.put("User-Agent", getUserAgent());
 	try {
