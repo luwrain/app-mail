@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -59,7 +59,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	treeParams.name = app.getStrings().foldersAreaName();
 	treeParams.model = new FoldersModel(app);
 	treeParams.leafClickHandler = this;
-	this.foldersArea = new TreeListArea(treeParams) {
+	this.foldersArea = new TreeListArea<MailFolder>(treeParams) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    if (event.getType() == SystemEvent.Type.REGULAR)
@@ -95,6 +95,8 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 								       fetchIncomingBkg),
 		      summaryArea, actions(
 					   action("reply", app.getStrings().actionReply(), HOT_KEY_REPLY, this::actSummaryReply),
+					   action("delete", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), this::actDeleteMessage),
+					   action("delete-forever", app.getStrings().actionDeleteMessageForever(), new InputEvent(InputEvent.Special.DELETE, EnumSet.of(InputEvent.Modifiers.SHIFT)), this::actDeleteMessage),
 					   fetchIncomingBkg
 					   ),
 		      messageArea, actions(
@@ -105,7 +107,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     {
 	this.folder = folder;
 	this.summaryItems.clear();
-	this.summaryItems.addAll(app.getHooks().organizeSummary(app.getStoring().getMessages().loadNoDeleted(folder)));
+	this.summaryItems.addAll(app.getHooks().organizeSummary(app.getStoring().getMessages().load(folder, (m)->{ return m.getState() != MailMessage.State.DELETED; })));
 	summaryArea.refresh();
 	summaryArea.reset(false);
 	setActiveArea(summaryArea);
@@ -175,30 +177,6 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
 
-    private boolean actDeleteMessage(ListArea summaryArea, boolean deleteForever)
-    {
-	/*
-	  NullCheck.notNull(summaryArea, "summaryArea");
-	final Object o = summaryArea.selected();
-	if (o == null || !(o instanceof SummaryItem))
-	    return false;
-	final SummaryItem item = (SummaryItem)o;
-	if (item.message == null)
-	    return false;
-	try {
-	    if (deleteForever)
-		base.storing.getMessages().delete(item.message); else
-		item.message.setState(MailMessage.State.DELETED);
-	}
-	catch(PimException e)
-	{
-	    luwrain.crash(e);
-	    return true;
-	}
-	*/
-	return true;
-    }
-
     private boolean actSummaryReply()
     {
 	final SummaryItem item = summaryArea.selected();
@@ -206,6 +184,26 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	    return false;
 app.getHooks().makeReply(item.message);
 return true;
+    }
+
+    private boolean actDeleteMessage()
+    {
+	final SummaryItem item = summaryArea.selected();
+	if (item == null || item.message == null)
+	    return false;
+	item.message.setState(MailMessage.State.DELETED);
+	app.getStoring().getMessages().update(item.message);
+	return true;
+    }
+
+    private boolean actDeleteMessageForever()
+    {
+	final SummaryItem item = summaryArea.selected();
+	if (item == null || item.message == null)
+	    return false;
+	item.message.setState(MailMessage.State.DELETED);
+	app.getStoring().getMessages().delete(item.message);
+	return true;
     }
 
     boolean saveAttachment(String fileName)
@@ -236,17 +234,5 @@ return true;
 	luwrain.message("Файл " + destFile.getAbsolutePath() + " успешно сохранён", Luwrain.MESSAGE_OK);
 	*/
 	return true;
-    }
-
-    private String[] getCcExcludeAddrs()
-    {
-	/*
-	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(luwrain.getRegistry());
-	final String addr = sett.getDefaultMailAddress("");
-	if (addr.trim().isEmpty())
-	    return new String[0];
-	return new String[]{addr};
-	*/
-	return null;
     }
 }

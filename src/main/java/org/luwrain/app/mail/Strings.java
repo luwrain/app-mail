@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
 
 i   This file is part of LUWRAIN.
 
@@ -36,6 +36,8 @@ public interface Strings
         String summaryAreaName();
     String actionReply();
     String actionReplyAll();
+    String actionDeleteMessage();
+    String actionDeleteMessageForever();
 
     String messageAreaAttachment();
     String messageAreaCc();

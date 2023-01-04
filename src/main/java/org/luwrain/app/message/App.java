@@ -29,6 +29,7 @@ import org.luwrain.pim.contacts.*;
 import org.luwrain.io.json.*;
 
 import static org.luwrain.pim.mail.BinaryMessage.*;
+import static org.luwrain.core.NullCheck.*;
 
 public final class App extends AppBase<Strings>
 {
@@ -88,6 +89,8 @@ public final class App extends AppBase<Strings>
 
     private void send(MailAccount account, MailMessage message)
     {
+notNull(account, "account");
+notNull(message, "message");
 	message.setFrom(getFromLine(account));
 	if (message.getFrom().trim().isEmpty())
 	    throw new PimException("No sender address");//FIXME:
@@ -126,10 +129,10 @@ public final class App extends AppBase<Strings>
 	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(getLuwrain().getRegistry());
 	final String personal;
 	final String addr;
-	if (!account.getSubstName().trim().isEmpty())
+	if (account != null && account.getSubstName() != null && !account.getSubstName().trim().isEmpty())
 	    personal = account.getSubstName().trim(); else
 	    personal = sett.getFullName("").trim();
-	if (!account.getSubstAddress().trim().isEmpty())
+	if (account != null && account.getSubstAddress() != null && !account.getSubstAddress().trim().isEmpty())
 	    addr = account.getSubstAddress().trim(); else
 	    addr = sett.getDefaultMailAddress("").trim();
 	return mailStoring.combinePersonalAndAddr(personal, addr);
