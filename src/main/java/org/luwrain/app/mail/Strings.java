@@ -38,10 +38,15 @@ public interface Strings
     String actionReplyAll();
     String actionDeleteMessage();
     String actionDeleteMessageForever();
+    String deleteMessageForeverPopupName();
+    String deleteMessageForeverPopupText();
     String actionMarkMessage();
     String messageMarked();
     String actionUnmarkMessage();
     String messageUnmarked();
+    String actionDeletedShow();
+    String actionDeletedHide();
+    
     
 
     String messageAreaAttachment();

@@ -48,6 +48,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     final ReaderArea messageArea;
 
     private final List<SummaryItem> summaryItems = new ArrayList<>();
+    private boolean showDeleted = false;
     private MailFolder folder = null;
     private MailMessage message = null;
 
@@ -55,6 +56,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     {
 	super(app);
 	this.app = app;
+	
 	final TreeListArea.Params<MailFolder> treeParams = new TreeListArea.Params<>();
         treeParams.context = getControlContext();
 	treeParams.name = app.getStrings().foldersAreaName();
@@ -73,6 +75,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 		}
 	    };
 	this.foldersArea.requery();
+	
 	this.summaryArea = new ListArea<>(listParams((params)->{
 		    params.name = app.getStrings().summaryAreaName();
 		    params.model = new ListModel<>(summaryItems);
@@ -85,16 +88,20 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 			    @Override public boolean isSectionItem(SummaryItem item) { return item.type == SummaryItem.Type.SECTION; }
 			};
 		}));
+
 	final ReaderArea.Params messageParams = new ReaderArea.Params();
 	messageParams.context = getControlContext();
 	messageParams.name = app.getStrings().messageAreaName();
 	this.messageArea = new ReaderArea(messageParams);
+
 	final ActionInfo
 	fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), ()->{	getLuwrain().runWorker(org.luwrain.pim.workers.Pop3.NAME); return true;});
+
 	setAreaLayout(AreaLayout.LEFT_TOP_BOTTOM, foldersArea, actions(
 								       action("remove-folder", app.getStrings().actionRemoveFolder(), new InputEvent(InputEvent.Special.DELETE), this::actRemoveFolder),
 								       action("new-folder", app.getStrings().actionNewFolder(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actNewFolder),
 								       fetchIncomingBkg),
+
 		      summaryArea, actions(
 					   action("reply", app.getStrings().actionReply(), HOT_KEY_REPLY, this::actSummaryReply),
 					   action("mark", app.getStrings().actionMarkMessage(), new InputEvent(InputEvent.Special.INSERT), this::actMarkMessage, ()->{
@@ -106,19 +113,40 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 						   return item != null && item.message != null && item.message.getState() == MailMessage.State.MARKED;
 					       }),
 					   action("delete", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), this::actDeleteMessage),
-					   action("delete-forever", app.getStrings().actionDeleteMessageForever(), new InputEvent(InputEvent.Special.DELETE, EnumSet.of(InputEvent.Modifiers.SHIFT)), this::actDeleteMessage),
-					   fetchIncomingBkg
+					   action("delete-forever", app.getStrings().actionDeleteMessageForever(), new InputEvent(InputEvent.Special.DELETE, EnumSet.of(InputEvent.Modifiers.CONTROL)), this::actDeleteMessageForever),
+		      action("deleted-show", app.getStrings().actionDeletedShow(), new InputEvent('='), ()->{
+			      showDeleted = true;
+			      updateSummary();
+			      getLuwrain().playSound(Sounds.OK);
+			      return true;
+			  }),
+					   		      action("deleted-hide", app.getStrings().actionDeletedHide(), new InputEvent('-'), ()->{
+			      showDeleted = false;
+			      updateSummary();
+			      getLuwrain().playSound(Sounds.OK);
+			      return true;
+			  }),
+					   					   fetchIncomingBkg
 					   ),
+
 		      messageArea, actions(
+					   fetchIncomingBkg
 					   ));
+    }
+
+    void updateSummary()
+    {
+	this.summaryItems.clear();
+	if (showDeleted)
+	    this.summaryItems.addAll(app.getHooks().organizeSummary(app.getStoring().getMessages().load(folder))); else
+	    this.summaryItems.addAll(app.getHooks().organizeSummary(app.getStoring().getMessages().load(folder, (m)->{ return m.getState() != MailMessage.State.DELETED; })));
+	summaryArea.refresh();
     }
 
     @Override public boolean onLeafClick(TreeListArea<MailFolder> area, MailFolder folder)
     {
 	this.folder = folder;
-	this.summaryItems.clear();
-	this.summaryItems.addAll(app.getHooks().organizeSummary(app.getStoring().getMessages().load(folder, (m)->{ return m.getState() != MailMessage.State.DELETED; })));
-	summaryArea.refresh();
+	updateSummary();
 	summaryArea.reset(false);
 	setActiveArea(summaryArea);
 	return true;
@@ -227,8 +255,22 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	    return false;
 	item.message.setState(MailMessage.State.DELETED);
 	app.getStoring().getMessages().update(item.message);
+	updateSummary();
 	return true;
     }
+
+        private boolean actDeleteMessageForever()
+    {
+	final SummaryItem item = summaryArea.selected();
+	if (item == null || item.message == null)
+	    return false;
+	if (!app.getConv().deleteMessageForever())
+	    return true;
+	app.getStoring().getMessages().delete(item.message);
+	updateSummary();
+	return true;
+    }
+
 
     private void announceSummaryMessage(SummaryItem summaryItem)
     {
@@ -256,15 +298,6 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	}
     }
 
-    private boolean actDeleteMessageForever()
-    {
-	final SummaryItem item = summaryArea.selected();
-	if (item == null || item.message == null)
-	    return false;
-	item.message.setState(MailMessage.State.DELETED);
-	app.getStoring().getMessages().delete(item.message);
-	return true;
-    }
 
     boolean saveAttachment(String fileName)
     {
