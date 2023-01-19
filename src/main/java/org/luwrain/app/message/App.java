@@ -34,6 +34,7 @@ import static org.luwrain.core.NullCheck.*;
 public final class App extends AppBase<Strings>
 {
     final Message message;
+    private org.luwrain.pim.mail.Settings sett = null;
     private MailStoring mailStoring = null;
     private ContactsStoring contactsStoring = null;
     private Conv conv = null;
@@ -52,6 +53,7 @@ public final class App extends AppBase<Strings>
 
     @Override protected AreaLayout onAppInit()
     {
+	this.sett = org.luwrain.pim.mail.Settings.create(getLuwrain().getRegistry());
 	this.mailStoring = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(getLuwrain(), true);
 	if (mailStoring == null || contactsStoring == null)

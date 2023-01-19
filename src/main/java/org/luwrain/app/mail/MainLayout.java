@@ -56,7 +56,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     {
 	super(app);
 	this.app = app;
-	
+
 	final TreeListArea.Params<MailFolder> treeParams = new TreeListArea.Params<>();
         treeParams.context = getControlContext();
 	treeParams.name = app.getStrings().foldersAreaName();
@@ -75,8 +75,8 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 		}
 	    };
 	this.foldersArea.requery();
-	
-	this.summaryArea = new ListArea<>(listParams((params)->{
+
+	this.summaryArea = new ListArea<SummaryItem>(listParams((params)->{
 		    params.name = app.getStrings().summaryAreaName();
 		    params.model = new ListModel<>(summaryItems);
 		    params.clickHandler = this;
@@ -87,7 +87,19 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 		    params.transition = new DoubleLevelTransition<SummaryItem>(params.model){
 			    @Override public boolean isSectionItem(SummaryItem item) { return item.type == SummaryItem.Type.SECTION; }
 			};
-		}));
+		})){
+		@Override public boolean onSystemEvent(SystemEvent event)
+		{
+		    if (event.getType() == SystemEvent.Type.REGULAR)
+			switch(event.getCode())
+			{
+			case REFRESH:
+			updateSummary();
+			return true;
+			}
+		    return super.onSystemEvent(event);
+		}
+	    };
 
 	final ReaderArea.Params messageParams = new ReaderArea.Params();
 	messageParams.context = getControlContext();
