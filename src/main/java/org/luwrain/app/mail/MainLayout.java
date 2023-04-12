@@ -104,7 +104,19 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	final ReaderArea.Params messageParams = new ReaderArea.Params();
 	messageParams.context = getControlContext();
 	messageParams.name = app.getStrings().messageAreaName();
-	this.messageArea = new ReaderArea(messageParams);
+	this.messageArea = new ReaderArea(messageParams){
+		@Override public boolean onInputEvent(InputEvent event)
+		{
+		    if (event.isSpecial())
+			switch(event.getSpecial())
+			{
+			case BACKSPACE:
+			    setActiveArea(summaryArea);
+			    return true;
+			}
+		    return super.onInputEvent(event);
+		}
+	    };
 
 	final ActionInfo
 	fetchIncomingBkg = action("fetch-incoming-bkg", app.getStrings().actionFetchIncomingBkg(), new InputEvent(InputEvent.Special.F6), ()->{	getLuwrain().runWorker(org.luwrain.pim.workers.Pop3.NAME); return true;});
@@ -262,12 +274,18 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 
     private boolean actDeleteMessage()
     {
-	final SummaryItem item = summaryArea.selected();
+	final var item = summaryArea.selected();
 	if (item == null || item.message == null)
 	    return false;
 	item.message.setState(MailMessage.State.DELETED);
 	app.getStoring().getMessages().update(item.message);
-	updateSummary();
+	//FIXME:not delete for showing deleted
+	summaryItems.remove(item);
+	summaryArea.refresh();
+	final var newSelected = summaryArea.selected();
+	if (newSelected != null)
+	    app.setEventResponse(text(Sounds.OK, newSelected.title)); else
+	    app.setEventResponse(hint(Hint.NO_ITEMS_BELOW));
 	return true;
     }
 
