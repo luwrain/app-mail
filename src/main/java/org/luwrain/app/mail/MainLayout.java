@@ -211,15 +211,16 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 
     private boolean onFolderProps()
     {
-	final Object obj = foldersArea.selected();
-	if (!(obj instanceof MailFolder))
+	final var folder = foldersArea.selected();
+	if (folder == null)
 	    return false;
-	final FolderPropertiesLayout propsLayout = new FolderPropertiesLayout(app, (MailFolder)obj, ()->{
-		app.layout(getAreaLayout());
+	final FolderPropertiesLayout propsLayout = new FolderPropertiesLayout(app, folder, ()->{
+		app.setAreaLayout(MainLayout.this);
 		foldersArea.refresh();
 		app.getLuwrain().announceActiveArea();
+		return true;
 	    });
-	app.layout(propsLayout.getLayout());
+	app.setAreaLayout(propsLayout);
 	app.getLuwrain().announceActiveArea();
 	return true;
     }
