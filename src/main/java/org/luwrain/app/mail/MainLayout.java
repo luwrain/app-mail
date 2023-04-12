@@ -187,7 +187,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	final int selectedIndex = foldersArea.selectedIndex();
 	final MailFolder newFolder = new MailFolder();
 	newFolder.setTitle(name);
-	app.getMailStoring().getFolders().save(opened, newFolder, Math.max(selectedIndex, 0));
+	app.getStoring().getFolders().save(opened, newFolder, Math.max(selectedIndex, 0));
 	foldersArea.requery();
 	foldersArea.refresh();
 	return true;

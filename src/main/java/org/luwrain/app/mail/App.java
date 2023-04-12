@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -45,17 +45,12 @@ public final class App extends AppBase<Strings> implements MonoApp
 	if (storing == null)
 	    return null;
 	this.conv = new Conv(this);
-		this.mainLayout = new MainLayout(this);
+	this.mainLayout = new MainLayout(this);
 	this.startingLayout = new StartingLayout(this);
 	setAppName(getStrings().appName());
 	if (storing.getAccounts().load().length == 0)
-	return startingLayout.getAreaLayout();
+	    return startingLayout.getAreaLayout();
 	return mainLayout.getAreaLayout();
-    }
-
-    void layout(AreaLayout layout)
-    {
-	getLayout().setBasicLayout(layout);
     }
 
     Layouts layouts()
@@ -72,7 +67,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	};
     }
 
-
     @Override public boolean onEscape()
     {
 	closeApp();
@@ -85,7 +79,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return MonoApp.Result.BRING_FOREGROUND;
     }
 
-    MailStoring getMailStoring() { return this.storing; }
     MailStoring getStoring() { return this.storing; }
     Hooks getHooks() { return this.hooks; }
     Conv getConv() { return conv; }
