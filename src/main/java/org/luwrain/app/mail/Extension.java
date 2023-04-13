@@ -57,13 +57,17 @@ public final class Extension extends EmptyExtension
 	};
     }
 
-        @Override public void i18nExtension(Luwrain luwrain, org.luwrain.i18n.I18nExtension i18nExt)
+    @Override public void i18nExtension(Luwrain luwrain, org.luwrain.i18n.I18nExtension i18nExt)
     {
 	i18nExt.addCommandTitle(Lang.EN, "mail", "Mail");
 	i18nExt.addCommandTitle(Lang.RU, "mail", "Почта");
+	i18nExt.addCommandTitle(Lang.EN, "message", "Message");
+	i18nExt.addCommandTitle(Lang.RU, "message", "Сообщение");
 	try {
 	    i18nExt.addStrings(Lang.EN, Strings.NAME, new ResourceStringsObj(luwrain, getClass().getClassLoader(), getClass(), "strings-mail.properties").create(Lang.EN, Strings.class));
 	    i18nExt.addStrings(Lang.RU, Strings.NAME, new ResourceStringsObj(luwrain, getClass().getClassLoader(), getClass(), "strings-mail.properties").create(Lang.RU, Strings.class));
+	    i18nExt.addStrings(Lang.EN, org.luwrain.app.message.Strings.NAME, new ResourceStringsObj(luwrain, getClass().getClassLoader(), getClass(), "strings-message.properties").create(Lang.EN, org.luwrain.app.message.Strings.class));
+	    i18nExt.addStrings(Lang.RU, org.luwrain.app.message.Strings.NAME, new ResourceStringsObj(luwrain, getClass().getClassLoader(), getClass(), "strings-message.properties").create(Lang.RU, org.luwrain.app.message.Strings.class));
 	}
 	catch(java.io.IOException e)
 	{

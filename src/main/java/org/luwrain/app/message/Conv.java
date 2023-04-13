@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -26,6 +26,8 @@ import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
 import org.luwrain.pim.contacts.*;
 import org.luwrain.popups.pim.*;
+
+import static org.luwrain.popups.Popups.*;
 
 final class Conv
 {
@@ -114,5 +116,10 @@ final class Conv
 	if (res == null)
 	    return null;
 	return (MailAccount)res;
+    }
+
+    boolean closeModified()
+    {
+	return confirmDefaultNo(luwrain, strings.closeModifiedPopupName(), strings.closeModifiedPopupText());
     }
 }

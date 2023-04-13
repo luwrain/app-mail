@@ -32,4 +32,7 @@ public interface Strings
     String attachmentPopupName();
     String attachmentPopupPrefix();
     //    String attachment(String f);
+
+    String closeModifiedPopupName();
+    String closeModifiedPopupText();
 }

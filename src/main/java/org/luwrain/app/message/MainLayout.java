@@ -34,6 +34,7 @@ final class MainLayout extends LayoutBase
     final App app;
     final MessageArea messageArea;
     final FormSpellChecking spellChecking;
+    boolean modified = false;
 
     MainLayout(App app)
     {
@@ -68,6 +69,7 @@ final class MainLayout extends LayoutBase
 		    return super.onSystemEvent(event);
 		}
 	    };
+	messageArea.getMultilineEditChangeListeners().add((area, event, lines, hotPoint)->{ modified = true; });
 	messageArea.getMultilineEditChangeListeners().add(spellChecking);
 	setAreaLayout(messageArea, actions(
 					   action("sent", app.getStrings().actionSend(), ()->app.send(getMailMessage(), false)),
@@ -86,7 +88,6 @@ final class MainLayout extends LayoutBase
 
     private boolean actEditCc(MessageArea area)
     {
-	NullCheck.notNull(area, "area");
 	final String res = app.getConv().editCc(area.getCc());
 	if (res != null)
 	    area.setCc(res);

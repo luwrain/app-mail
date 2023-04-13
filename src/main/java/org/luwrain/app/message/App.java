@@ -66,6 +66,9 @@ public final class App extends AppBase<Strings>
 
     @Override public boolean onEscape()
     {
+	if (this.mainLayout.modified)
+	    if (!conv.closeModified())
+	    return true;
 	closeApp();
 	return true;
     }
