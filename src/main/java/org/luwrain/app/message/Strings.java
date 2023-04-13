@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2022 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -16,11 +16,10 @@
 
 package org.luwrain.app.message;
 
-import java.io.File;
-
 public interface Strings
 {
-    static final String NAME = "luwrain.message";
+    static public final String
+	NAME = "luwrain.message";
 
     String actionAttachFile();
     String actionChooseCc();
@@ -31,8 +30,6 @@ public interface Strings
     String appName();
     String attachmentPopupName();
     String attachmentPopupPrefix();
-    //    String attachment(String f);
-
     String closeModifiedPopupName();
     String closeModifiedPopupText();
 }
