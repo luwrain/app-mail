@@ -80,7 +80,7 @@ final class Hooks
     void makeReply(MailMessage message)
     {
 	try {
-chainOfResponsibility(luwrain, REPLY, new Object[]{new MessageObj(message)});
+chainOfResponsibilityNoExc(luwrain, REPLY, new Object[]{new MessageObj(message)});
 	}
 	catch(RuntimeException e)
 	{
