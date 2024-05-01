@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2024 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -28,7 +28,12 @@ import org.luwrain.pim.mail.*;
 import org.luwrain.pim.contacts.*;
 import org.luwrain.io.json.*;
 
+import static org.luwrain.pim.mail2.persistence.MailPersistence.*;
+import org.luwrain.pim.mail2.persistence.model.*;
+import org.luwrain.pim.mail2.persistence.dao.*;
+
 import static org.luwrain.pim.mail.BinaryMessage.*;
+import static org.luwrain.pim.mail2.FolderProperties.*;
 import static org.luwrain.core.NullCheck.*;
 
 public final class App extends AppBase<Strings>
@@ -36,6 +41,7 @@ public final class App extends AppBase<Strings>
     final Message message;
     private org.luwrain.pim.mail.Settings sett = null;
     private MailStoring mailStoring = null;
+    private FolderDAO folderDAO = null;
     private ContactsStoring contactsStoring = null;
     private Conv conv = null;
     private MainLayout mainLayout = null;
@@ -55,6 +61,7 @@ public final class App extends AppBase<Strings>
     {
 	this.sett = org.luwrain.pim.mail.Settings.create(getLuwrain().getRegistry());
 	this.mailStoring = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
+	this.folderDAO = getFolderDAO();
 	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(getLuwrain(), true);
 	if (mailStoring == null || contactsStoring == null)
 	    return null;
@@ -103,7 +110,7 @@ notNull(message, "message");
 	sendingData.setAccountId(mailStoring.getAccounts().getId(account));
 	message.setExtInfo(sendingData.toString());
 	fillMessageData(message);
-	final MailFolder folder = mailStoring.getFolders().findFirstByProperty(MailFolders.PROP_DEFAULT_OUTGOING, "true");
+	final Folder folder = folderDAO.findFirstByProperty(DEFAULT_OUTGOING, "true");
 	if (folder == null)
 	    throw new PimException("Unable to prepare a folder for pending messages");
 	mailStoring.getMessages().save(folder, message);

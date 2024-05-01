@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2024 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -29,6 +29,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     private Hooks hooks = null;
     private MailStoring storing = null;
+    private Data data = null;
     private Conv conv = null;
     private MainLayout mainLayout = null;
     private StartingLayout startingLayout = null;
@@ -41,15 +42,24 @@ public final class App extends AppBase<Strings> implements MonoApp
     @Override protected AreaLayout onAppInit()
     {
 	this.hooks = new Hooks(getLuwrain());
+	Log.debug(LOG_COMPONENT, "before data");
+	this.data = new Data();
+	Log.debug(LOG_COMPONENT, "after data");
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
+	/*
 	if (storing == null)
 	    return null;
+	*/
 	this.conv = new Conv(this);
-	this.mainLayout = new MainLayout(this);
+	Log.debug("proba", "before main layout ");
+	this.mainLayout = new MainLayout(this, data);
+	Log.debug("proba", "after main layout");
 	this.startingLayout = new StartingLayout(this);
 	setAppName(getStrings().appName());
+	/*
 	if (storing.getAccounts().load().length == 0)
 	    return startingLayout.getAreaLayout();
+	*/
 	return mainLayout.getAreaLayout();
     }
 
@@ -82,6 +92,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     MailStoring getStoring() { return this.storing; }
     Hooks getHooks() { return this.hooks; }
     Conv getConv() { return conv; }
+    public Data getData() { return data; }
 
     interface Layouts
     {

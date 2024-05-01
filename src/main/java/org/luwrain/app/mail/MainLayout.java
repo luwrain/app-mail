@@ -1,5 +1,5 @@
 /*
-   Copyright 2012-2023 Michael Pozhidaev <msp@luwrain.org>
+   Copyright 2012-2024 Michael Pozhidaev <msp@luwrain.org>
 
    This file is part of LUWRAIN.
 
@@ -30,6 +30,10 @@ import org.luwrain.pim.mail.*;
 import org.luwrain.pim.mail.script.*;
 import org.luwrain.app.base.*;
 
+import org.luwrain.pim.mail2.persistence.model.*;
+import org.luwrain.app.mail.layouts.*;
+
+
 import static org.luwrain.script.ScriptUtils.*;
 import static org.luwrain.core.DefaultEventResponse.*;
 
@@ -37,32 +41,34 @@ import static org.luwrain.app.mail.App.*;
 import static org.luwrain.app.mail.Utils.*;
 import static org.luwrain.core.DefaultEventResponse.*;
 
-final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandler<MailFolder>, ClickHandler<SummaryItem>
+final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandler<Folder>, ClickHandler<SummaryItem>
 {
     static private final InputEvent
 	HOT_KEY_REPLY = new InputEvent('r', EnumSet.of(InputEvent.Modifiers.ALT));
 
     final App app;
-    final TreeListArea<MailFolder> foldersArea;
+    final TreeListArea<Folder> foldersArea;
     final ListArea<SummaryItem> summaryArea;
     final ReaderArea messageArea;
 
+    private final Data data;
     private final List<SummaryItem> summaryItems = new ArrayList<>();
     private boolean showDeleted = false;
-    private MailFolder folder = null;
+    private Folder folder = null;
     private MailMessage message = null;
 
-    MainLayout(App app)
+    MainLayout(App app, Data data)
     {
 	super(app);
 	this.app = app;
+	this.data = data;
 
-	final TreeListArea.Params<MailFolder> treeParams = new TreeListArea.Params<>();
+	final TreeListArea.Params<Folder> treeParams = new TreeListArea.Params<>();
         treeParams.context = getControlContext();
 	treeParams.name = app.getStrings().foldersAreaName();
-	treeParams.model = new FoldersModel(app);
+	treeParams.model = new FoldersModel();
 	treeParams.leafClickHandler = this;
-	this.foldersArea = new TreeListArea<MailFolder>(treeParams) {
+	this.foldersArea = new TreeListArea<>(treeParams) {
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    if (event.getType() == SystemEvent.Type.REGULAR)
@@ -167,7 +173,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	summaryArea.refresh();
     }
 
-    @Override public boolean onLeafClick(TreeListArea<MailFolder> area, MailFolder folder)
+    @Override public boolean onLeafClick(TreeListArea<Folder> area, Folder folder)
     {
 	this.folder = folder;
 	updateSummary();
@@ -178,6 +184,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 
     private boolean actNewFolder()
     {
+	/*
 	final MailFolder opened = foldersArea.opened();
 	if (opened == null)
 	    return false;
@@ -190,11 +197,13 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	app.getStoring().getFolders().save(opened, newFolder, Math.max(selectedIndex, 0));
 	foldersArea.requery();
 	foldersArea.refresh();
+	*/
 	return true;
     }
 
     private boolean actRemoveFolder()
     {
+	/*
 	final MailFolder opened = foldersArea.opened();
 	if (opened == null)
 	    return false;
@@ -206,6 +215,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	app.getStoring().getFolders().remove(opened, selectedIndex);
 	foldersArea.requery();
 	foldersArea.refresh();
+	*/
 	return true;
     }
 
@@ -359,4 +369,15 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	*/
 	return true;
     }
+
+    final class FoldersModel implements TreeListArea.Model<Folder>
+{
+    @Override public boolean getItems(Folder folder, TreeListArea.Collector<Folder> collector)
+    {
+	collector.collect(data.folderDAO.getChildFolders(folder));
+	return true;
+    }
+    @Override public Folder getRoot() { return data.folderDAO.getRoot(); }
+    @Override public boolean isLeaf(Folder folder) { return data.folderDAO.getChildFolders(folder).size() != 0; }
+}
 }
