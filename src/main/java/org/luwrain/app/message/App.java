@@ -25,6 +25,7 @@ import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.pim.mail2.persistence.model.*;
 import org.luwrain.pim.contacts.*;
 import org.luwrain.io.json.*;
 
@@ -80,8 +81,9 @@ public final class App extends AppBase<Strings>
 	return true;
     }
 
-    boolean send(MailMessage message, boolean useAnotherAccount)
+    boolean send(org.luwrain.pim.mail2.Message message, boolean useAnotherAccount)
     {
+	/*
 	if (useAnotherAccount)
 	{
 	    final MailAccount account = conv.accountToSend();
@@ -96,11 +98,13 @@ public final class App extends AppBase<Strings>
 	    account = conv.accountToSend(); else
 	    account = defaultAccount;
 	send(account, message);
+	*/
 	return true;
     }
 
-    private void send(MailAccount account, MailMessage message)
+    private void send(Account account, Message message)
     {
+	/*
 notNull(account, "account");
 notNull(message, "message");
 	message.setFrom(getFromLine(account));
@@ -116,10 +120,12 @@ notNull(message, "message");
 	mailStoring.getMessages().save(folder, message);
 	getLuwrain().runWorker(org.luwrain.pim.workers.Smtp.NAME);
 	closeApp();
+	*/
     }
 
-    private void fillMessageData(MailMessage message)
+    private void fillMessageData(Message message)
     {
+	/*
 	message.setSentDate(new Date());
 	final Map<String, String> headers = new HashMap<>();
 	headers.put("User-Agent", getUserAgent());
@@ -130,6 +136,7 @@ notNull(message, "message");
 	{
 	    throw new PimException(e);
 	}
+	*/
     }
 
     Conv getConv() { return this.conv; }

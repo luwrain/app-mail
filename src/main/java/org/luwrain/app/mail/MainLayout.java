@@ -27,6 +27,7 @@ import org.luwrain.controls.ListUtils.*;
 import org.luwrain.controls.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.pim.mail2.*;
 import org.luwrain.pim.mail.script.*;
 import org.luwrain.app.base.*;
 
@@ -55,7 +56,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     private final List<SummaryItem> summaryItems = new ArrayList<>();
     private boolean showDeleted = false;
     private Folder folder = null;
-    private MailMessage message = null;
+    private Message message = null;
 
     MainLayout(App app, Data data)
     {
@@ -136,11 +137,11 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 					   action("reply", app.getStrings().actionReply(), HOT_KEY_REPLY, this::actSummaryReply),
 					   action("mark", app.getStrings().actionMarkMessage(), new InputEvent(InputEvent.Special.INSERT), this::actMarkMessage, ()->{
 						   final SummaryItem item = summaryArea.selected();
-						   return item != null && item.message != null && item.message.getState() != MailMessage.State.MARKED;
+						   return item != null && item.message != null && item.message.getMetadata().getState() != MessageMetadata.State.MARKED;
 					       }),
 					   action("unmark", app.getStrings().actionUnmarkMessage(), new InputEvent(InputEvent.Special.INSERT), this::actUnmarkMessage, ()->{
 						   final SummaryItem item = summaryArea.selected();
-						   return item != null && item.message != null && item.message.getState() == MailMessage.State.MARKED;
+						   return item != null && item.message != null && item.message.getMetadata().getState() == MessageMetadata.State.MARKED;
 					       }),
 					   action("delete", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), this::actDeleteMessage),
 					   action("delete-forever", app.getStrings().actionDeleteMessageForever(), new InputEvent(InputEvent.Special.DELETE, EnumSet.of(InputEvent.Modifiers.CONTROL)), this::actDeleteMessageForever),
@@ -167,9 +168,15 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     void updateSummary()
     {
 	this.summaryItems.clear();
-	if (showDeleted)
-	    this.summaryItems.addAll(app.getHooks().organizeSummary(app.getStoring().getMessages().load(folder))); else
-	    this.summaryItems.addAll(app.getHooks().organizeSummary(app.getStoring().getMessages().load(folder, (m)->{ return m.getState() != MailMessage.State.DELETED; })));
+	final var mm = data.messageDAO.getByFolderId(folder.getId());
+	final var m = new ArrayList<Message>();
+	m.ensureCapacity(mm.size());
+	mm.forEach(i -> m.add(new Message(i)));
+	if (!showDeleted)
+	{
+	    
+	}
+	this.summaryItems.addAll(app.getHooks().organizeSummary(m));
 	summaryArea.refresh();
     }
 
@@ -184,27 +191,25 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 
     private boolean actNewFolder()
     {
-	/*
-	final MailFolder opened = foldersArea.opened();
+	final var opened = foldersArea.opened();
 	if (opened == null)
 	    return false;
 	final String name = app.getConv().newFolderName();
 	if (name == null)
 	    return true;
 	final int selectedIndex = foldersArea.selectedIndex();
-	final MailFolder newFolder = new MailFolder();
-	newFolder.setTitle(name);
-	app.getStoring().getFolders().save(opened, newFolder, Math.max(selectedIndex, 0));
-	foldersArea.requery();
-	foldersArea.refresh();
-	*/
+	final var newFolder = new Folder();
+	newFolder.setName(name);
+	newFolder.setParentFolderId(opened.getId());
+	data.folderDAO.add(newFolder);
+    foldersArea.requery();
+    foldersArea.refresh();
 	return true;
     }
 
     private boolean actRemoveFolder()
     {
-	/*
-	final MailFolder opened = foldersArea.opened();
+	final Folder opened = foldersArea.opened();
 	if (opened == null)
 	    return false;
 	final int selectedIndex = foldersArea.selectedIndex();
@@ -212,10 +217,9 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	    return false;
 	if (!app.getConv().removeFolder())
 	    return true;
-	app.getStoring().getFolders().remove(opened, selectedIndex);
+	//	app.getStoring().getFolders().remove(opened, selectedIndex);
 	foldersArea.requery();
 	foldersArea.refresh();
-	*/
 	return true;
     }
 
@@ -237,13 +241,13 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 
     @Override public boolean onListClick(ListArea area, int index, SummaryItem item)
     {
-	final MailMessage message = item.message;
+	final var message = item.message;
 	if (message == null)
 	    return false;
-	if (message.getState() == MailMessage.State.NEW)
+	if (message.getMetadata().getState() == MessageMetadata.State.NEW)
 	{
-	    message.setState(MailMessage.State.READ);
-	    app.getStoring().getMessages().update(message);
+	    message.getMetadata().setState(MessageMetadata.State.READ);
+	    data.messageDAO.update(message.getMetadata());
 	    summaryArea.refresh();
 	}
 	messageArea.setDocument(createDocForMessage(message, app.getStrings()), 128);
@@ -257,8 +261,8 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	final SummaryItem item = summaryArea.selected();
 	if (item == null || item.message == null)
 	    return false;
-	item.message.setState(MailMessage.State.MARKED);
-	app.getStoring().getMessages().update(item.message);
+	item.message.getMetadata().setState(MessageMetadata.State.MARKED);
+	data.messageDAO.update(item.message.getMetadata());
 	app.setEventResponse(text(Sounds.SELECTED, app.getStrings().messageMarked()));
 	return true;
     }
@@ -268,8 +272,8 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	final SummaryItem item = summaryArea.selected();
 	if (item == null || item.message == null)
 	    return false;
-	item.message.setState(MailMessage.State.READ);
-	app.getStoring().getMessages().update(item.message);
+	item.message.getMetadata().setState(MessageMetadata.State.READ);
+	data.messageDAO.update(item.message.getMetadata());
 	app.setEventResponse(text(Sounds.SELECTED, app.getStrings().messageUnmarked()));
 	return true;
     }
@@ -288,8 +292,8 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	final var item = summaryArea.selected();
 	if (item == null || item.message == null)
 	    return false;
-	item.message.setState(MailMessage.State.DELETED);
-	app.getStoring().getMessages().update(item.message);
+	item.message.getMetadata().setState(MessageMetadata.State.DELETED);
+	data.messageDAO.update(item.message.getMetadata());
 	//FIXME:not delete for showing deleted
 	summaryItems.remove(item);
 	summaryArea.refresh();
@@ -307,7 +311,8 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	    return false;
 	if (!app.getConv().deleteMessageForever())
 	    return true;
-	app.getStoring().getMessages().delete(item.message);
+	//FIXME:deleting raw message
+	data.messageDAO.delete(item.message.getMetadata());
 	updateSummary();
 	return true;
     }
@@ -315,27 +320,27 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 
     private void announceSummaryMessage(SummaryItem summaryItem)
     {
-	final MailMessage m = summaryItem.message;
+	final Message m = summaryItem.message;
 	if (m == null)
 	    return;
-	if (m.getState() == null)
+	if (m.getMetadata().getState() == null)
 	{
-	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
 	    return;
 	}
-	switch(m.getState())
+	switch(m.getMetadata().getState())
 	{
 	case NEW:
-	    app.setEventResponse(listItem(Sounds.ATTENTION, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.ATTENTION, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
 	    break;
 	case READ:
-	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
 	    break;
 	case MARKED:
-	    app.setEventResponse(listItem(Sounds.SELECTED, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.SELECTED, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
 	    break;
 	default:
-	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getFrom(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
 	}
     }
 

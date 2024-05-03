@@ -22,7 +22,7 @@ import java.util.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
-import org.luwrain.pim.mail.MailMessage;
+import org.luwrain.pim.mail2.*;
 import org.luwrain.io.json.*;
 import org.luwrain.app.base.*;
 import org.luwrain .util.*;
@@ -160,9 +160,10 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    private MailMessage getMailMessage()
+    private org.luwrain.pim.mail2.Message getMailMessage()
     {
-	final MailMessage msg = new MailMessage();
+	final var msg = new org.luwrain.pim.mail2.Message();
+	/*
 	msg.setTo(App.splitAddrs(messageArea.getTo()));
 	msg.setCc(App.splitAddrs(messageArea.getCc()));
 	msg.setSubject(messageArea.getSubject());
@@ -176,6 +177,7 @@ final class MainLayout extends LayoutBase
 	for(File f: messageArea.getAttachmentFiles())
 	    a.add(f.getAbsolutePath());
 	msg.setAttachments(a.toArray(new String[a.size()]));
+	*/
 	return msg;
     }
 }

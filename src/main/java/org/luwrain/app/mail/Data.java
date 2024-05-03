@@ -17,6 +17,7 @@
 package org.luwrain.app.mail;
 
 import java.util.*;
+import java.io.*;
 
 import org.luwrain.core.*;
 import org.luwrain.pim.mail2.persistence.dao.*;
@@ -24,17 +25,22 @@ import org.luwrain.pim.mail2.persistence.model.*;
 import org.luwrain.pim.mail2.persistence.*;
 
 import static org.luwrain.pim.mail2.FolderProperties.*;
+import static org.luwrain.app.mail.App.*;
 
 public final class Data
 {
     public final FolderDAO folderDAO = MailPersistence.getFolderDAO();
     public final MessageDAO messageDAO = MailPersistence.getMessageDAO();
     public final AccountDAO accountDAO = MailPersistence.getAccountDAO();
+    final File userSettingsFile;
 
-    Data()
+    Data(File userSettingsFile)
     {
+	this.userSettingsFile = userSettingsFile;
 	if (folderDAO.getRoot() == null)
 	    createInitialFolders();
+	if (accountDAO.getAll().isEmpty() && userSettingsFile != null )
+	    createInitialAccounts();
     }
 
     private void createInitialFolders()
@@ -68,5 +74,45 @@ public final class Data
 	f.setName("Черновики");
 	f.setParentFolderId(root.getId());
 	folderDAO.add(f);
+    }
+
+    private void createInitialAccounts()
+    {
+	if (!userSettingsFile.exists())
+	    return;
+	Log.debug(LOG_COMPONENT, "user settings file is " + userSettingsFile.getAbsolutePath());
+	try {
+	    final var p = new Properties();
+	    try (final var r = new BufferedReader(new InputStreamReader(new FileInputStream(userSettingsFile), "UTF-8"))) {
+		p.load(r);
+	    }
+	    final String
+	    pop3Host = p.getProperty("pop3.host"),
+	    pop3Port = p.getProperty("pop3.port"),
+	    pop3Login = p.getProperty("pop3.login"),
+	    pop3Passwd = p.getProperty("pop3.passwd");
+	    if (pop3Host != null && !pop3Host.trim().isEmpty() &&
+		pop3Login != null && !pop3Login.trim().isEmpty())
+	    {
+		final var a = new Account();
+		a.setName("Automatically created from default settings POP3 account  on " + pop3Host.trim());
+		a.setType(Account.Type.POP3);
+		a.setHost(pop3Host.trim());
+		a.setPort((pop3Port != null && !pop3Port.trim().isEmpty())?Integer.parseInt(pop3Port.trim()):110);
+		a.setPasswd(pop3Passwd.trim());
+		a.setLogin(pop3Login.trim());
+		a.setEnabled(true);
+		a.setDefaultAccount(false);
+		a.setLeaveMessages(true);
+		a.setTrustedHosts("*");
+		a.setSsl(true);
+		accountDAO.add(a);
+		Log.debug(LOG_COMPONENT, "Added the POP3 account: host=" + a.getHost() + ", login=" + a.getLogin() + ", port=" + a.getPort());
+	    }
+	}
+	catch(Exception e)
+	{
+	    Log.error(LOG_COMPONENT, "unable to load user accounts settings: " + e.getMessage());
+	}
     }
 }

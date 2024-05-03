@@ -16,6 +16,8 @@
 
 package org.luwrain.app.mail;
 
+import java.io.*;
+
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.pim.*;
@@ -42,16 +44,13 @@ public final class App extends AppBase<Strings> implements MonoApp
     @Override protected AreaLayout onAppInit()
     {
 	this.hooks = new Hooks(getLuwrain());
-	Log.debug(LOG_COMPONENT, "before data");
-	this.data = new Data();
-	Log.debug(LOG_COMPONENT, "after data");
+	this.data = new Data(new File(getLuwrain().getFileProperty(Luwrain.PROP_DIR_USERHOME), ".luwrain-defaults.conf"));
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	/*
 	if (storing == null)
 	    return null;
 	*/
 	this.conv = new Conv(this);
-	Log.debug("proba", "before main layout ");
 	this.mainLayout = new MainLayout(this, data);
 	Log.debug("proba", "after main layout");
 	this.startingLayout = new StartingLayout(this);

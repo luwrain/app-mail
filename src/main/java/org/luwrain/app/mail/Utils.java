@@ -23,13 +23,15 @@ import org.luwrain.core.*;
 import org.luwrain.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.pim.mail2.*;
 import org.luwrain.util.*;
 
 final class Utils
 {
-    static Document createDocForMessage(MailMessage message, Strings strings) throws PimException
+    static Document createDocForMessage(Message message, Strings strings) throws PimException
     {
 	final NodeBuilder builder = new NodeBuilder();
+	/*
 	builder.addParagraph(strings.messageAreaFrom() + " " + message.getFrom());
 	builder.addParagraph(strings.messageAreaTo() + " " + listToString(message.getTo()));
 	builder.addParagraph(strings.messageAreaCc() + " " + listToString(message.getCc()));
@@ -47,6 +49,7 @@ final class Utils
 	    if (!line.trim().isEmpty())
 		builder.addParagraph(line); else
 		builder.addEmptyLine();
+	*/
 	final Document doc = new Document(builder.newRoot());
 	doc.commit();
 	return doc;

@@ -18,9 +18,12 @@ package org.luwrain.app.mail;
 
 import java.util.*;
 import org.graalvm.polyglot.*;
+import org.graalvm.polyglot.proxy.*;
 
 import org.luwrain.core.*;
 import org.luwrain.pim.mail.*;
+import org.luwrain.pim.mail2.*;
+//import org.luwrain.pim.mail2.persistence.model.*;
 import org.luwrain.pim.mail.script.*;
 
 import static org.luwrain.script.ScriptUtils.*;
@@ -35,19 +38,25 @@ final class Hooks
 	ORGANIZE_SUMMARY = "luwrain.mail.summary.organize";
 
     private final Luwrain luwrain;
-    Hooks(Luwrain luwrain) { this.luwrain = luwrain; }
+    private final MailObj mailObj;
 
-    List<SummaryItem> organizeSummary(MailMessage[] messages)
+    Hooks(Luwrain luwrain)
     {
-	Log.debug("proba", "" + messages.length + " messages");
-	final MessageObj [] hookObjs = new MessageObj[messages.length];
-	for(int i = 0;i < messages.length;i++)
-	    hookObjs[i] = new MessageObj(messages[i]);
-	final Object[] args = new Object[]{getArray(hookObjs)};
-	final Object[] res;
-	final List<SummaryItem> items = new ArrayList<>();
+	this.luwrain = luwrain;
+	this.mailObj = new MailObj(luwrain);
+    }
+
+    List<SummaryItem> organizeSummary(List<Message> messages)
+    {
+	final var m = new ArrayList<MessageObj>();
+	messages.forEach(mm -> m.add(new MessageObj(mm)));
+	final List<Object> res;
+		    	final var items = new ArrayList<SummaryItem>();
 	try {
-	    res = asArray(provider(luwrain, ORGANIZE_SUMMARY, new Object[]{getArray(hookObjs)}));
+	    res = asListOfNativeObjects(provider(luwrain, ORGANIZE_SUMMARY, new Object[]{
+			mailObj,
+			ProxyArray.fromArray((Object[])m.toArray(new MessageObj[m.size()]))
+		    }));
 	}
 	catch(RuntimeException e)
 	{
@@ -61,24 +70,23 @@ final class Hooks
 	}
 	for(Object o: res)
 	{
-	    if (!(o instanceof Value))
-		continue;
-	    final Value value = (Value)o;
-	    if (value.isString())
+	    if (o instanceof String s)
 	    {
-		items.add(new SummaryItem(value.asString()));
+		items.add(new SummaryItem(s));
 		continue;
 	    }
-	    final MessageObj messageObj = value.asHostObject();
-	    if (messageObj == null)
-		continue;
-	    items.add(new SummaryItem(messageObj.getMessage()));
+		if (o instanceof MessageObj mm)
+		{
+	    items.add(new SummaryItem(mm.getMessage()));
+	    continue;
 	}
+	    }
 	return items;
     }
 
-    void makeReply(MailMessage message)
+    void makeReply(Message message)
     {
+	/*
 	try {
 chainOfResponsibilityNoExc(luwrain, REPLY, new Object[]{new MessageObj(message)});
 	}
@@ -86,6 +94,7 @@ chainOfResponsibilityNoExc(luwrain, REPLY, new Object[]{new MessageObj(message)}
 	{
 	    luwrain.crash(e);
 	}
+	*/
     }
 
     Map<String, MailAccount> server(String mailAddr)
