@@ -80,7 +80,7 @@ public final class Data
     {
 	if (!userSettingsFile.exists())
 	    return;
-	Log.debug(LOG_COMPONENT, "user settings file is " + userSettingsFile.getAbsolutePath());
+	log.debug("User settings file is " + userSettingsFile.getAbsolutePath());
 	try {
 	    final var p = new Properties();
 	    try (final var r = new BufferedReader(new InputStreamReader(new FileInputStream(userSettingsFile), "UTF-8"))) {
@@ -107,12 +107,12 @@ public final class Data
 		a.setTrustedHosts("*");
 		a.setSsl(true);
 		accountDAO.add(a);
-		Log.debug(LOG_COMPONENT, "Added the POP3 account: host=" + a.getHost() + ", login=" + a.getLogin() + ", port=" + a.getPort());
+		log.debug("Added the POP3 account: host=" + a.getHost() + ", login=" + a.getLogin() + ", port=" + a.getPort());
 	    }
 	}
 	catch(Exception e)
 	{
-	    Log.error(LOG_COMPONENT, "unable to load user accounts settings: " + e.getMessage());
+	    log.error("Unable to load user accounts settings: " + e.getMessage());
 	}
     }
 }

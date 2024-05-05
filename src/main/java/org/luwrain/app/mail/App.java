@@ -17,6 +17,7 @@
 package org.luwrain.app.mail;
 
 import java.io.*;
+import org.apache.logging.log4j.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
@@ -26,9 +27,8 @@ import org.luwrain.app.base.*;
 
 public final class App extends AppBase<Strings> implements MonoApp
 {
-    static final String
-	LOG_COMPONENT = "mail";
-
+    static final Logger log = LogManager.getLogger();
+    
     private Hooks hooks = null;
     private MailStoring storing = null;
     private Data data = null;

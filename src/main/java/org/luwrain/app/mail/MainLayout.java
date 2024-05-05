@@ -20,27 +20,18 @@ import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
-import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.controls.ListArea.*;
 import org.luwrain.controls.ListUtils.*;
 import org.luwrain.controls.reader.*;
-import org.luwrain.pim.*;
-import org.luwrain.pim.mail.*;
 import org.luwrain.pim.mail2.*;
-import org.luwrain.pim.mail.script.*;
 import org.luwrain.app.base.*;
-
 import org.luwrain.pim.mail2.persistence.model.*;
 import org.luwrain.app.mail.layouts.*;
 
-
-import static org.luwrain.script.ScriptUtils.*;
 import static org.luwrain.core.DefaultEventResponse.*;
-
 import static org.luwrain.app.mail.App.*;
 import static org.luwrain.app.mail.Utils.*;
-import static org.luwrain.core.DefaultEventResponse.*;
 
 final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandler<Folder>, ClickHandler<SummaryItem>
 {
@@ -169,6 +160,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     {
 	this.summaryItems.clear();
 	final var mm = data.messageDAO.getByFolderId(folder.getId());
+	log.trace("Obtained " + mm.size() + " messages on summary update for folder ID " + folder.getId());
 	final var m = new ArrayList<Message>();
 	m.ensureCapacity(mm.size());
 	mm.forEach(i -> m.add(new Message(i)));
@@ -323,24 +315,25 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	final Message m = summaryItem.message;
 	if (m == null)
 	    return;
+	final String announcement = (m.getMetadata().getTitle() != null && !m.getMetadata().getTitle().isEmpty())?m.getMetadata().getTitle().trim():m.getMetadata().getFromAddr();
 	if (m.getMetadata().getState() == null)
 	{
-	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, announcement, Suggestions.CLICKABLE_LIST_ITEM));
 	    return;
 	}
 	switch(m.getMetadata().getState())
 	{
 	case NEW:
-	    app.setEventResponse(listItem(Sounds.ATTENTION, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.ATTENTION, announcement, Suggestions.CLICKABLE_LIST_ITEM)); 
 	    break;
 	case READ:
-	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, announcement, Suggestions.CLICKABLE_LIST_ITEM));
 	    break;
 	case MARKED:
-	    app.setEventResponse(listItem(Sounds.SELECTED, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.SELECTED, announcement, Suggestions.CLICKABLE_LIST_ITEM));
 	    break;
 	default:
-	    app.setEventResponse(listItem(Sounds.LIST_ITEM, m.getMetadata().getFromAddr(), Suggestions.CLICKABLE_LIST_ITEM));
+	    app.setEventResponse(listItem(Sounds.LIST_ITEM, announcement, Suggestions.CLICKABLE_LIST_ITEM));
 	}
     }
 
@@ -383,6 +376,6 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	return true;
     }
     @Override public Folder getRoot() { return data.folderDAO.getRoot(); }
-    @Override public boolean isLeaf(Folder folder) { return data.folderDAO.getChildFolders(folder).size() != 0; }
+    @Override public boolean isLeaf(Folder folder) { return data.folderDAO.getChildFolders(folder).size() == 0; }
 }
 }

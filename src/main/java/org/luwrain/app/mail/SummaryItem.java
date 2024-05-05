@@ -17,11 +17,7 @@
 package org.luwrain.app.mail;
 
 import org.luwrain.core.*;
-//import org.luwrain.script.*;
-import org.luwrain.pim.*;
-import org.luwrain.pim.mail.*;
 import org.luwrain.pim.mail2.*;
-import org.luwrain.pim.mail.script.*;
 
 final class SummaryItem
 {
@@ -33,7 +29,6 @@ final class SummaryItem
 
     SummaryItem(String sectName)
     {
-	NullCheck.notNull(sectName, "sectName");
 	this.type = Type.SECTION;
 	this.title = sectName;
 	this.message = null;
@@ -41,7 +36,6 @@ final class SummaryItem
 
     SummaryItem(Message message)
     {
-	NullCheck.notNull(message, "message");
 	this.type = Type.MESSAGE;
 	this.title = message.getMetadata().getFromAddr();
 	this.message = message;
@@ -49,6 +43,6 @@ final class SummaryItem
 
     @Override public String toString()
     {
-	return title;
+	return title != null?title:"";
     }
 }

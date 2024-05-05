@@ -35,7 +35,7 @@ final class Hooks
     static private final String
 	SERVERS = "luwrain.mail.servers",
 	REPLY = "luwrain.mail.reply",
-	ORGANIZE_SUMMARY = "luwrain.mail.summary.organize";
+	SUMMARY = "luwrain.mail.summary";
 
     private final Luwrain luwrain;
     private final MailObj mailObj;
@@ -53,19 +53,20 @@ final class Hooks
 	final List<Object> res;
 		    	final var items = new ArrayList<SummaryItem>();
 	try {
-	    res = asListOfNativeObjects(provider(luwrain, ORGANIZE_SUMMARY, new Object[]{
+	    res = asListOfNativeObjects(provider(luwrain, SUMMARY, new Object[]{
 			mailObj,
 			ProxyArray.fromArray((Object[])m.toArray(new MessageObj[m.size()]))
 		    }));
 	}
-	catch(RuntimeException e)
+	catch(Exception ex)
 	{
-	    luwrain.crash(e);
+	    log.error("The " + SUMMARY + " hook failed", ex);
+	    luwrain.crash(ex);
 	    return items;
 	}
 	if (res == null)
 	{
-	    Log.warning(LOG_COMPONENT, "The " + ORGANIZE_SUMMARY + " hook returned null");
+	    log.warn("The " + SUMMARY + " hook returned null");
 	    return items;
 	}
 	for(Object o: res)
