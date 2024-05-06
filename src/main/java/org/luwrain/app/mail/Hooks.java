@@ -49,7 +49,7 @@ final class Hooks
     List<SummaryItem> organizeSummary(List<Message> messages)
     {
 	final var m = new ArrayList<MessageObj>();
-	messages.forEach(mm -> m.add(new MessageObj(mm)));
+	messages.forEach(mm -> m.add(new MessageObj(mailObj, mm)));
 	final List<Object> res;
 		    	final var items = new ArrayList<SummaryItem>();
 	try {
@@ -78,7 +78,7 @@ final class Hooks
 	    }
 		if (o instanceof MessageObj mm)
 		{
-	    items.add(new SummaryItem(mm.getMessage()));
+	    items.add(new SummaryItem(mm.message));
 	    continue;
 	}
 	    }

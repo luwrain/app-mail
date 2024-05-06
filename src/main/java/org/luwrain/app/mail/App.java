@@ -28,7 +28,7 @@ import org.luwrain.app.base.*;
 public final class App extends AppBase<Strings> implements MonoApp
 {
     static final Logger log = LogManager.getLogger();
-    
+
     private Hooks hooks = null;
     private MailStoring storing = null;
     private Data data = null;
@@ -52,7 +52,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	*/
 	this.conv = new Conv(this);
 	this.mainLayout = new MainLayout(this, data);
-	Log.debug("proba", "after main layout");
 	this.startingLayout = new StartingLayout(this);
 	setAppName(getStrings().appName());
 	/*
