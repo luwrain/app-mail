@@ -20,27 +20,74 @@ import java.util.*;
 import java.io.*;
 
 import org.luwrain.core.*;
+import org.luwrain.pim.mail2.*;
 import org.luwrain.pim.mail2.persistence.dao.*;
 import org.luwrain.pim.mail2.persistence.model.*;
 import org.luwrain.pim.mail2.persistence.*;
 
 import static org.luwrain.pim.mail2.FolderProperties.*;
 import static org.luwrain.app.mail.App.*;
+import static org.luwrain.util.TextUtils.*;
 
 public final class Data
 {
+    public final Strings strings;
     public final FolderDAO folderDAO = MailPersistence.getFolderDAO();
     public final MessageDAO messageDAO = MailPersistence.getMessageDAO();
     public final AccountDAO accountDAO = MailPersistence.getAccountDAO();
     final File userSettingsFile;
+    final List<String> messageLines = new ArrayList<>();
+    final List<MessageContentItem> messageAttachments = new ArrayList<>();
 
-    Data(File userSettingsFile)
+    Data(Strings strings, File userSettingsFile)
     {
+	this.strings = strings;
 	this.userSettingsFile = userSettingsFile;
 	if (folderDAO.getRoot() == null)
 	    createInitialFolders();
 	if (accountDAO.getAll().isEmpty() && userSettingsFile != null )
 	    createInitialAccounts();
+    }
+
+    List<Message> getMessagesInLocalFolder(int folderId)
+    {
+	final var mm = messageDAO.getByFolderId(folderId);
+		final var m = new ArrayList<Message>();
+	m.ensureCapacity(mm.size());
+	mm.forEach(i -> m.add(new Message(i)));
+	return m;
+    }
+
+    void setMessage(Message message)
+    {
+	messageLines.clear();
+	messageAttachments.clear();
+	messageLines.add(strings.messageAreaFrom() + " " + ((message.getMetadata().getFromAddr() != null && !message.getMetadata().getFromAddr().trim().isEmpty())?message.getMetadata().getFromAddr().trim():"(без отправителя)"));//FIXME:
+	messageAttachments.add(null);
+	messageLines.add(strings.messageAreaSubject() + " " + ((message.getMetadata().getSubject() != null && !message.getMetadata().getSubject().trim().isEmpty())?message.getMetadata().getSubject().trim():"(без темы)"));//FIXME:
+	messageAttachments.add(null);
+	MessageContentItem plain = null, plainAlternative = null;
+	for(var i: message.getContentItems())
+	{
+	    final boolean isTextPlain = i.getContentType().toLowerCase().startsWith("text/plain");
+	    if (isTextPlain)
+	    {
+		if (i.isAlternative())
+		    plainAlternative = i; else
+		    plain = i;
+	    }
+	    if (i.getDisposition() != null && i.getDisposition().toLowerCase().startsWith("attachment"))
+	    {
+		messageLines.add("" + i.getFileName()); //FIXME: something if empty 
+		messageAttachments.add(i);
+	    }
+	}
+	
+	    if (plain == null)
+		plain = plainAlternative;
+	    if (plain != null && plain.getText() != null)
+		for(var s: splitLinesAnySeparator(plain.getText()))
+								   messageLines.add(s.trim());
     }
 
     private void createInitialFolders()
@@ -112,7 +159,7 @@ public final class Data
 	}
 	catch(Exception e)
 	{
-	    log.error("Unable to load user accounts settings: " + e.getMessage());
+	    log.error("Unable to load user accounts settings", e);
 	}
     }
 }

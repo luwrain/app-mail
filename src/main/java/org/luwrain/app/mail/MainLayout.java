@@ -41,7 +41,8 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     final App app;
     final TreeListArea<Folder> foldersArea;
     final ListArea<SummaryItem> summaryArea;
-    final ReaderArea messageArea;
+    //    final ReaderArea messageArea;
+    final NavigationArea messageArea;
 
     private final Data data;
     private final List<SummaryItem> summaryItems = new ArrayList<>();
@@ -99,10 +100,28 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 		}
 	    };
 
+	/*
 	final ReaderArea.Params messageParams = new ReaderArea.Params();
 	messageParams.context = getControlContext();
 	messageParams.name = app.getStrings().messageAreaName();
 	this.messageArea = new ReaderArea(messageParams){
+	*/
+	messageArea = new NavigationArea(getControlContext()){
+		@Override public String getAreaName() { return app.getStrings().messageAreaName(); }
+		@Override public String getLine(int index) { return index < data.messageLines.size()?data.messageLines.get(index):""; }
+		@Override public int getLineCount() { return data.messageLines.size() >= 1?data.messageLines.size():1; }
+		@Override public void announceLine(int index, String line)
+		{
+		    final boolean attention = index < data.messageAttachments.size() && data.messageAttachments.get(index) != null;
+		    if (line.isEmpty())
+		    {
+			app.setEventResponse(hint(Hint.EMPTY_LINE));
+			return;
+		    }
+		    if (attention)
+			app.setEventResponse(text(Sounds.ATTENTION, getLuwrain().getSpeakableText(line, Luwrain.SpeakableTextType.PROGRAMMING))); else
+		    app.setEventResponse(text(getLuwrain().getSpeakableText(line, Luwrain.SpeakableTextType.PROGRAMMING)));
+		}
 		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    if (event.isSpecial())
@@ -159,11 +178,7 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
     void updateSummary()
     {
 	this.summaryItems.clear();
-	final var mm = data.messageDAO.getByFolderId(folder.getId());
-	log.trace("Obtained " + mm.size() + " messages on summary update for folder ID " + folder.getId());
-	final var m = new ArrayList<Message>();
-	m.ensureCapacity(mm.size());
-	mm.forEach(i -> m.add(new Message(i)));
+	final var m = data.getMessagesInLocalFolder(folder.getId());
 	if (!showDeleted)
 	{
 	    
@@ -242,7 +257,9 @@ final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandl
 	    data.messageDAO.update(message.getMetadata());
 	    summaryArea.refresh();
 	}
-	messageArea.setDocument(createDocForMessage(message, app.getStrings()), 128);
+	data.setMessage(message);
+	messageArea.redraw();
+	messageArea.setHotPoint(0, 0);
 	setActiveArea(messageArea);
 	return true;
     }

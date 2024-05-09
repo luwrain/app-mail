@@ -44,7 +44,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     @Override protected AreaLayout onAppInit()
     {
 	this.hooks = new Hooks(getLuwrain());
-	this.data = new Data(new File(getLuwrain().getFileProperty(Luwrain.PROP_DIR_USERHOME), ".luwrain-defaults.conf"));
+	this.data = new Data(getStrings(), new File(getLuwrain().getFileProperty(Luwrain.PROP_DIR_USERHOME), ".luwrain-defaults.conf"));
 	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	/*
 	if (storing == null)
