@@ -19,19 +19,12 @@ package org.luwrain.app.mail.layouts;
 import java.util.*;
 
 import org.luwrain.core.*;
-import org.luwrain.core.events.*;
-import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
-import org.luwrain.controls.reader.*;
-import org.luwrain.pim.*;
-import org.luwrain.pim.mail.*;
 import org.luwrain.app.base.*;
 import org.luwrain.app.mail.*;
 
-import org.luwrain.pim.mail2.persistence.model.*;
-import org.luwrain.pim.mail2.persistence.dao.*;
-import static org.luwrain.pim.mail2.FolderProperties.*;
-
+import org.luwrain.pim.mail.persistence.model.*;
+import static org.luwrain.pim.mail.FolderProperties.*;
 
 public final class FolderPropertiesLayout extends LayoutBase
 {

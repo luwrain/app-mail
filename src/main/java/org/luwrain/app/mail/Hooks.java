@@ -17,13 +17,10 @@
 package org.luwrain.app.mail;
 
 import java.util.*;
-import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.proxy.*;
 
 import org.luwrain.core.*;
 import org.luwrain.pim.mail.*;
-import org.luwrain.pim.mail2.*;
-//import org.luwrain.pim.mail2.persistence.model.*;
 import org.luwrain.pim.mail.script.*;
 
 import static org.luwrain.script.ScriptUtils.*;
@@ -96,45 +93,5 @@ chainOfResponsibilityNoExc(luwrain, REPLY, new Object[]{new MessageObj(message)}
 	    luwrain.crash(e);
 	}
 	*/
-    }
-
-    Map<String, MailAccount> server(String mailAddr)
-    {
-	final Object res = provider(luwrain, SERVERS, new Object[]{mailAddr});
-	if (isNull(res))
-	    return null;
-	final Map<String, MailAccount> accounts = new HashMap<>();
-	final Object
-	smtp = getMember(res, "smtp"),
-	pop3 = getMember(res, "pop3");
-	if (!isNull(smtp))
-	    accounts.put("smtp", getAccount(smtp));
-	if (!isNull(pop3))
-	    accounts.put("pop3", getAccount(pop3));
-	for(Map.Entry<String, MailAccount> e: accounts.entrySet())
-	{
-	    e.getValue().setLogin(mailAddr);
-	    e.getValue().setTitle(e.getKey().toUpperCase() + " (" + mailAddr + ")");
-	}
-	return accounts;
-    }
-
-    static MailAccount getAccount(Object obj)
-    {
-	final MailAccount account = new MailAccount();
-	account.setHost(asString(getMember(obj, "host")));
-	account.setPort(asInt(getMember(obj, "port")));
-	final EnumSet<MailAccount.Flags> flags = EnumSet.noneOf(MailAccount.Flags.class);
-	final boolean
-	ssl = asBoolean(getMember(obj, "ssl")),
-	tls = asBoolean(getMember(obj, "tls"));
-	if (ssl)
-	    flags.add(MailAccount.Flags.SSL);
-	if (tls)
-	    flags.add(MailAccount.Flags.TLS);
-	flags.add(MailAccount.Flags.ENABLED);
-	flags.add(MailAccount.Flags.DEFAULT);
-	account.setFlags(flags);
-	return account;
     }
 }

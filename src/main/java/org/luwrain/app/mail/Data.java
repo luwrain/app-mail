@@ -19,13 +19,12 @@ package org.luwrain.app.mail;
 import java.util.*;
 import java.io.*;
 
-import org.luwrain.core.*;
-import org.luwrain.pim.mail2.*;
-import org.luwrain.pim.mail2.persistence.dao.*;
-import org.luwrain.pim.mail2.persistence.model.*;
-import org.luwrain.pim.mail2.persistence.*;
+import org.luwrain.pim.mail.*;
+import org.luwrain.pim.mail.persistence.dao.*;
+import org.luwrain.pim.mail.persistence.model.*;
+import org.luwrain.pim.mail.persistence.*;
 
-import static org.luwrain.pim.mail2.FolderProperties.*;
+import static org.luwrain.pim.mail.FolderProperties.*;
 import static org.luwrain.app.mail.App.*;
 import static org.luwrain.util.TextUtils.*;
 

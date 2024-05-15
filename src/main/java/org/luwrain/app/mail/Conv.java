@@ -16,8 +16,6 @@
 
 package org.luwrain.app.mail;
 
-import java.util.*;
-
 import org.luwrain.core.*;
 import static org.luwrain.popups.Popups.*;
 

@@ -16,16 +16,13 @@
 
 package org.luwrain.app.message;
 
-import java.util.*;
 import java.io.*;
 
 import org.luwrain.core.*;
-import org.luwrain.core.events.*;
 import org.luwrain.popups.*;
 import org.luwrain.pim.*;
-import org.luwrain.pim.mail.*;
-import org.luwrain.pim.contacts.*;
 import org.luwrain.popups.pim.*;
+import org.luwrain.pim.mail.persistence.model.*;
 
 import static org.luwrain.popups.Popups.*;
 
@@ -103,8 +100,9 @@ final class Conv
 	return Popups.confirmDefaultYes(luwrain, "Отправление сообщения", "Учётные записи для отправления почты отсутствуют. Вы хотите добавить новую сейчас?");//FIXME:
     }
 
-    MailAccount accountToSend() throws PimException
+    Account accountToSend() throws PimException
     {
+/*
 	final MailAccount[] accounts = app.getMailStoring().getAccounts().load();
 	final List<MailAccount> items = new ArrayList<>();
 	for(MailAccount a: accounts)
@@ -116,6 +114,8 @@ final class Conv
 	if (res == null)
 	    return null;
 	return (MailAccount)res;
+																				*/
+return null;
     }
 
     boolean closeModified()

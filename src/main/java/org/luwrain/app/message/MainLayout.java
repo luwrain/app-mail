@@ -22,7 +22,7 @@ import java.util.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
-import org.luwrain.pim.mail2.*;
+import org.luwrain.pim.mail.*;
 import org.luwrain.io.json.*;
 import org.luwrain.app.base.*;
 import org.luwrain .util.*;
@@ -41,7 +41,7 @@ final class MainLayout extends LayoutBase
 	super(app);
 	this.app = app;
 	this.spellChecking =new FormSpellChecking(getLuwrain());
-	final Settings.PersonalInfo sett = Settings.createPersonalInfo(app.getLuwrain().getRegistry());
+	final var sett = org.luwrain.core.Settings.createPersonalInfo(app.getLuwrain().getRegistry());
 	final List<String> text = new ArrayList<>();
 	if (app.message.getText() != null)
 	    text.addAll(app.message.getText());
@@ -160,9 +160,9 @@ final class MainLayout extends LayoutBase
 	return true;
     }
 
-    private org.luwrain.pim.mail2.Message getMailMessage()
+    private org.luwrain.pim.mail.Message getMailMessage()
     {
-	final var msg = new org.luwrain.pim.mail2.Message();
+	final var msg = new org.luwrain.pim.mail.Message();
 	/*
 	msg.setTo(App.splitAddrs(messageArea.getTo()));
 	msg.setCc(App.splitAddrs(messageArea.getCc()));

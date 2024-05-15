@@ -17,31 +17,20 @@
 package org.luwrain.app.message;
 
 import java.util.*;
-import java.io.*;
 
 import org.luwrain.core.*;
-import org.luwrain.core.events.*;
-import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
-import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
-import org.luwrain.pim.mail2.persistence.model.*;
 import org.luwrain.pim.contacts.*;
-import org.luwrain.io.json.*;
 
-import static org.luwrain.pim.mail2.persistence.MailPersistence.*;
-import org.luwrain.pim.mail2.persistence.model.*;
-import org.luwrain.pim.mail2.persistence.dao.*;
-
-import static org.luwrain.pim.mail.BinaryMessage.*;
-import static org.luwrain.pim.mail2.FolderProperties.*;
-import static org.luwrain.core.NullCheck.*;
+import static org.luwrain.pim.mail.persistence.MailPersistence.*;
+import org.luwrain.pim.mail.persistence.model.*;
+import org.luwrain.pim.mail.persistence.dao.*;
 
 public final class App extends AppBase<Strings>
 {
-    final Message message;
+    final org.luwrain.io.json.Message message;
     private org.luwrain.pim.mail.Settings sett = null;
-    private MailStoring mailStoring = null;
     private FolderDAO folderDAO = null;
     private ContactsStoring contactsStoring = null;
     private Conv conv = null;
@@ -52,19 +41,19 @@ public final class App extends AppBase<Strings>
 	this(null);
     }
 
-    public App(Message message)
+    public App(org.luwrain.io.json.Message message)
     {
 	super(Strings.NAME, Strings.class, "luwrain.message");
-	this.message = message != null?message:new Message();
+	this.message = message != null?message:new org.luwrain.io.json.Message();
     }
 
     @Override protected AreaLayout onAppInit()
     {
 	this.sett = org.luwrain.pim.mail.Settings.create(getLuwrain().getRegistry());
-	this.mailStoring = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
+//	this.mailStoring = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	this.folderDAO = getFolderDAO();
 	this.contactsStoring = org.luwrain.pim.Connections.getContactsStoring(getLuwrain(), true);
-	if (mailStoring == null || contactsStoring == null)
+	if (contactsStoring == null)
 	    return null;
 	this.conv = new Conv(this);
 	this.mainLayout = new MainLayout(this);
@@ -81,7 +70,7 @@ public final class App extends AppBase<Strings>
 	return true;
     }
 
-    boolean send(org.luwrain.pim.mail2.Message message, boolean useAnotherAccount)
+    boolean send(org.luwrain.pim.mail.Message message, boolean useAnotherAccount)
     {
 	/*
 	if (useAnotherAccount)
@@ -141,9 +130,9 @@ notNull(message, "message");
 
     Conv getConv() { return this.conv; }
     ContactsStoring getContactsStoring() { return this.contactsStoring; }
-    MailStoring getMailStoring() { return this.mailStoring; }
+//    MailStoring getMailStoring() { return this.mailStoring; }
 
-    private String getFromLine(MailAccount account)
+    private String getFromLine(Account account)
     {
 	final org.luwrain.core.Settings.PersonalInfo sett = org.luwrain.core.Settings.createPersonalInfo(getLuwrain().getRegistry());
 	final String personal;
@@ -154,7 +143,7 @@ notNull(message, "message");
 	if (account != null && account.getSubstAddress() != null && !account.getSubstAddress().trim().isEmpty())
 	    addr = account.getSubstAddress().trim(); else
 	    addr = sett.getDefaultMailAddress("").trim();
-	return mailStoring.combinePersonalAndAddr(personal, addr);
+	return "FIXME";//mailStoring.combinePersonalAndAddr(personal, addr);
     }
 
     private String getUserAgent()

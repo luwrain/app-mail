@@ -20,9 +20,6 @@ import java.io.*;
 import org.apache.logging.log4j.*;
 
 import org.luwrain.core.*;
-import org.luwrain.core.events.*;
-import org.luwrain.pim.*;
-import org.luwrain.pim.mail.*;
 import org.luwrain.app.base.*;
 
 public final class App extends AppBase<Strings> implements MonoApp
@@ -30,7 +27,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     static final Logger log = LogManager.getLogger();
 
     private Hooks hooks = null;
-    private MailStoring storing = null;
+    //    private MailStoring storing = null;
     private Data data = null;
     private Conv conv = null;
     private MainLayout mainLayout = null;
@@ -45,7 +42,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     {
 	this.hooks = new Hooks(getLuwrain());
 	this.data = new Data(getStrings(), new File(getLuwrain().getFileProperty(Luwrain.PROP_DIR_USERHOME), ".luwrain-defaults.conf"));
-	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
+//	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
 	/*
 	if (storing == null)
 	    return null;
@@ -87,7 +84,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return MonoApp.Result.BRING_FOREGROUND;
     }
 
-    MailStoring getStoring() { return this.storing; }
+//    MailStoring getStoring() { return this.storing; }
     Hooks getHooks() { return this.hooks; }
     Conv getConv() { return conv; }
     public Data getData() { return data; }

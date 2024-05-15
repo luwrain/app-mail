@@ -23,7 +23,7 @@ import org.luwrain.core.*;
 import org.luwrain.reader.*;
 import org.luwrain.pim.*;
 import org.luwrain.pim.mail.*;
-import org.luwrain.pim.mail2.*;
+import org.luwrain.pim.mail.*;
 import org.luwrain.util.*;
 
 final class Utils

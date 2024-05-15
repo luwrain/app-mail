@@ -23,15 +23,12 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.controls.ListArea.*;
 import org.luwrain.controls.ListUtils.*;
-import org.luwrain.controls.reader.*;
-import org.luwrain.pim.mail2.*;
+import org.luwrain.pim.mail.*;
 import org.luwrain.app.base.*;
-import org.luwrain.pim.mail2.persistence.model.*;
+import org.luwrain.pim.mail.persistence.model.*;
 import org.luwrain.app.mail.layouts.*;
 
 import static org.luwrain.core.DefaultEventResponse.*;
-import static org.luwrain.app.mail.App.*;
-import static org.luwrain.app.mail.Utils.*;
 
 final class MainLayout extends LayoutBase implements TreeListArea.LeafClickHandler<Folder>, ClickHandler<SummaryItem>
 {

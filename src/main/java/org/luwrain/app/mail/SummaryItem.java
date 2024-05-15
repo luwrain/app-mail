@@ -16,8 +16,7 @@
 
 package org.luwrain.app.mail;
 
-import org.luwrain.core.*;
-import org.luwrain.pim.mail2.*;
+import org.luwrain.pim.mail.*;
 
 final class SummaryItem
 {

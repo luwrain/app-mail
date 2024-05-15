@@ -21,8 +21,8 @@ import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
-import org.luwrain.pim.mail.*;
 import org.luwrain.app.base.*;
+import org.luwrain.pim.mail.persistence.model.*;
 
 import org.luwrain.controls.WizardArea.Frame;
 import org.luwrain.controls.WizardArea.WizardValues;
@@ -36,7 +36,7 @@ final class StartingLayout extends LayoutBase
     final Frame introFrame, passwordFrame;
 
     private String mail = "", passwd = "";
-    private MailAccount smtp = null, pop3 = null;
+    private Account smtp = null, pop3 = null;
 
     StartingLayout(App app)
     {
@@ -68,7 +68,7 @@ final class StartingLayout extends LayoutBase
 	    app.message(app.getStrings().wizardMailAddrIsInvalid(), Luwrain.MessageType.ERROR);
 	    return true;
 	}
-	final 	Map<String, MailAccount> accounts = app.getHooks().server(mail);
+	final 	Map<String, Account> accounts = null;//app.getHooks().server(mail);
 	if (accounts == null)
 	    return false;
 	this.smtp = accounts.get("smtp");
@@ -90,10 +90,10 @@ final class StartingLayout extends LayoutBase
 	}
 	this.smtp.setPasswd(password);
 	pop3.setPasswd(password);
-	NullCheck.notNull(app.getStoring(), "storing");
-	NullCheck.notNull(app.getStoring().getAccounts(), "accounts");
-	app.getStoring().getAccounts().save(smtp);
-	app.getStoring().getAccounts().save(pop3);
+//	NullCheck.notNull(app.getStoring(), "storing");
+//	NullCheck.notNull(app.getStoring().getAccounts(), "accounts");
+//	app.getStoring().getAccounts().save(smtp);
+//	app.getStoring().getAccounts().save(pop3);
 	app.layouts().main();
 	return true;
     }
