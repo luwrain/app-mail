@@ -42,19 +42,12 @@ public final class App extends AppBase<Strings> implements MonoApp
     {
 	this.hooks = new Hooks(getLuwrain());
 	this.data = new Data(getStrings(), new File(getLuwrain().getFileProperty(Luwrain.PROP_DIR_USERHOME), ".luwrain-defaults.conf"));
-//	this.storing = org.luwrain.pim.Connections.getMailStoring(getLuwrain(), true);
-	/*
-	if (storing == null)
-	    return null;
-	*/
 	this.conv = new Conv(this);
 	this.mainLayout = new MainLayout(this, data);
 	this.startingLayout = new StartingLayout(this);
 	setAppName(getStrings().appName());
-	/*
-	if (storing.getAccounts().load().length == 0)
+	if (data.accountDAO.getAll().isEmpty())
 	    return startingLayout.getAreaLayout();
-	*/
 	return mainLayout.getAreaLayout();
     }
 

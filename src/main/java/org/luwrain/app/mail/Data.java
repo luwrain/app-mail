@@ -44,8 +44,10 @@ public final class Data
 	this.userSettingsFile = userSettingsFile;
 	if (folderDAO.getRoot() == null)
 	    createInitialFolders();
+	/*
 	if (accountDAO.getAll().isEmpty() && userSettingsFile != null )
 	    createInitialAccounts();
+	*/
     }
 
     List<Message> getMessagesInLocalFolder(int folderId)
